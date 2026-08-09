@@ -24,7 +24,7 @@ export default function Home() {
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const ADMIN_SECRET = 'flixora@X@X@X7';
+  const ADMIN_SECRET = 'flixes@X@X@X7';
 
   // Categorías personalizadas para contenido de adultos
   const categoriasAdultos = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trío', 'Latina'];
@@ -135,7 +135,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="bg-rose-600 text-white font-black text-xs px-2 py-0.5 rounded">18+</span>
             <h1 className="text-2xl font-extrabold bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 bg-clip-text text-transparent tracking-wider">
-              FLIXORA
+              FLIXES
             </h1>
           </div>
 
