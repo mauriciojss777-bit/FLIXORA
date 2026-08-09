@@ -239,7 +239,9 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-400 mb-1">Archivo de Video</label>
+                <label className="block text-xs font-medium text-neutral-400 mb-1">Imagen de Portada (Opcional)</label>
+<input type="file" accept="image/*" onChange={(e) => setPosterFile(e.target.files?.[0] || null)} className="w-full p-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-neutral-300 mb-3" />
+<label className="text-xs text-neutral-400 block mb-1">Archivo de Video</label>
                 <input
                   type="file"
                   accept="video/*"
