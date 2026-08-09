@@ -21,6 +21,7 @@ export default function Home() {
   const [categoria, setCategoria] = useState('Amateur');
   const [duracion, setDuracion] = useState('1080p');
   const [file, setFile] = useState<File | null>(null);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const ADMIN_SECRET = 'flixora@X@X@X7';
@@ -307,6 +308,7 @@ export default function Home() {
                     <video
                       src={vid.url}
                       controls
+              poster={vid.poster_url || "/icon.png"}
                       className="w-full rounded-xl bg-black aspect-video object-cover"
                     />
 
