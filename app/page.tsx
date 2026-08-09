@@ -52,7 +52,8 @@ export default function Home() {
   useEffect(() => {
     fetchVideos();
   }, []);
-  const compartirVideo = (videoUrl: string) => {
+  const compartirVideo = (videoId: string) => {
+    const videoUrl = `https://flixes.vercel.app/video/${videoId}`;
     if (navigator.share) {
       navigator.share({
         title: 'Flixes',
