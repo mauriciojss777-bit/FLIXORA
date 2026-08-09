@@ -24,7 +24,7 @@ export default function Home() {
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const ADMIN_SECRET = 'flixes@X@X@X7';
+  const ADMIN_SECRET = 'flixes2026#Admin#Pass';
 
   // Categorías personalizadas para contenido de adultos
   const categoriasAdultos = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trío', 'Latina'];
