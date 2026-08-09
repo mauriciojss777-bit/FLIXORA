@@ -37,6 +37,8 @@ export default function Home() {
         .select('*')
         .order('id', { ascending: false });
 
+
+
       if (error) {
         console.error('Error Supabase:', error);
       } else if (data) {
@@ -84,10 +86,14 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || '');
+     
+formData.append('upload_preset','videos_unsigned');
 
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
+
+
+const cloudName = 'flixora_app';
+
+     const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
         method: 'POST',
         body: formData,
       });
