@@ -1,3 +1,6 @@
+
+
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -45,6 +48,18 @@ export default function Home() {
   useEffect(() => {
     fetchVideos();
   }, []);
+  const compartirVideo = (videoUrl: string) => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Flixes',
+        text: '¡Mira este video en Flixes!',
+        url: videoUrl,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(videoUrl);
+      alert('¡Enlace copiado al portapapeles!');
+    }
+  };
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,9 +309,17 @@ export default function Home() {
                       controls
                       className="w-full rounded-xl bg-black aspect-video object-cover"
                     />
+
                     <h4 className="font-semibold text-sm text-neutral-100 group-hover:text-rose-400 transition line-clamp-1">
                       {vid.titulo}
                     </h4>
+<button
+  onClick={() => compartirVideo(vid.url)}
+  className="mt-2 flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-lg text-sm transition"
+>
+  🔗 Compartir
+</button>
+
                   </div>
 
                   <div className="flex justify-between items-center text-xs text-neutral-400 pt-3 mt-2 border-t border-neutral-800/60">
