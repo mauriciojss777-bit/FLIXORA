@@ -87,11 +87,13 @@ export default function Home() {
       const formData = new FormData();
       formData.append('file', file);
      
-formData.append('upload_preset','videos_unsigned');
+formData.append('upload_preset','flixora_preset');
 
 
 
-const cloudName = 'flixora_app';
+const cloudName ='hgo8sfia';
+
+
 
      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
         method: 'POST',
