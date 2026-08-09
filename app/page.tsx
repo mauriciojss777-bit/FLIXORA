@@ -310,7 +310,7 @@ export default function Home() {
                     <video
                       src={vid.url}
                       controls
-              poster={vid.poster_url || "/icon.png"}
+              poster={vid.poster_url || vid.poster || vid.thumbnail_url || vid.thumbnail || "/icon.png"}
                       className="w-full rounded-xl bg-black aspect-video object-cover"
                     />
 
