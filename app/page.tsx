@@ -1,6 +1,7 @@
 
 
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -308,11 +309,19 @@ export default function Home() {
                 >
                   <div className="space-y-3">
                     <video
-                      src={vid.url}
-                      controls
-              poster={vid.poster_url || vid.poster || vid.thumbnail_url || vid.thumbnail || "/icon.png"}
-                      className="w-full rounded-xl bg-black aspect-video object-cover"
-                    />
+  controls
+  preload="metadata"
+  poster={vid.poster_url || vid.poster || vid.thumbnail || ""}
+  src={vid.url}
+  className="w-full rounded-xl bg-black aspect-video object-cover"
+/>
+
+
+
+                    
+                   
+          
+                           
 
                     <h4 className="font-semibold text-sm text-neutral-100 group-hover:text-rose-400 transition line-clamp-1">
                       {vid.titulo}
