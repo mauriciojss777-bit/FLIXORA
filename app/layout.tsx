@@ -4,8 +4,8 @@ export const metadata = {
   title: 'FLIXES',
   description: 'Tu plataforma de streaming de contenido exclusivo',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png', // Usamos este icono, que es el que mejor funciona
+    icon: '/favicon.ico?v=2',
+    apple: '/apple-touch-icon.png?v=2',
   },
 };
 
