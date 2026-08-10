@@ -32,7 +32,6 @@ export default function Home() {
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
-    document.title = "FLIXORA - Streaming";
     if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
       setAgeAccepted(true);
     }
@@ -76,8 +75,9 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
-          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ORA</span></h1>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">INGRESAR</button>
+          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ES</span></h1>
+          <p className="text-zinc-400 text-sm">Este sitio contiene contenido exclusivo para mayores de 18 años.</p>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">SOY MAYOR DE 18</button>
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#050505] text-zinc-200">
       <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLIX<span className="text-amber-500">ORA</span></h1>
+        <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLIX<span className="text-amber-500">ES</span></h1>
         <div className="flex items-center gap-2">
           <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ DONAR</a>
           <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">+ SUBIR</button>
