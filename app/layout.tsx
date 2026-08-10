@@ -3,11 +3,11 @@ import './globals.css';
 export const metadata = {
   title: 'FLIXES',
   icons: {
-    icon: '/icon.png',
-    apple: '/icon.png',
+    icon: '/logo-nuevo.png',
+    apple: '/logo-nuevo.png',
   },
   openGraph: {
-    images: ['/icon.png'],
+    images: ['/logo-nuevo.png'],
   },
 };
 
