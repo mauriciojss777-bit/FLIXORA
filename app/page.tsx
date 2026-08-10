@@ -9,6 +9,7 @@ export default function Home() {
   const [busqueda, setBusqueda] = useState<string>('')
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
   const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
+  const [mostrarPropinas, setMostrarPropinas] = useState<boolean>(false)
 
   // Estado para editar portada
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
@@ -82,7 +83,6 @@ export default function Home() {
     setAutorizadoEdicion(true)
   }
 
-  // Redimensionar y comprimir la imagen
   const comprimirImagen = (archivo: File): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader()
@@ -92,14 +92,14 @@ export default function Home() {
         img.src = event.target?.result as string
         img.onload = () => {
           const canvas = document.createElement('canvas')
-          const MAX_WIDTH = 500
+          const MAX_WIDTH = 300
           const scale = MAX_WIDTH / img.width
           canvas.width = MAX_WIDTH
           canvas.height = img.height * scale
 
           const ctx = canvas.getContext('2d')
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-          resolve(canvas.toDataURL('image/jpeg', 0.6))
+          resolve(canvas.toDataURL('image/jpeg', 0.5))
         }
       }
     })
@@ -116,16 +116,18 @@ export default function Home() {
       if (!videoAEditar) {
         setNuevaPortadaUrl(base64Comprimido)
       } else {
-        // Actualizamos estrictamente la columna 'thumbnail'
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('videos')
           .update({ thumbnail: base64Comprimido })
           .eq('id', videoAEditar.id)
+          .select()
 
         if (error) {
-          alert('Error al guardar la imagen: ' + error.message)
+          alert('❌ Error de Supabase: ' + error.message)
+        } else if (!data || data.length === 0) {
+          alert('⚠️ Supabase no actualizó ninguna fila. Revisa si RLS está bloqueando la edición.')
         } else {
-          alert('¡Portada actualizada con éxito!')
+          alert('¡Portada actualizada y guardada correctamente!')
           setVideoAEditar(null)
           setAutorizadoEdicion(false)
           setPasswordEdicion('')
@@ -179,22 +181,28 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-4 font-sans pb-24">
-      {/* Header */}
       <header className="flex justify-between items-center py-4 border-b border-neutral-800 mb-6 max-w-6xl mx-auto">
         <div className="flex items-center gap-2">
           <span className="text-xs bg-pink-600 font-bold px-2 py-0.5 rounded text-white">18+</span>
           <h1 className="text-xl font-black tracking-wider text-pink-500">FLIXES</h1>
         </div>
-        <button
-          onClick={() => setMostrarSubir(true)}
-          className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-        >
-          ➕ Subir Video
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setMostrarPropinas(true)}
+            className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+          >
+            ☕ Apoyar
+          </button>
+          <button
+            onClick={() => setMostrarSubir(true)}
+            className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+          >
+            ➕ Subir Video
+          </button>
+        </div>
       </header>
 
       <main className="max-w-6xl mx-auto space-y-6">
-        {/* Banner */}
         <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-6 text-center space-y-3">
           <h2 className="text-2xl font-bold">Catálogo Exclusivo</h2>
           <p className="text-sm text-neutral-400">Encuentra el contenido que buscas al instante.</p>
@@ -207,7 +215,6 @@ export default function Home() {
           />
         </div>
 
-        {/* Categorías */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           {categorias.map((cat) => (
             <button
@@ -224,7 +231,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
             const hasThumbnail = video.thumbnail && video.thumbnail.trim() !== ''
@@ -235,7 +241,6 @@ export default function Home() {
                 onClick={() => setVideoActivo(video)}
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between relative"
               >
-                {/* Botón flotante protegido */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -296,7 +301,44 @@ export default function Home() {
         </div>
       </main>
 
-      {/* MODAL EDITAR PORTADA PROTEGIDO */}
+      {/* MODAL PROPINAS */}
+      {mostrarPropinas && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-lg text-amber-400 flex items-center gap-2">☕ Dejar Propina</h3>
+              <button
+                onClick={() => setMostrarPropinas(false)}
+                className="text-neutral-400 hover:text-white font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              Si disfrutas del contenido y deseas apoyar el mantenimiento de la plataforma, puedes dejar una contribución voluntaria. ¡Gracias por el apoyo!
+            </p>
+
+            <a
+              href="https://paypal.me/umbrellapaypal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-blue-600 hover:bg-blue-500 font-bold text-white py-3 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center gap-2"
+            >
+              💳 Donar con PayPal
+            </a>
+
+            <button
+              onClick={() => setMostrarPropinas(false)}
+              className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-neutral-400 text-xs py-2 rounded-xl transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDITAR PORTADA */}
       {videoAEditar && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
@@ -346,7 +388,7 @@ export default function Home() {
                 </div>
 
                 {cargandoImagen && (
-                  <p className="text-xs text-pink-400 text-center animate-pulse">Guardando imagen en la base de datos...</p>
+                  <p className="text-xs text-pink-400 text-center animate-pulse">Procesando y guardando en Supabase...</p>
                 )}
 
                 <button
