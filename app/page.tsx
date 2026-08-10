@@ -12,8 +12,8 @@ export default function Home() {
 
   // Estado para editar portada de un video específico
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
-  const [nuevaThumbnailEdit, setNuevaThumbnailEdit] = useState('')
   const [passwordEdicion, setPasswordEdicion] = useState('')
+  const [cargandoImagen, setCargandoImagen] = useState(false)
 
   // Campos del formulario de subida
   const [nuevoTitulo, setNuevoTitulo] = useState('')
@@ -72,6 +72,38 @@ export default function Home() {
     }
   }
 
+  // Función para procesar la imagen seleccionada de la galería local
+  const handleArchivoGaleria = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+
+    setCargandoImagen(true)
+    const lector = new FileReader()
+    lector.onloadend = async () => {
+      const base64String = lector.result as string
+      
+      if (!videoAEditar) {
+        setNuevaPortadaUrl(base64String)
+      } else {
+        // Actualizar directamente en Supabase si está editando
+        const { error } = await supabase
+          .from('videos')
+          .update({ thumbnail: base64String })
+          .eq('id', videoAEditar.id)
+
+        if (error) {
+          alert('Error al guardar la imagen: ' + error.message)
+        } else {
+          alert('¡Portada de galería cargada con éxito!')
+          setVideoAEditar(null)
+          fetchVideos()
+        }
+      }
+      setCargandoImagen(false)
+    }
+    lector.readAsDataURL(archivo)
+  }
+
   const handleSubirVideo = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -107,32 +139,6 @@ export default function Home() {
       setNuevaPortadaUrl('')
       setPasswordAdmin('')
       setMostrarSubir(false)
-      fetchVideos()
-    }
-  }
-
-  const guardarNuevaPortada = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (passwordEdicion !== 'flixes2026#Admin#Pass') {
-      alert('❌ Contraseña de administrador incorrecta')
-      return
-    }
-
-    if (!videoAEditar) return
-
-    const { error } = await supabase
-      .from('videos')
-      .update({ thumbnail: nuevaThumbnailEdit })
-      .eq('id', videoAEditar.id)
-
-    if (error) {
-      alert('Error al actualizar la portada: ' + error.message)
-    } else {
-      alert('¡Portada actualizada con éxito!')
-      setVideoAEditar(null)
-      setNuevaThumbnailEdit('')
-      setPasswordEdicion('')
       fetchVideos()
     }
   }
@@ -195,17 +201,16 @@ export default function Home() {
                 onClick={() => setVideoActivo(video)}
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between relative"
               >
-                {/* Botón oculto/flotante rápido para cambiar la portada de este video específico */}
+                {/* Botón flotante para cambiar la portada desde la galería */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     setVideoAEditar(video)
-                    setNuevaThumbnailEdit(video.thumbnail || '')
                   }}
-                  title="Cambiar portada"
+                  title="Cambiar portada desde galería"
                   className="absolute top-2 right-2 z-10 bg-black/70 hover:bg-pink-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs opacity-80 group-hover:opacity-100 transition-all shadow-md"
                 >
-                  ✏️
+                  🖼️
                 </button>
 
                 <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/40 to-neutral-900 flex items-center justify-center overflow-hidden">
@@ -255,12 +260,12 @@ export default function Home() {
         </div>
       </main>
 
-      {/* MODAL EDITAR PORTADA */}
+      {/* MODAL EDITAR PORTADA DESDE GALERÍA */}
       {videoAEditar && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <h3 className="font-bold text-lg text-white">Editar Portada de Video</h3>
+              <h3 className="font-bold text-lg text-white">Elegir Portada de Galería</h3>
               <button
                 onClick={() => setVideoAEditar(null)}
                 className="text-neutral-400 hover:text-white font-bold"
@@ -271,37 +276,29 @@ export default function Home() {
 
             <p className="text-xs text-neutral-400 line-clamp-1">Video: <strong className="text-white">{videoAEditar.titulo}</strong></p>
 
-            <form onSubmit={guardarNuevaPortada} className="space-y-4 text-sm">
+            <div className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs text-neutral-400 mb-1">URL de la nueva portada (Imagen)</label>
+                <label className="block text-xs text-neutral-400 mb-2">Selecciona una imagen desde tu dispositivo</label>
                 <input
-                  type="url"
-                  placeholder="https://... (enlace de imagen)"
-                  value={nuevaThumbnailEdit}
-                  onChange={(e) => setNuevaThumbnailEdit(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleArchivoGaleria}
+                  disabled={cargandoImagen}
+                  className="w-full text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-neutral-400 mb-1">Contraseña de Administrador</label>
-                <input
-                  type="password"
-                  placeholder="Clave admin"
-                  value={passwordEdicion}
-                  onChange={(e) => setPasswordEdicion(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
-                  required
-                />
-              </div>
+              {cargandoImagen && (
+                <p className="text-xs text-pink-400 text-center animate-pulse">Cargando imagen a la base de datos...</p>
+              )}
 
               <button
-                type="submit"
-                className="w-full bg-pink-600 hover:bg-pink-500 font-bold text-white py-2.5 rounded-xl transition-colors"
+                onClick={() => setVideoAEditar(null)}
+                className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-white py-2.5 rounded-xl transition-colors"
               >
-                Actualizar Portada
+                Cancelar
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -353,7 +350,7 @@ export default function Home() {
       {/* MODAL SUBIR VIDEO */}
       {mostrarSubir && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
               <h3 className="font-bold text-lg text-white">Panel Admin: Subir Video</h3>
               <button
@@ -417,14 +414,14 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-neutral-400 mb-1">URL de Portada (Opcional)</label>
+                <label className="block text-xs text-neutral-400 mb-1">Portada desde Galería (Opcional)</label>
                 <input
-                  type="url"
-                  placeholder="Pega la URL de imagen de la portada"
-                  value={nuevaPortadaUrl}
-                  onChange={(e) => setNuevaPortadaUrl(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleArchivoGaleria}
+                  className="w-full text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer"
                 />
+                {nuevaPortadaUrl && <p className="text-[10px] text-green-400 mt-1">✓ Imagen de galería cargada correctamente</p>}
               </div>
 
               <button
