@@ -22,6 +22,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // Estado para el menú desplegable de las 3 rayitas
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -75,23 +76,60 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
-          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ES</span></h1>
-          <p className="text-zinc-400 text-sm">Este sitio contiene contenido exclusivo para mayores de 18 años.</p>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">SOY MAYOR DE 18</button>
+          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ORA</span></h1>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">INGRESAR</button>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-zinc-200">
+    <main className="min-h-screen bg-[#050505] text-zinc-200 relative">
       <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLIX<span className="text-amber-500">ES</span></h1>
+        <div className="flex items-center gap-3">
+          {/* Botón de las 3 rayitas (Menú hamburguesa) */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            className="text-zinc-300 hover:text-white p-1 focus:outline-none flex flex-col justify-center gap-1.5 w-6 h-6"
+            aria-label="Abrir menú"
+          >
+            <span className="block h-0.5 w-full bg-current rounded-full"></span>
+            <span className="block h-0.5 w-full bg-current rounded-full"></span>
+            <span className="block h-0.5 w-full bg-current rounded-full"></span>
+          </button>
+
+          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>
+            FLIX<span className="text-amber-500">ORA</span>
+          </h1>
+        </div>
+
         <div className="flex items-center gap-2">
           <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ DONAR</a>
           <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">+ SUBIR</button>
         </div>
       </nav>
+
+      {/* Menú Desplegable Lateral/Flotante de las 3 rayitas */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 flex" onClick={() => setMenuOpen(false)}>
+          <div className="bg-zinc-950 border-r border-zinc-800 w-64 h-full p-6 flex flex-col space-y-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <h2 className="text-xl font-black text-white">MENÚ</h2>
+              <button onClick={() => setMenuOpen(false)} className="text-zinc-400 hover:text-white font-bold text-lg">✕</button>
+            </div>
+            
+            <div className="flex flex-col space-y-3">
+              <a href="/" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-bold text-sm">
+                🏠 Videos (Inicio)
+              </a>
+              <a href="/fotos" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 font-bold text-sm">
+                📸 Fotos y Álbumes
+              </a>
+            </div>
+          </div>
+          <div className="flex-1 bg-black/60 backdrop-blur-xs"></div>
+        </div>
+      )}
 
       <section className="px-4 pt-6 pb-2">
         <input 
