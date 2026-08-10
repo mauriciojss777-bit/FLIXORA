@@ -22,7 +22,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // Estado para el menú desplegable de las 3 rayitas
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -77,7 +77,7 @@ export default function Home() {
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ORA</span></h1>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">INGRESAR</button>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">INGRESAR (+18)</button>
         </div>
       </div>
     );
@@ -87,7 +87,6 @@ export default function Home() {
     <main className="min-h-screen bg-[#050505] text-zinc-200 relative">
       <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* Botón de las 3 rayitas (Menú hamburguesa) */}
           <button 
             onClick={() => setMenuOpen(!menuOpen)} 
             className="text-zinc-300 hover:text-white p-1 focus:outline-none flex flex-col justify-center gap-1.5 w-6 h-6"
@@ -105,26 +104,38 @@ export default function Home() {
 
         <div className="flex items-center gap-2">
           <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ DONAR</a>
-          <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">+ SUBIR</button>
+          <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">+ SUBIR VÍDEO</button>
         </div>
       </nav>
 
-      {/* Menú Desplegable Lateral/Flotante de las 3 rayitas */}
+      {/* Menú Desplegable Completo de las 3 rayitas */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setMenuOpen(false)}>
-          <div className="bg-zinc-950 border-r border-zinc-800 w-64 h-full p-6 flex flex-col space-y-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <h2 className="text-xl font-black text-white">MENÚ</h2>
-              <button onClick={() => setMenuOpen(false)} className="text-zinc-400 hover:text-white font-bold text-lg">✕</button>
+          <div className="bg-zinc-950 border-r border-zinc-800 w-72 h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <h2 className="text-xl font-black text-white">MENÚ</h2>
+                <button onClick={() => setMenuOpen(false)} className="text-zinc-400 hover:text-white font-bold text-lg">✕</button>
+              </div>
+              
+              <div className="flex flex-col space-y-3">
+                <a href="/" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-bold text-sm flex items-center gap-3">
+                  🏠 Inicio (Vídeos)
+                </a>
+                <a href="/fotos" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 font-bold text-sm flex items-center gap-3">
+                  📸 Fotos y Álbumes
+                </a>
+                <a href="/fotos/admin" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 font-bold text-sm flex items-center gap-3">
+                  ⚙️ Admin Fotos
+                </a>
+                <a href="https://t.me/TuCanal" target="_blank" rel="noopener noreferrer" className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-sm flex items-center gap-3">
+                  📢 Canal de Telegram
+                </a>
+              </div>
             </div>
-            
-            <div className="flex flex-col space-y-3">
-              <a href="/" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-bold text-sm">
-                🏠 Videos (Inicio)
-              </a>
-              <a href="/fotos" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 font-bold text-sm">
-                📸 Fotos y Álbumes
-              </a>
+
+            <div className="pt-4 border-t border-zinc-800 text-center text-xs text-zinc-500">
+              FLIXORA © 2026
             </div>
           </div>
           <div className="flex-1 bg-black/60 backdrop-blur-xs"></div>
@@ -202,7 +213,7 @@ export default function Home() {
       {showAdminModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
           <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold">Panel Admin</h2>
+            <h2 className="text-xl font-bold">Panel Admin - Vídeos</h2>
             <input type="password" placeholder="Clave" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
             <input type="text" placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
             <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300">
