@@ -1,7 +1,6 @@
-import type { Metadata } from 'node_modules/next';
 import './globals.css';
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'FLIXES',
   description: 'Tu plataforma de streaming de contenido exclusivo',
 };
