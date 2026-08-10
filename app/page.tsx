@@ -32,6 +32,7 @@ export default function Home() {
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
+    document.title = "FLIXORA - Streaming";
     if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
       setAgeAccepted(true);
     }
