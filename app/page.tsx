@@ -86,7 +86,7 @@ export default function Home() {
         titulo: nuevoTitulo,
         categoria: nuevaCategoria,
         embed_url: nuevoEmbedUrl,
-        thumbnail_url: nuevaPortadaUrl || null,
+        thumbnail: nuevaPortadaUrl || null,
         created_at: new Date().toISOString()
       }
     ])
@@ -156,7 +156,7 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const hasThumbnail = video.thumbnail_url || video.thumbnail
+            const hasThumbnail = video.thumbnail || video.thumbnail_url
 
             return (
               <div
@@ -322,10 +322,10 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-neutral-400 mb-1">URL de Portada (Enlace Doodstream Single/Splash Image)</label>
+                <label className="block text-xs text-neutral-400 mb-1">URL de Portada (Opcional)</label>
                 <input
                   type="url"
-                  placeholder="Pega la URL de imagen de Doodstream"
+                  placeholder="Pega la URL de imagen de la portada"
                   value={nuevaPortadaUrl}
                   onChange={(e) => setNuevaPortadaUrl(e.target.value)}
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
