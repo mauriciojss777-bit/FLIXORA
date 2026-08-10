@@ -42,6 +42,16 @@ export default function Home() {
     }
   }
 
+  // Función para obtener la miniatura automática de Doodstream
+  const obtenerMiniaturaDoodstream = (url: string) => {
+    if (!url) return null
+    const match = url.match(/\/e\/([a-zA-Z0-9]+)/) || url.match(/\/d\/([a-zA-Z0-9]+)/)
+    if (match && match[1]) {
+      return `https://img.doodcdn.co/snaps/${match[1]}.jpg`
+    }
+    return null
+  }
+
   const categorias = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trio', 'Latina']
 
   const videosFiltrados = videos.filter((video) => {
@@ -156,7 +166,9 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const hasThumbnail = video.thumbnail || video.thumbnail_url
+            const miniaturaManual = video.thumbnail || video.thumbnail_url
+            const miniaturaAuto = obtenerMiniaturaDoodstream(video.embed_url)
+            const imagenSrc = miniaturaManual || miniaturaAuto
 
             return (
               <div
@@ -165,24 +177,25 @@ export default function Home() {
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between"
               >
                 <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/30 to-neutral-900 flex items-center justify-center overflow-hidden">
-                  {hasThumbnail ? (
+                  {imagenSrc ? (
                     <img 
-                      src={hasThumbnail} 
+                      src={imagenSrc} 
                       alt={video.titulo} 
+                      onError={(e: any) => {
+                        e.target.onerror = null
+                        e.target.style.display = 'none'
+                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                  ) : (
-                    <div className="p-4 text-center">
+                  ) : null}
+
+                  {/* Capa de respaldo con texto y botón play */}
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex flex-col items-center justify-center p-3 text-center">
+                    {!imagenSrc && (
                       <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest block mb-1">
                         {video.categoria || 'VIDEO'}
                       </span>
-                      <p className="text-xs text-neutral-300 font-medium line-clamp-2 px-2">
-                        {video.titulo}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    )}
                     <div className="w-12 h-12 rounded-full bg-pink-600/90 group-hover:bg-pink-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg">
                       <span className="text-white text-lg ml-0.5">▶</span>
                     </div>
