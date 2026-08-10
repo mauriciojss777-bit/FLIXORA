@@ -10,13 +10,13 @@ export default function Home() {
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
   const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
 
-  // Estado para editar portada de un video específico de forma segura
+  // Estado para editar portada
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
   const [passwordEdicion, setPasswordEdicion] = useState('')
   const [autorizadoEdicion, setAutorizadoEdicion] = useState(false)
   const [cargandoImagen, setCargandoImagen] = useState(false)
 
-  // Campos del formulario de subida
+  // Campos del formulario
   const [nuevoTitulo, setNuevoTitulo] = useState('')
   const [nuevaCategoria, setNuevaCategoria] = useState('Amateur')
   const [nuevoEmbedUrl, setNuevoEmbedUrl] = useState('')
@@ -73,7 +73,6 @@ export default function Home() {
     }
   }
 
-  // Verificar clave de administración para editar
   const verificarClaveEdicion = (e: React.FormEvent) => {
     e.preventDefault()
     if (passwordEdicion !== 'flixes2026#Admin#Pass') {
@@ -83,38 +82,63 @@ export default function Home() {
     setAutorizadoEdicion(true)
   }
 
-  // Función para procesar la imagen seleccionada de la galería local
-  const handleArchivoGaleria = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Redimensionar y comprimir la imagen de la galería para asegurar guardado rápido
+  const comprimirImagen = (archivo: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(archivo)
+      reader.onload = (event) => {
+        const img = new Image()
+        img.src = event.target?.result as string
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const MAX_WIDTH = 600
+          const scale = MAX_WIDTH / img.width
+          canvas.width = MAX_WIDTH
+          canvas.height = img.height * scale
+
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+          resolve(canvas.toDataURL('image/jpeg', 0.7))
+        }
+      }
+    })
+  }
+
+  const handleArchivoGaleria = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = e.target.files?.[0]
     if (!archivo) return
 
     setCargandoImagen(true)
-    const lector = new FileReader()
-    lector.onloadend = async () => {
-      const base64String = lector.result as string
-      
+    try {
+      const base64Comprimido = await comprimirImagen(archivo)
+
       if (!videoAEditar) {
-        setNuevaPortadaUrl(base64String)
+        setNuevaPortadaUrl(base64Comprimido)
       } else {
-        // Actualizar directamente en Supabase si está editando
+        // Actualizamos de forma simultánea en thumbnail_url y thumbnail para compatibilidad total
         const { error } = await supabase
           .from('videos')
-          .update({ thumbnail: base64String })
+          .update({ 
+            thumbnail_url: base64Comprimido,
+            thumbnail: base64Comprimido 
+          })
           .eq('id', videoAEditar.id)
 
         if (error) {
           alert('Error al guardar la imagen: ' + error.message)
         } else {
-          alert('¡Portada de galería actualizada con éxito!')
+          alert('¡Portada actualizada con éxito!')
           setVideoAEditar(null)
           setAutorizadoEdicion(false)
           setPasswordEdicion('')
           fetchVideos()
         }
       }
-      setCargandoImagen(false)
+    } catch (err) {
+      alert('Error procesando la imagen de la galería.')
     }
-    lector.readAsDataURL(archivo)
+    setCargandoImagen(false)
   }
 
   const handleSubirVideo = async (e: React.FormEvent) => {
@@ -136,6 +160,7 @@ export default function Home() {
         titulo: nuevoTitulo,
         categoria: nuevaCategoria,
         embed_url: nuevoEmbedUrl,
+        thumbnail_url: nuevaPortadaUrl || null,
         thumbnail: nuevaPortadaUrl || null,
         created_at: new Date().toISOString()
       }
@@ -206,7 +231,7 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const hasThumbnail = video.thumbnail && video.thumbnail.trim() !== ''
+            const imagenMostrada = video.thumbnail_url || video.thumbnail
 
             return (
               <div
@@ -222,16 +247,16 @@ export default function Home() {
                     setAutorizadoEdicion(false)
                     setPasswordEdicion('')
                   }}
-                  title="Cambiar portada protegida"
+                  title="Cambiar portada"
                   className="absolute top-2 right-2 z-10 bg-black/70 hover:bg-pink-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs opacity-80 group-hover:opacity-100 transition-all shadow-md"
                 >
                   🖼️
                 </button>
 
                 <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/40 to-neutral-900 flex items-center justify-center overflow-hidden">
-                  {hasThumbnail ? (
+                  {imagenMostrada ? (
                     <img 
-                      src={video.thumbnail} 
+                      src={imagenMostrada} 
                       alt={video.titulo} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
@@ -325,7 +350,7 @@ export default function Home() {
                 </div>
 
                 {cargandoImagen && (
-                  <p className="text-xs text-pink-400 text-center animate-pulse">Guardando imagen en la base de datos...</p>
+                  <p className="text-xs text-pink-400 text-center animate-pulse">Optimizando y guardando imagen...</p>
                 )}
 
                 <button
