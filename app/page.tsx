@@ -14,6 +14,9 @@ export default function Home() {
   // Estado para el modal de agradecimiento al terminar el video
   const [mostrarDonacionFinVideo, setMostrarDonacionFinVideo] = useState<boolean>(false)
 
+  // Estado para el aviso de +18
+  const [mostrarAviso18, setMostrarAviso18] = useState<boolean>(false)
+
   // Estado para editar portada
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
   const [passwordEdicion, setPasswordEdicion] = useState('')
@@ -30,7 +33,18 @@ export default function Home() {
 
   useEffect(() => {
     fetchVideos()
+    
+    // Verificar si ya aceptó el aviso +18 en esta sesión/navegador
+    const edadAceptada = localStorage.getItem('flixes_edad_aceptada')
+    if (!edadAceptada) {
+      setMostrarAviso18(true)
+    }
   }, [])
+
+  const aceptarEdad = () => {
+    localStorage.setItem('flixes_edad_aceptada', 'true')
+    setMostrarAviso18(false)
+  }
 
   async function fetchVideos() {
     const { data, error } = await supabase
@@ -68,7 +82,6 @@ export default function Home() {
 
   const cerrarReproductor = () => {
     setVideoActivo(null)
-    // Mostrar modal de propina al terminar de ver el video
     setMostrarDonacionFinVideo(true)
   }
 
@@ -190,6 +203,37 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-4 font-sans pb-24">
+      {/* MODAL AVISO +18 (EDAD) */}
+      {mostrarAviso18 && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-lg flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center space-y-5">
+            <div className="mx-auto w-12 h-12 rounded-full bg-pink-600/20 border border-pink-500/30 flex items-center justify-center text-pink-500 font-black text-lg">
+              18+
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-bold text-xl text-white">Contenido para Adultos</h3>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Este sitio web contiene material explícito y está restringido estrictamente a personas mayores de 18 años (o la edad legal en tu jurisdicción).
+              </p>
+            </div>
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={aceptarEdad}
+                className="w-full bg-pink-600 hover:bg-pink-500 font-bold text-white py-3 rounded-xl transition-all shadow-lg text-sm"
+              >
+                Soy mayor de 18 años - Entrar
+              </button>
+              <a
+                href="https://www.google.com"
+                className="block w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-neutral-400 text-xs py-2.5 rounded-xl transition-colors text-center"
+              >
+                Salir
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="flex justify-between items-center py-4 border-b border-neutral-800 mb-6 max-w-6xl mx-auto">
         <div className="flex items-center gap-2">
           <span className="text-xs bg-pink-600 font-bold px-2 py-0.5 rounded text-white">18+</span>
