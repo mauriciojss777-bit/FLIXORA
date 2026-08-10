@@ -10,6 +10,9 @@ export default function Home() {
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
   const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
   const [mostrarPropinas, setMostrarPropinas] = useState<boolean>(false)
+  
+  // Estado para el modal de agradecimiento al terminar el video
+  const [mostrarDonacionFinVideo, setMostrarDonacionFinVideo] = useState<boolean>(false)
 
   // Estado para editar portada
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
@@ -62,6 +65,12 @@ export default function Home() {
 
     return coincideCategoria && coincideBusqueda
   })
+
+  const cerrarReproductor = () => {
+    setVideoActivo(null)
+    // Mostrar modal de propina al terminar de ver el video
+    setMostrarDonacionFinVideo(true)
+  }
 
   const compartirVideo = (video: any, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -301,7 +310,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* MODAL PROPINAS */}
+      {/* MODAL PROPINAS (Menú superior) */}
       {mostrarPropinas && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
@@ -333,6 +342,43 @@ export default function Home() {
               className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-neutral-400 text-xs py-2 rounded-xl transition-colors"
             >
               Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL AGRADECIMIENTO / PROPINA AL TERMINAR VIDEO */}
+      {mostrarDonacionFinVideo && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-lg text-amber-400 flex items-center gap-2">🎬 ¿Disfrutaste el video?</h3>
+              <button
+                onClick={() => setMostrarDonacionFinVideo(false)}
+                className="text-neutral-400 hover:text-white font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              Esperamos que te haya gustado. Mantener este espacio activo y sin anuncios molestos es posible gracias a tu apoyo. ¿Te gustaría dejar una propina?
+            </p>
+
+            <a
+              href="https://paypal.me/umbrellapaypal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-blue-600 hover:bg-blue-500 font-bold text-white py-3 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center gap-2"
+            >
+              ☕ Dejar Propina (PayPal)
+            </a>
+
+            <button
+              onClick={() => setMostrarDonacionFinVideo(false)}
+              className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-neutral-400 text-xs py-2 rounded-xl transition-colors"
+            >
+              Seguir viendo más videos
             </button>
           </div>
         </div>
@@ -410,7 +456,7 @@ export default function Home() {
             <div className="flex justify-between items-center p-4 border-b border-neutral-800">
               <h3 className="font-bold text-lg text-white line-clamp-1">{videoActivo.titulo}</h3>
               <button
-                onClick={() => setVideoActivo(null)}
+                onClick={cerrarReproductor}
                 className="w-8 h-8 rounded-full bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors font-bold"
               >
                 ✕
@@ -435,7 +481,17 @@ export default function Home() {
             </div>
 
             <div className="p-4 flex justify-between items-center text-xs text-neutral-400">
-              <span>Categoría: <strong className="text-white">{videoActivo.categoria || 'General'}</strong></span>
+              <div className="flex items-center gap-2">
+                <span>Categoría: <strong className="text-white">{videoActivo.categoria || 'General'}</strong></span>
+                <a
+                  href="https://paypal.me/umbrellapaypal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 px-3 py-1 rounded-lg font-medium transition-colors border border-amber-500/30"
+                >
+                  ☕ Apoyar creador
+                </a>
+              </div>
               <button
                 onClick={(e) => compartirVideo(videoActivo, e)}
                 className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-1.5 rounded-lg font-medium transition-colors"
