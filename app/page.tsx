@@ -82,7 +82,7 @@ export default function Home() {
     setAutorizadoEdicion(true)
   }
 
-  // Redimensionar y comprimir la imagen de la galería para asegurar guardado rápido
+  // Redimensionar y comprimir la imagen
   const comprimirImagen = (archivo: File): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader()
@@ -92,14 +92,14 @@ export default function Home() {
         img.src = event.target?.result as string
         img.onload = () => {
           const canvas = document.createElement('canvas')
-          const MAX_WIDTH = 600
+          const MAX_WIDTH = 500
           const scale = MAX_WIDTH / img.width
           canvas.width = MAX_WIDTH
           canvas.height = img.height * scale
 
           const ctx = canvas.getContext('2d')
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-          resolve(canvas.toDataURL('image/jpeg', 0.7))
+          resolve(canvas.toDataURL('image/jpeg', 0.6))
         }
       }
     })
@@ -116,13 +116,10 @@ export default function Home() {
       if (!videoAEditar) {
         setNuevaPortadaUrl(base64Comprimido)
       } else {
-        // Actualizamos de forma simultánea en thumbnail_url y thumbnail para compatibilidad total
+        // Actualizamos estrictamente la columna 'thumbnail'
         const { error } = await supabase
           .from('videos')
-          .update({ 
-            thumbnail_url: base64Comprimido,
-            thumbnail: base64Comprimido 
-          })
+          .update({ thumbnail: base64Comprimido })
           .eq('id', videoAEditar.id)
 
         if (error) {
@@ -160,7 +157,6 @@ export default function Home() {
         titulo: nuevoTitulo,
         categoria: nuevaCategoria,
         embed_url: nuevoEmbedUrl,
-        thumbnail_url: nuevaPortadaUrl || null,
         thumbnail: nuevaPortadaUrl || null,
         created_at: new Date().toISOString()
       }
@@ -231,7 +227,7 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const imagenMostrada = video.thumbnail_url || video.thumbnail
+            const hasThumbnail = video.thumbnail && video.thumbnail.trim() !== ''
 
             return (
               <div
@@ -254,9 +250,9 @@ export default function Home() {
                 </button>
 
                 <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/40 to-neutral-900 flex items-center justify-center overflow-hidden">
-                  {imagenMostrada ? (
+                  {hasThumbnail ? (
                     <img 
-                      src={imagenMostrada} 
+                      src={video.thumbnail} 
                       alt={video.titulo} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
@@ -350,7 +346,7 @@ export default function Home() {
                 </div>
 
                 {cargandoImagen && (
-                  <p className="text-xs text-pink-400 text-center animate-pulse">Optimizando y guardando imagen...</p>
+                  <p className="text-xs text-pink-400 text-center animate-pulse">Guardando imagen en la base de datos...</p>
                 )}
 
                 <button
