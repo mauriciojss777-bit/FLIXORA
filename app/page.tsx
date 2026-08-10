@@ -42,20 +42,6 @@ export default function Home() {
     }
   }
 
-  // Función para extraer automáticamente la miniatura oficial de Doodstream/Playmogo desde el embed URL
-  const obtenerMiniaturaAutomatica = (embedUrl: string) => {
-    if (!embedUrl) return null
-    // Ejemplo embed: https://playmogo.com/e/tb3f316w... -> miniatura: https://img.doodcdn.co/splash/tb3f316w...jpg (o similar)
-    // O extraemos el ID del embed para armar la imagen de previsualización
-    const match = embedUrl.match(/\/e\/([a-zA-Z0-9]+)/)
-    if (match && match[1]) {
-      const fileId = match[1]
-      // Doodstream suele servir las imágenes de splash con este formato estándar:
-      return `https://img.doodcdn.co/splash/${fileId}.jpg`
-    }
-    return null
-  }
-
   const categorias = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trio', 'Latina']
 
   const videosFiltrados = videos.filter((video) => {
@@ -170,8 +156,7 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            // Prioridad: 1. Portada personalizada, 2. Miniatura automática del embed, 3. Fallback
-            const thumbnailFinal = video.thumbnail_url || video.thumbnail || obtenerMiniaturaAutomatica(video.embed_url)
+            const hasThumbnail = video.thumbnail_url || video.thumbnail
 
             return (
               <div
@@ -179,20 +164,25 @@ export default function Home() {
                 onClick={() => setVideoActivo(video)}
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between"
               >
-                <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
-                  {thumbnailFinal ? (
+                <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/30 to-neutral-900 flex items-center justify-center overflow-hidden">
+                  {hasThumbnail ? (
                     <img 
-                      src={thumbnailFinal} 
+                      src={hasThumbnail} 
                       alt={video.titulo} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                      onError={(e: any) => {
-                        // Si falla la imagen automática, ocultarla para mostrar el fondo por defecto
-                        e.target.style.display = 'none'
-                      }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                  ) : null}
+                  ) : (
+                    <div className="p-4 text-center">
+                      <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest block mb-1">
+                        {video.categoria || 'VIDEO'}
+                      </span>
+                      <p className="text-xs text-neutral-300 font-medium line-clamp-2 px-2">
+                        {video.titulo}
+                      </p>
+                    </div>
+                  )}
                   
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="w-12 h-12 rounded-full bg-pink-600/90 group-hover:bg-pink-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg">
                       <span className="text-white text-lg ml-0.5">▶</span>
                     </div>
@@ -332,10 +322,10 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-neutral-400 mb-1">URL de Portada Personalizada (Opcional)</label>
+                <label className="block text-xs text-neutral-400 mb-1">URL de Portada (Enlace Doodstream Single/Splash Image)</label>
                 <input
                   type="url"
-                  placeholder="Déjalo vacío para usar miniatura automática"
+                  placeholder="Pega la URL de imagen de Doodstream"
                   value={nuevaPortadaUrl}
                   onChange={(e) => setNuevaPortadaUrl(e.target.value)}
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
