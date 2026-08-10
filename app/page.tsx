@@ -10,9 +10,10 @@ export default function Home() {
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
   const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
 
-  // Estado para editar portada de un video específico
+  // Estado para editar portada de un video específico de forma segura
   const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
   const [passwordEdicion, setPasswordEdicion] = useState('')
+  const [autorizadoEdicion, setAutorizadoEdicion] = useState(false)
   const [cargandoImagen, setCargandoImagen] = useState(false)
 
   // Campos del formulario de subida
@@ -72,6 +73,16 @@ export default function Home() {
     }
   }
 
+  // Verificar clave de administración para editar
+  const verificarClaveEdicion = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwordEdicion !== 'flixes2026#Admin#Pass') {
+      alert('❌ Contraseña de administrador incorrecta')
+      return
+    }
+    setAutorizadoEdicion(true)
+  }
+
   // Función para procesar la imagen seleccionada de la galería local
   const handleArchivoGaleria = (e: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = e.target.files?.[0]
@@ -94,8 +105,10 @@ export default function Home() {
         if (error) {
           alert('Error al guardar la imagen: ' + error.message)
         } else {
-          alert('¡Portada de galería cargada con éxito!')
+          alert('¡Portada de galería actualizada con éxito!')
           setVideoAEditar(null)
+          setAutorizadoEdicion(false)
+          setPasswordEdicion('')
           fetchVideos()
         }
       }
@@ -201,13 +214,15 @@ export default function Home() {
                 onClick={() => setVideoActivo(video)}
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between relative"
               >
-                {/* Botón flotante para cambiar la portada desde la galería */}
+                {/* Botón flotante protegido */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     setVideoAEditar(video)
+                    setAutorizadoEdicion(false)
+                    setPasswordEdicion('')
                   }}
-                  title="Cambiar portada desde galería"
+                  title="Cambiar portada protegida"
                   className="absolute top-2 right-2 z-10 bg-black/70 hover:bg-pink-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs opacity-80 group-hover:opacity-100 transition-all shadow-md"
                 >
                   🖼️
@@ -260,12 +275,12 @@ export default function Home() {
         </div>
       </main>
 
-      {/* MODAL EDITAR PORTADA DESDE GALERÍA */}
+      {/* MODAL EDITAR PORTADA PROTEGIDO */}
       {videoAEditar && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <h3 className="font-bold text-lg text-white">Elegir Portada de Galería</h3>
+              <h3 className="font-bold text-lg text-white">Panel Admin: Cambiar Portada</h3>
               <button
                 onClick={() => setVideoAEditar(null)}
                 className="text-neutral-400 hover:text-white font-bold"
@@ -276,29 +291,51 @@ export default function Home() {
 
             <p className="text-xs text-neutral-400 line-clamp-1">Video: <strong className="text-white">{videoAEditar.titulo}</strong></p>
 
-            <div className="space-y-4 text-sm">
-              <div>
-                <label className="block text-xs text-neutral-400 mb-2">Selecciona una imagen desde tu dispositivo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleArchivoGaleria}
-                  disabled={cargandoImagen}
-                  className="w-full text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer"
-                />
+            {!autorizadoEdicion ? (
+              <form onSubmit={verificarClaveEdicion} className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs text-neutral-400 mb-1">Contraseña de Administrador</label>
+                  <input
+                    type="password"
+                    placeholder="Clave de seguridad"
+                    value={passwordEdicion}
+                    onChange={(e) => setPasswordEdicion(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-pink-600 hover:bg-pink-500 font-bold text-white py-2.5 rounded-xl transition-colors"
+                >
+                  Verificar Clave
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs text-neutral-400 mb-2">Selecciona la nueva imagen desde tu galería</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleArchivoGaleria}
+                    disabled={cargandoImagen}
+                    className="w-full text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer"
+                  />
+                </div>
+
+                {cargandoImagen && (
+                  <p className="text-xs text-pink-400 text-center animate-pulse">Guardando imagen en la base de datos...</p>
+                )}
+
+                <button
+                  onClick={() => setVideoAEditar(null)}
+                  className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-white py-2.5 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
               </div>
-
-              {cargandoImagen && (
-                <p className="text-xs text-pink-400 text-center animate-pulse">Cargando imagen a la base de datos...</p>
-              )}
-
-              <button
-                onClick={() => setVideoAEditar(null)}
-                className="w-full bg-neutral-800 hover:bg-neutral-700 font-bold text-white py-2.5 rounded-xl transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
+            )}
           </div>
         </div>
       )}
