@@ -59,6 +59,18 @@ export default function Home() {
     }
   };
 
+  const handleShare = (video: Video) => {
+    if (navigator.share) {
+      navigator.share({
+        title: video.title,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('¡Enlace copiado al portapapeles!');
+    }
+  };
+
   if (!ageAccepted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
@@ -113,9 +125,36 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)}>
           <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
-            <div className="p-4 flex justify-between items-center bg-zinc-950">
-              <h2 className="font-bold text-white truncate w-2/3">{selectedVideo.title}</h2>
-              <button type="button" onClick={() => setSelectedVideo(null)} className="text-zinc-400 bg-zinc-800 px-4 py-2 rounded-lg">CERRAR</button>
+            
+            <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
+              <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
+              
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                <button 
+                  type="button" 
+                  onClick={() => handleShare(selectedVideo)} 
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1"
+                >
+                  🔗 Compartir
+                </button>
+
+                <a 
+                  href="https://paypal.me/TU_USUARIO_PAYPAL" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-amber-500/20 flex items-center gap-1"
+                >
+                  ☕ Donar
+                </a>
+
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedVideo(null)} 
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-xl font-bold"
+                >
+                  CERRAR
+                </button>
+              </div>
             </div>
           </div>
         </div>
