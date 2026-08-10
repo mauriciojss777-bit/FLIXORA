@@ -3,357 +3,163 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Video {
   id: string;
   title: string;
   category: string;
+  tags?: string;
   voe_url: string;
-  dood_url?: string;
   cover_url: string;
 }
 
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [serverSource, setServerSource] = useState<'voe' | 'dood'>('voe');
-  const [filterCategory, setFilterCategory] = useState<string>('Todos');
+  const [activeTag, setActiveTag] = useState<string>('Todos');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
+  // Formulario Admin
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Amateur');
+  const [category, setCategory] = useState('HD');
   const [voeUrl, setVoeUrl] = useState('');
-  const [doodUrl, setDoodUrl] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const isAdult = localStorage.getItem('age_verified');
-    if (isAdult === 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
       setAgeAccepted(true);
     }
     fetchVideos();
   }, []);
 
-  const acceptAge = () => {
-    localStorage.setItem('age_verified', 'true');
-    setAgeAccepted(true);
-  };
-
   const fetchVideos = async () => {
-    const { data, error } = await supabase
-      .from('videos')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error al obtener videos:', error);
-    } else if (data) {
-      setVideos(data);
+    try {
+      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      if (data) setVideos(data);
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const handleSaveVideo = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (adminPassword !== 'ADMIN_SECRET_KEY') {
-      alert('Contraseña de administrador incorrecta');
+    if (adminPassword !== 'flixes2026#Admin#Pass') {
+      alert('Contraseña incorrecta');
       return;
     }
-
-    if (!title || !voeUrl || !coverUrl) {
-      alert('Por favor completa el Título, el Enlace de VOE y la URL de la Portada.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
+    
     const { error } = await supabase.from('videos').insert([
-      {
-        title,
-        category,
-        voe_url: voeUrl,
-        dood_url: doodUrl || null,
-        cover_url: coverUrl,
-      },
+      { title, category, voe_url: voeUrl, cover_url: coverUrl }
     ]);
-
-    setIsSubmitting(false);
-
+    
     if (error) {
-      alert('Error al guardar el video: ' + error.message);
+      alert('Error: ' + error.message);
     } else {
-      alert('¡Video guardado con éxito!');
-      setTitle('');
-      setVoeUrl('');
-      setDoodUrl('');
-      setCoverUrl('');
       setShowAdminModal(false);
+      setTitle(''); setVoeUrl(''); setCoverUrl(''); setAdminPassword('');
       fetchVideos();
     }
   };
 
-  const categories = ['Todos', 'Amateur', 'HD', 'Parodia', 'VR'];
-
-  const filteredVideos = filterCategory === 'Todos'
-    ? videos
-    : videos.filter((v) => v.category === filterCategory);
+  const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
+  const filteredVideos = videos.filter((v) => {
+    const matchesTag = activeTag === 'Todos' || v.category === activeTag;
+    const matchesSearch = v.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTag && matchesSearch;
+  });
 
   if (!ageAccepted) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 text-center">
-        <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 max-w-sm w-full space-y-4 shadow-2xl">
-          <h1 className="text-3xl font-black text-pink-500 tracking-wider">FLIXORA</h1>
-          <div className="inline-block bg-red-600/20 text-red-500 border border-red-500/30 font-bold px-3 py-1 rounded-full text-xs">
-            +18 ADVERTENCIA
-          </div>
-          <p className="text-zinc-300 text-sm">
-            Este sitio contiene material para adultos. Al ingresar confirmas que tienes al menos 18 años de edad.
-          </p>
-          <button
-            onClick={acceptAge}
-            className="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg shadow-pink-600/30"
-          >
-            Soy mayor de 18 años - Entrar
-          </button>
+      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+        <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
+          <h1 className="text-4xl font-black tracking-tighter text-white">FLIX<span className="text-amber-500">ORA</span></h1>
+          <div className="text-red-500 border border-red-500/20 bg-red-950/20 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">+18 ADVERTENCIA</div>
+          <p className="text-zinc-400 text-sm">Este sitio es exclusivo para adultos. Al ingresar confirmas ser mayor de 18 años.</p>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500 transition-colors">INGRESAR</button>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans pb-12">
-      <header className="flex justify-between items-center p-4 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur sticky top-0 z-40">
-        <h1 className="text-xl font-extrabold tracking-wider text-pink-500">FLIXORA</h1>
-        <div className="flex items-center gap-2">
-          <a
-            href="https://paypal.me/TU_USUARIO_PAYPAL"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-500/30 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
-          >
-            ☕ Apoyar
-          </a>
-          <button
-            onClick={() => setShowAdminModal(true)}
-            className="bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-300 py-1.5 px-3 rounded-lg border border-zinc-800"
-          >
-            + Subir
-          </button>
+    <main className="min-h-screen bg-[#050505] text-zinc-200">
+      {/* BARRA SUPERIOR */}
+      <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
+        <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLIX<span className="text-amber-500">ORA</span></h1>
+        <div className="flex items-center gap-3">
+          <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noreferrer" className="bg-amber-500/10 text-amber-500 text-xs px-4 py-2 rounded-full font-bold border border-amber-500/20 hover:bg-amber-500 hover:text-black transition-all">☕ DONAR</a>
+          <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-4 py-2 rounded-full border border-zinc-800 hover:border-zinc-600 transition-all">+ SUBIR</button>
         </div>
-      </header>
+      </nav>
 
-      <div className="flex gap-2 p-4 overflow-x-auto no-scrollbar">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-              filterCategory === cat
-                ? 'bg-pink-600 text-white'
-                : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {/* BUSCADOR Y ETIQUETAS */}
+      <section className="px-4 pt-6 pb-2">
+        <input 
+          type="text" 
+          placeholder="Buscar contenido..." 
+          onChange={(e) => setSearchQuery(e.target.value)} 
+          className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none transition-all mb-4" 
+        />
+        <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+          {defaultTags.map(tag => (
+            <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}`}>
+              {tag}
+            </button>
+          ))}
+        </div>
+      </section>
 
-      <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      {/* GRILLA DE VIDEOS */}
+      <div className="px-4 pb-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredVideos.map((video) => (
-          <div
-            key={video.id}
-            onClick={() => setSelectedVideo(video)}
-            className="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-pink-500/50 cursor-pointer transition-all group flex flex-col"
-          >
-            <div className="relative aspect-video w-full bg-zinc-950">
-              <img
-                src={video.cover_url}
-                alt={video.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <div className="w-9 h-9 bg-pink-600/90 rounded-full flex items-center justify-center pl-0.5 shadow-lg group-hover:scale-110 transition-transform">
-                  ▶
-                </div>
-              </div>
+          <div key={video.id} onClick={() => setSelectedVideo(video)} className="group cursor-pointer">
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900">
+              <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-amber-500 border border-white/5">{video.category}</div>
             </div>
-            <div className="p-2.5 flex-1 flex flex-col justify-between">
-              <h3 className="text-xs font-semibold text-zinc-200 line-clamp-2 leading-tight mb-1">
-                {video.title}
-              </h3>
-              <span className="text-[10px] text-pink-400 font-medium">
-                {video.category}
-              </span>
-            </div>
+            <h3 className="mt-2 text-sm font-semibold text-zinc-300 group-hover:text-white line-clamp-1">{video.title}</h3>
           </div>
         ))}
       </div>
 
+      {/* MODAL DE REPRODUCCIÓN */}
       {selectedVideo && (
-        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl relative">
-            <div className="p-3 border-b border-zinc-800 flex justify-between items-center">
-              <h3 className="text-sm font-bold text-zinc-200 truncate pr-4">
-                {selectedVideo.title}
-              </h3>
-              <button
-                onClick={() => setSelectedVideo(null)}
-                className="text-zinc-400 hover:text-white text-lg font-bold px-2"
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedVideo(null)}>
+          <div className="bg-zinc-900 w-full max-w-4xl rounded-3xl overflow-hidden border border-zinc-800" onClick={e => e.stopPropagation()}>
+            <div className="aspect-video w-full">
+              <iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen />
             </div>
-
-            <div className="relative aspect-video w-full bg-black">
-              <iframe
-                src={serverSource === 'voe' ? selectedVideo.voe_url : selectedVideo.dood_url}
-                className="w-full h-full border-0"
-                allowFullScreen
-                sandbox="allow-scripts allow-same-origin"
-              ></iframe>
-            </div>
-
-            <div className="p-3 flex items-center justify-between bg-zinc-900">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">Servidor:</span>
-                <button
-                  onClick={() => setServerSource('voe')}
-                  className={`px-3 py-1 text-xs rounded-lg font-medium ${
-                    serverSource === 'voe'
-                      ? 'bg-pink-600 text-white'
-                      : 'bg-zinc-800 text-zinc-400'
-                  }`}
-                >
-                  VOE
-                </button>
-                {selectedVideo.dood_url && (
-                  <button
-                    onClick={() => setServerSource('dood')}
-                    className={`px-3 py-1 text-xs rounded-lg font-medium ${
-                      serverSource === 'dood'
-                        ? 'bg-pink-600 text-white'
-                        : 'bg-zinc-800 text-zinc-400'
-                    }`}
-                  >
-                    Doodstream
-                  </button>
-                )}
-              </div>
+            <div className="p-4 flex justify-between items-center">
+              <h2 className="font-bold text-white">{selectedVideo.title}</h2>
+              <button onClick={() => setSelectedVideo(null)} className="text-zinc-500 hover:text-white font-bold text-xs bg-zinc-800 px-3 py-1.5 rounded-lg">CERRAR</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* MODAL ADMINISTRADOR */}
       {showAdminModal && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl w-full max-w-md relative shadow-2xl">
-            <button
-              onClick={() => setShowAdminModal(false)}
-              className="absolute top-3 right-3 text-zinc-400 hover:text-white"
-            >
-              ✕
-            </button>
-            <h2 className="text-base font-bold mb-4 text-white">Subir Video</h2>
-
-            <form onSubmit={handleSaveVideo} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  Título
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Título del video"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  Categoría
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                >
-                  <option value="Amateur">Amateur</option>
-                  <option value="HD">HD</option>
-                  <option value="Parodia">Parodia</option>
-                  <option value="VR">VR</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  Enlace VOE (Embed)
-                </label>
-                <input
-                  type="url"
-                  value={voeUrl}
-                  onChange={(e) => setVoeUrl(e.target.value)}
-                  placeholder="https://voe.sx/e/..."
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  Enlace Doodstream (Opcional)
-                </label>
-                <input
-                  type="url"
-                  value={doodUrl}
-                  onChange={(e) => setDoodUrl(e.target.value)}
-                  placeholder="https://dood.so/e/..."
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1">
-                  URL de Portada
-                </label>
-                <input
-                  type="url"
-                  value={coverUrl}
-                  onChange={(e) => setCoverUrl(e.target.value)}
-                  placeholder="https://voe.sx/cache/..."
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-lg transition-colors text-xs mt-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Guardando...' : 'Guardar Video'}
-              </button>
-            </form>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+          <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
+            <h2 className="text-xl font-bold">Panel Admin</h2>
+            <input type="password" placeholder="Clave" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
+            <input type="text" placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300">
+              {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <input type="text" placeholder="URL VOE" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
+            <input type="text" placeholder="URL Portada" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800">Cancelar</button>
+              <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-bold">Publicar</button>
+            </div>
+          </form>
         </div>
       )}
     </main>
