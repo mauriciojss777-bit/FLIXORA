@@ -8,20 +8,38 @@ export default function Home() {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('Todos')
   const [busqueda, setBusqueda] = useState<string>('')
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
+  const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
+
+  // Campos para subir video
+  const [nuevoTitulo, setNuevoTitulo] = useState('')
+  const [nuevaCategoria, setNuevaCategoria] = useState('Amateur')
+  const [nuevoEmbedUrl, setNuevoEmbedUrl] = useState('')
+  const [passwordAdmin, setPasswordAdmin] = useState('')
+  const [subiendo, setSubiendo] = useState(false)
 
   useEffect(() => {
-    async function fetchVideos() {
-      const { data, error } = await supabase
-        .from('videos')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (!error && data) {
-        setVideos(data)
-      }
-    }
     fetchVideos()
   }, [])
+
+  async function fetchVideos() {
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && data) {
+      setVideos(data)
+      
+      const searchParams = new URLSearchParams(window.location.search)
+      const videoId = searchParams.get('v')
+      if (videoId) {
+        const videoEncontrado = data.find((v) => String(v.id) === String(videoId))
+        if (videoEncontrado) {
+          setVideoActivo(videoEncontrado)
+        }
+      }
+    }
+  }
 
   const categorias = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trio', 'Latina']
 
@@ -48,6 +66,43 @@ export default function Home() {
     }
   }
 
+  const handleSubirVideo = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (passwordAdmin !== 'flixes2026#Admin#Pass') {
+      alert('❌ Contraseña de administrador incorrecta')
+      return
+    }
+
+    if (!nuevoTitulo || !nuevoEmbedUrl) {
+      alert('Por favor completa el título y la URL de inserción (Embed URL)')
+      return
+    }
+
+    setSubiendo(true)
+    const { error } = await supabase.from('videos').insert([
+      {
+        titulo: nuevoTitulo,
+        categoria: nuevaCategoria,
+        embed_url: nuevoEmbedUrl,
+        created_at: new Date().toISOString()
+      }
+    ])
+
+    setSubiendo(false)
+
+    if (error) {
+      alert('Error al guardar el video: ' + error.message)
+    } else {
+      alert('¡Video agregado con éxito!')
+      setNuevoTitulo('')
+      setNuevoEmbedUrl('')
+      setPasswordAdmin('')
+      setMostrarSubir(false)
+      fetchVideos()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-4 font-sans pb-24">
       {/* Header */}
@@ -56,6 +111,12 @@ export default function Home() {
           <span className="text-xs bg-pink-600 font-bold px-2 py-0.5 rounded text-white">18+</span>
           <h1 className="text-xl font-black tracking-wider text-pink-500">FLIXES</h1>
         </div>
+        <button
+          onClick={() => setMostrarSubir(true)}
+          className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+        >
+          ➕ Subir Video
+        </button>
       </header>
 
       <main className="max-w-6xl mx-auto space-y-6">
@@ -92,16 +153,27 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const videoSource = video.embed_url || video.url
+            const hasDirectVideo = video.url && video.url.includes('.mp4')
             return (
               <div
                 key={video.id}
                 onClick={() => setVideoActivo(video)}
                 className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between"
               >
-                <div className="relative aspect-video bg-black flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-pink-600/80 group-hover:bg-pink-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg">
-                    <span className="text-white text-lg ml-0.5">▶</span>
+                <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+                  {hasDirectVideo ? (
+                    <video src={`${video.url}#t=0.1`} preload="metadata" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center">
+                      <span className="text-xs text-neutral-500 font-semibold uppercase tracking-widest">
+                        {video.categoria || 'VIDEO'}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-pink-600/90 group-hover:bg-pink-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg">
+                      <span className="text-white text-lg ml-0.5">▶</span>
+                    </div>
                   </div>
                 </div>
 
@@ -131,7 +203,6 @@ export default function Home() {
       {videoActivo && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl relative">
-            {/* Header Modal */}
             <div className="flex justify-between items-center p-4 border-b border-neutral-800">
               <h3 className="font-bold text-lg text-white line-clamp-1">{videoActivo.titulo}</h3>
               <button
@@ -142,7 +213,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Reproductor Frame */}
             <div className="relative aspect-video bg-black w-full">
               {videoActivo.embed_url ? (
                 <iframe
@@ -160,7 +230,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Footer Modal */}
             <div className="p-4 flex justify-between items-center text-xs text-neutral-400">
               <span>Categoría: <strong className="text-white">{videoActivo.categoria || 'General'}</strong></span>
               <button
@@ -170,6 +239,84 @@ export default function Home() {
                 Compartir Video
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SUBIR VIDEO CON ADMIN PASS */}
+      {mostrarSubir && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-lg text-white">Panel Admin: Subir Video</h3>
+              <button
+                onClick={() => setMostrarSubir(false)}
+                className="text-neutral-400 hover:text-white font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubirVideo} className="space-y-4 text-sm">
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Contraseña de Administrador</label>
+                <input
+                  type="password"
+                  placeholder="Escribe la clave admin"
+                  value={passwordAdmin}
+                  onChange={(e) => setPasswordAdmin(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Título del Video</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Mi video nuevo"
+                  value={nuevoTitulo}
+                  onChange={(e) => setNuevoTitulo(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Categoría</label>
+                <select
+                  value={nuevaCategoria}
+                  onChange={(e) => setNuevaCategoria(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                >
+                  {categorias.filter((c) => c !== 'Todos').map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">URL de Inserción (Doodstream Embed)</label>
+                <input
+                  type="url"
+                  placeholder="https://playmogo.com/e/..."
+                  value={nuevoEmbedUrl}
+                  onChange={(e) => setNuevoEmbedUrl(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={subiendo}
+                className="w-full bg-pink-600 hover:bg-pink-500 font-bold text-white py-2.5 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {subiendo ? 'Guardando...' : 'Guardar Video'}
+              </button>
+            </form>
           </div>
         </div>
       )}
