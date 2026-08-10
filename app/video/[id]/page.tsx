@@ -13,7 +13,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: video } = await supabase
     .from('videos')
-    .select('titulo, url, poster_url')
+    .select('titulo, embed_url, poster_url')
     .eq('id', params.id)
     .single();
 
@@ -23,7 +23,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // Usa la portada si existe, o un thumbnail por defecto
   const imageUrl = video.poster_url || 'https://res.cloudinary.com/demo/image/upload/sample.jpg';
 
   return {
@@ -60,23 +59,31 @@ export default async function VideoPage({ params }: Props) {
     .single();
 
   if (!video) {
-    return <div className="p-8 text-center text-white">Video no encontrado.</div>;
+    return <div className="p-8 text-center text-white min-h-screen bg-neutral-950">Video no encontrado.</div>;
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 p-4 flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-neutral-950 text-neutral-100 p-4 flex flex-col items-center">
       <div className="w-full max-w-3xl space-y-4">
         <h1 className="text-2xl font-bold">{video.titulo}</h1>
-        <video 
-          src={video.url} 
-          controls 
-          autoPlay 
-          className="w-full rounded-xl bg-black aspect-video object-cover"
-        />
+        
+        {/* Contenedor responsivo 16:9 con Iframe */}
+        <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-xl border border-neutral-800">
+          {video.embed_url ? (
+            <iframe
+              src={video.embed_url}
+              className="absolute top-0 left-0 w-full h-full border-0"
+              allowFullScreen
+              scrolling="no"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-neutral-500">
+              No hay enlace de reproductor configurado.
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
 }
-
-
 
