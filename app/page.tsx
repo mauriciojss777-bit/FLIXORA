@@ -52,18 +52,15 @@ export default function Home() {
   useEffect(() => {
     fetchVideos();
   }, []);
-  const compartirVideo = (videoId: string) => {
-    const videoUrl = `https://flixes.vercel.app/video/${videoId}`;
-    if (navigator.share) {
-      navigator.share({
-        title: 'Flixes',
-        text: '¡Mira este video en Flixes!',
-        url: videoUrl,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(videoUrl);
-      alert('¡Enlace copiado al portapapeles!');
-    }
+const compartirVideo = (video: any) => {
+  const videoUrl = `https://flixes.vercel.app/video/${video.id}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Flixes', text: '¡Mira este video en Flixes!', url: videoUrl }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(videoUrl);
+    alert('¡Enlace copiado al portapapeles!');
+  }
+}
   };
 
   const handleAdminLogin = (e: React.FormEvent) => {
