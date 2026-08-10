@@ -10,7 +10,12 @@ export default function Home() {
   const [videoActivo, setVideoActivo] = useState<any | null>(null)
   const [mostrarSubir, setMostrarSubir] = useState<boolean>(false)
 
-  // Campos del formulario
+  // Estado para editar portada de un video específico
+  const [videoAEditar, setVideoAEditar] = useState<any | null>(null)
+  const [nuevaThumbnailEdit, setNuevaThumbnailEdit] = useState('')
+  const [passwordEdicion, setPasswordEdicion] = useState('')
+
+  // Campos del formulario de subida
   const [nuevoTitulo, setNuevoTitulo] = useState('')
   const [nuevaCategoria, setNuevaCategoria] = useState('Amateur')
   const [nuevoEmbedUrl, setNuevoEmbedUrl] = useState('')
@@ -40,16 +45,6 @@ export default function Home() {
         }
       }
     }
-  }
-
-  // Función para obtener la miniatura automática de Doodstream
-  const obtenerMiniaturaDoodstream = (url: string) => {
-    if (!url) return null
-    const match = url.match(/\/e\/([a-zA-Z0-9]+)/) || url.match(/\/d\/([a-zA-Z0-9]+)/)
-    if (match && match[1]) {
-      return `https://img.doodcdn.co/snaps/${match[1]}.jpg`
-    }
-    return null
   }
 
   const categorias = ['Todos', 'Amateur', 'Anal', 'Hentai', 'HD', 'VR', 'Trio', 'Latina']
@@ -116,6 +111,32 @@ export default function Home() {
     }
   }
 
+  const guardarNuevaPortada = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (passwordEdicion !== 'flixes2026#Admin#Pass') {
+      alert('❌ Contraseña de administrador incorrecta')
+      return
+    }
+
+    if (!videoAEditar) return
+
+    const { error } = await supabase
+      .from('videos')
+      .update({ thumbnail: nuevaThumbnailEdit })
+      .eq('id', videoAEditar.id)
+
+    if (error) {
+      alert('Error al actualizar la portada: ' + error.message)
+    } else {
+      alert('¡Portada actualizada con éxito!')
+      setVideoAEditar(null)
+      setNuevaThumbnailEdit('')
+      setPasswordEdicion('')
+      fetchVideos()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-4 font-sans pb-24">
       {/* Header */}
@@ -166,36 +187,46 @@ export default function Home() {
         {/* Grid de Videos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videosFiltrados.map((video) => {
-            const miniaturaManual = video.thumbnail || video.thumbnail_url
-            const miniaturaAuto = obtenerMiniaturaDoodstream(video.embed_url)
-            const imagenSrc = miniaturaManual || miniaturaAuto
+            const hasThumbnail = video.thumbnail && video.thumbnail.trim() !== ''
 
             return (
               <div
                 key={video.id}
                 onClick={() => setVideoActivo(video)}
-                className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between"
+                className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 transition-all group flex flex-col justify-between relative"
               >
-                <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/30 to-neutral-900 flex items-center justify-center overflow-hidden">
-                  {imagenSrc ? (
+                {/* Botón oculto/flotante rápido para cambiar la portada de este video específico */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setVideoAEditar(video)
+                    setNuevaThumbnailEdit(video.thumbnail || '')
+                  }}
+                  title="Cambiar portada"
+                  className="absolute top-2 right-2 z-10 bg-black/70 hover:bg-pink-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs opacity-80 group-hover:opacity-100 transition-all shadow-md"
+                >
+                  ✏️
+                </button>
+
+                <div className="relative aspect-video bg-gradient-to-br from-neutral-900 via-pink-950/40 to-neutral-900 flex items-center justify-center overflow-hidden">
+                  {hasThumbnail ? (
                     <img 
-                      src={imagenSrc} 
+                      src={video.thumbnail} 
                       alt={video.titulo} 
-                      onError={(e: any) => {
-                        e.target.onerror = null
-                        e.target.style.display = 'none'
-                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                  ) : null}
-
-                  {/* Capa de respaldo con texto y botón play */}
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex flex-col items-center justify-center p-3 text-center">
-                    {!imagenSrc && (
+                  ) : (
+                    <div className="p-4 text-center">
                       <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest block mb-1">
                         {video.categoria || 'VIDEO'}
                       </span>
-                    )}
+                      <p className="text-xs text-neutral-300 font-medium line-clamp-2 px-2">
+                        {video.titulo}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="w-12 h-12 rounded-full bg-pink-600/90 group-hover:bg-pink-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg">
                       <span className="text-white text-lg ml-0.5">▶</span>
                     </div>
@@ -223,6 +254,57 @@ export default function Home() {
           })}
         </div>
       </main>
+
+      {/* MODAL EDITAR PORTADA */}
+      {videoAEditar && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-lg text-white">Editar Portada de Video</h3>
+              <button
+                onClick={() => setVideoAEditar(null)}
+                className="text-neutral-400 hover:text-white font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-400 line-clamp-1">Video: <strong className="text-white">{videoAEditar.titulo}</strong></p>
+
+            <form onSubmit={guardarNuevaPortada} className="space-y-4 text-sm">
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">URL de la nueva portada (Imagen)</label>
+                <input
+                  type="url"
+                  placeholder="https://... (enlace de imagen)"
+                  value={nuevaThumbnailEdit}
+                  onChange={(e) => setNuevaThumbnailEdit(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Contraseña de Administrador</label>
+                <input
+                  type="password"
+                  placeholder="Clave admin"
+                  value={passwordEdicion}
+                  onChange={(e) => setPasswordEdicion(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-pink-600 hover:bg-pink-500 font-bold text-white py-2.5 rounded-xl transition-colors"
+              >
+                Actualizar Portada
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL REPRODUCTOR */}
       {videoActivo && (
