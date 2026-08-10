@@ -3,11 +3,9 @@ import './globals.css';
 export const metadata = {
   title: 'FLIXES',
   description: 'Tu plataforma de streaming de contenido exclusivo',
-  manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    apple: '/apple-touch-icon.png', // Usamos este icono, que es el que mejor funciona
   },
 };
 
