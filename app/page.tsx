@@ -34,9 +34,7 @@ export default function Home() {
   const [showStore, setShowStore] = useState(false);
   const [showAdminProd, setShowAdminProd] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
-  // Cambiamos a null inicialmente para evitar que parpadee el aviso si ya está verificado
-  const [ageAccepted, setAgeAccepted] = useState<boolean | null>(null);
+  const [ageAccepted, setAgeAccepted] = useState(false);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -52,16 +50,21 @@ export default function Home() {
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (localStorage.getItem('age_verified') === 'true') {
-        setAgeAccepted(true);
-      } else {
-        setAgeAccepted(false);
-      }
+    if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
+      setAgeAccepted(true);
     }
     fetchVideos();
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vId = params.get('v');
+    if (vId && videos.length > 0) {
+      const video = videos.find(v => v.id === vId);
+      if (video) setSelectedVideo(video);
+    }
+  }, [videos]);
 
   const fetchVideos = async () => {
     try {
@@ -75,6 +78,16 @@ export default function Home() {
       const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (data) setProducts(data);
     } catch (e) { console.error(e); }
+  };
+
+  const handleSelectVideo = (video: Video) => {
+    setSelectedVideo(video);
+    window.history.pushState(null, '', `?v=${video.id}`);
+  };
+
+  const handleCloseVideo = () => {
+    setSelectedVideo(null);
+    window.history.pushState(null, '', '/');
   };
 
   const handleSaveVideo = async (e: React.FormEvent) => {
@@ -115,21 +128,14 @@ export default function Home() {
   };
 
   const handleShare = (video: Video) => {
+    const shareUrl = window.location.href;
     if (navigator.share) {
-      navigator.share({
-        title: video.title,
-        url: window.location.href,
-      }).catch(() => {});
+      navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('¡Enlace copiado al portapapeles!');
+      navigator.clipboard.writeText(shareUrl);
+      alert('¡Enlace directo copiado al portapapeles!');
     }
   };
-
-  // Mientras lee el almacenamiento local, muestra una pantalla negra limpia para evitar el parpadeo
-  if (ageAccepted === null) {
-    return <div className="min-h-screen bg-black"></div>;
-  }
 
   if (!ageAccepted) {
     return (
@@ -152,7 +158,7 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLI<span className="text-amber-500">XES</span></h1>
+          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => { setActiveTag('Todos'); handleCloseVideo(); }}>FLI<span className="text-amber-500">XES</span></h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -175,7 +181,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col space-y-2 text-sm font-semibold">
-              <button onClick={() => { setActiveTag('Todos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
+              <button onClick={() => { setActiveTag('Todos'); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
               <button onClick={() => { alert('Sección de Fotos y Álbumes próximamente'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📸 Fotos y Álbumes</button>
               <button onClick={() => { alert('Contenido VIP exclusivo'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">💎 Contenido VIP</button>
               <button onClick={() => { setActiveTag('Destacados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Secciones Patrocinadas</button>
@@ -216,7 +222,7 @@ export default function Home() {
       <section className="px-4 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
-            <div key={video.id} onClick={() => setSelectedVideo(video)} className="group cursor-pointer">
+            <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer">
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/50">
                 <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
@@ -276,7 +282,7 @@ export default function Home() {
       )}
 
       {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={handleCloseVideo}>
           <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
             
@@ -303,7 +309,7 @@ export default function Home() {
 
                 <button 
                   type="button" 
-                  onClick={() => setSelectedVideo(null)} 
+                  onClick={handleCloseVideo} 
                   className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-xl font-bold"
                 >
                   CERRAR
