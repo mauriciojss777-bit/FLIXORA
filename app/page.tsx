@@ -128,7 +128,7 @@ export default function Home() {
   };
 
   const handleShare = (video: Video) => {
-    const shareUrl = 'https://flixes.vercel.app/?v=' + video.id;
+    const shareUrl = window.location.href;
     if (navigator.share) {
       navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
     } else {
@@ -150,194 +150,228 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-zinc-200">
-      <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowMenu(true)} className="text-zinc-200 focus:outline-none p-1">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => { setActiveTag('Todos'); handleCloseVideo(); }}>FLI<span className="text-amber-500">XES</span></h1>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ Apoyame</a>
-          <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 text-zinc-200 px-3 py-1.5 rounded-full border border-zinc-800 font-bold hover:border-amber-500">+ SUBIR</button>
-        </div>
-      </nav>
-
-      {showMenu && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
-          <div className="relative bg-zinc-950 border-r border-zinc-800 w-80 h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-900">
-              <h2 className="text-lg font-black text-white tracking-wider">MENÚ PRO</h2>
-              <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex flex-col space-y-2 text-sm font-semibold">
-              <button onClick={() => { setActiveTag('Todos'); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
-              <button onClick={() => { alert('Sección de Fotos y Álbumes próximamente'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📸 Fotos y Álbumes</button>
-              <button onClick={() => { alert('Contenido VIP exclusivo'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">💎 Contenido VIP</button>
-              <button onClick={() => { setActiveTag('Destacados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Secciones Patrocinadas</button>
-              <button onClick={() => { prompt('Escribe el título o detalles del video que deseas solicitar:'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🌿 Solicitar Video</button>
-              <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
-              <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">☕ Apóyame (PayPal)</a>
-              <button onClick={() => { alert('Panel de Perfil de Usuario'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">👤 Registro / Mi Perfil</button>
-              <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
-              <button onClick={() => { setActiveTag('HD'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🔍 Filtros Premium</button>
-              <button onClick={() => { alert('No tienes videos favoritos guardados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">❤️ Mis Favoritos (0)</button>
-              <button onClick={() => { alert('Próximos estrenos en cartelera'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📅 Estrenos (Agenda)</button>
-              
-              <div className="pt-2">
-                <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-amber-500 text-black font-black text-center">+ Subir Video (Admin)</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <section className="px-4 pt-6 pb-2">
-        <input 
-          type="text" 
-          placeholder="Buscar contenido..." 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} 
-          className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none mb-4 text-zinc-200" 
-        />
-        <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-          {defaultTags.map(tag => (
-            <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'}`}>
-              {tag}
+    <main className="min-h-screen bg-[#050505] text-zinc-200 flex flex-col justify-between">
+      <div>
+        <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowMenu(true)} className="text-zinc-200 focus:outline-none p-1">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
-          ))}
-        </div>
-      </section>
+            <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => { setActiveTag('Todos'); handleCloseVideo(); }}>FLI<span className="text-amber-500">XES</span></h1>
+          </div>
 
-      <section className="px-4 pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
-            <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/50">
-                <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-              <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
-            </div>
-          ))}
-        </div>
-      </section>
+          <div className="flex items-center gap-2">
+            <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ Apoyame</a>
+            <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 text-zinc-200 px-3 py-1.5 rounded-full border border-zinc-800 font-bold hover:border-amber-500">+ SUBIR</button>
+          </div>
+        </nav>
 
-      {showStore && (
-        <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-900">
-              <h2 className="text-2xl font-black text-white">🛍️ Mi Tienda Exclusiva</h2>
-              <div className="flex gap-3 items-center">
-                <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:border-amber-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
-                <button onClick={() => setShowStore(false)} className="bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
+        {showMenu && (
+          <div className="fixed inset-0 z-50 flex">
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
+            <div className="relative bg-zinc-950 border-r border-zinc-800 w-80 h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-900">
+                <h2 className="text-lg font-black text-white tracking-wider">MENÚ PRO</h2>
+                <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-              {products.map(p => (
-                <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:border-amber-500 transition-all flex flex-col group">
-                  <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 mb-3">
-                    <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </div>
-                  <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-amber-500 font-black text-sm">{p.price}</span>
-                    <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Comprar</span>
-                  </div>
-                </a>
-              ))}
-              {products.length === 0 && (
-                <p className="col-span-full text-center text-zinc-500 py-12">No hay productos disponibles en la tienda todavía.</p>
-              )}
+
+              <div className="flex flex-col space-y-2 text-sm font-semibold">
+                <button onClick={() => { setActiveTag('Todos'); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
+                <button onClick={() => { alert('Sección de Fotos y Álbumes próximamente'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📸 Fotos y Álbumes</button>
+                <button onClick={() => { alert('Contenido VIP exclusivo'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">💎 Contenido VIP</button>
+                <button onClick={() => { setActiveTag('Destacados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Secciones Patrocinadas</button>
+                <button onClick={() => { prompt('Escribe el título o detalles del video que deseas solicitar:'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🌿 Solicitar Video</button>
+                <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
+                <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">☕ Apóyame (PayPal)</a>
+                <button onClick={() => { alert('Panel de Perfil de Usuario'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">👤 Registro / Mi Perfil</button>
+                <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
+                <button onClick={() => { setActiveTag('HD'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🔍 Filtros Premium</button>
+                <button onClick={() => { alert('No tienes videos favoritos guardados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">❤️ Mis Favoritos (0)</button>
+                <button onClick={() => { alert('Próximos estrenos en cartelera'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📅 Estrenos (Agenda)</button>
+                
+                <div className="pt-2">
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-amber-500 text-black font-black text-center">+ Subir Video (Admin)</button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showAdminProd && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-white">Panel Admin - Nuevo Producto</h2>
-            <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="Precio (ej. $10.00 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="URL de compra o pago (PayPal, Telegram, etc.)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <div className="flex gap-2 pt-2">
-              <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-              <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Guardar Producto</button>
-            </div>
-          </form>
-        </div>
-      )}
+        <section className="px-4 pt-6 pb-2">
+          <input 
+            type="text" 
+            placeholder="Buscar contenido..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} 
+            className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none mb-4 text-zinc-200" 
+          />
+          <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+            {defaultTags.map(tag => (
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'}`}>
+                {tag}
+              </button>
+            ))}
+          </div>
+        </section>
 
-      {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={handleCloseVideo}>
-          <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
-            
-            <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
-              <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
+        <section className="px-4 pb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
+              <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer">
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/50">
+                  <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                </div>
+                <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {showStore && (
+          <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-900">
+                <h2 className="text-2xl font-black text-white">🛍️ Mi Tienda Exclusiva</h2>
+                <div className="flex gap-3 items-center">
+                  <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:border-amber-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
+                  <button onClick={() => setShowStore(false)} className="bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
+                </div>
+              </div>
               
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                <button 
-                  type="button" 
-                  onClick={() => handleShare(selectedVideo)} 
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1"
-                >
-                  🔗 Compartir
-                </button>
-
-                <a 
-                  href="https://paypal.me/TU_USUARIO_PAYPAL" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-amber-500/20 flex items-center gap-1"
-                >
-                  ☕ Donar
-                </a>
-
-                <button 
-                  type="button" 
-                  onClick={handleCloseVideo} 
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-xl font-bold"
-                >
-                  CERRAR
-                </button>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                {products.map(p => (
+                  <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:border-amber-500 transition-all flex flex-col group">
+                    <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 mb-3">
+                      <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-amber-500 font-black text-sm">{p.price}</span>
+                      <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Comprar</span>
+                    </div>
+                  </a>
+                ))}
+                {products.length === 0 && (
+                  <p className="col-span-full text-center text-zinc-500 py-12">No hay productos disponibles en la tienda todavía.</p>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showAdminModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-white">Panel Admin - Subir Video</h2>
-            <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-amber-500">
-              {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <input type="text" placeholder="URL VOE del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-            <div className="flex gap-2 pt-2">
-              <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-              <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Publicar</button>
+        {showAdminProd && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+            <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold text-white">Panel Admin - Nuevo Producto</h2>
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="Precio (ej. $10.00 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="URL de compra o pago (PayPal, Telegram, etc.)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <div className="flex gap-2 pt-2">
+                <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Guardar Producto</button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {selectedVideo && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={handleCloseVideo}>
+            <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
+              
+              <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
+                <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
+                
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                  <button 
+                    type="button" 
+                    onClick={() => handleShare(selectedVideo)} 
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1"
+                  >
+                    🔗 Compartir
+                  </button>
+
+                  <a 
+                    href="https://paypal.me/TU_USUARIO_PAYPAL" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-amber-500/20 flex items-center gap-1"
+                  >
+                    ☕ Donar
+                  </a>
+
+                  <button 
+                    type="button" 
+                    onClick={handleCloseVideo} 
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-xl font-bold"
+                  >
+                    CERRAR
+                  </button>
+                </div>
+              </div>
+
+              {/* Espacio Publicitario Híbrido */}
+              <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
+                <div className="text-xs text-zinc-600 bg-zinc-950 border border-zinc-900 w-full py-4 rounded-xl text-center">
+                  [ Espacio para Banner Publicitario Híbrido ]
+                </div>
+              </div>
+
             </div>
-          </form>
+          </div>
+        )}
+
+        {showAdminModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+            <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold text-white">Panel Admin - Subir Video</h2>
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-amber-500">
+                {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <input type="text" placeholder="URL VOE del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <div className="flex gap-2 pt-2">
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Publicar</button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* Footer / Aviso Legal */}
+      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6">
+        <div className="max-w-3xl mx-auto space-y-3">
+          <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO</h3>
+          <p className="leading-relaxed text-[11px] text-zinc-400">
+            Todo el material alojado en esta web es recolectado de sitios web públicos, por lo tanto Flixes desconoce a las personas expuestas aquí. El equipo de Flixes siempre está actualizando y agregando videos XXX cada día. Flixes es un sitio donde usted encontrará videos caseros, HD, latinos, entre otros. Solo se recomienda a personas mayores de edad visitar este sitio por lo tanto, todo aquel que tenga la edad mínima de los 18 años la entrada a Flixes es totalmente prohibida.
+          </p>
         </div>
-      )}
+
+        <div className="flex justify-center gap-6 font-semibold text-zinc-400 flex-wrap">
+          <a href="#" className="hover:text-amber-500">Política Y privacidad</a>
+          <span>•</span>
+          <a href="#" className="hover:text-amber-500">DMCA</a>
+          <span>•</span>
+          <a href="#" className="hover:text-amber-500">2257</a>
+          <span>•</span>
+          <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:text-amber-500">Contact</a>
+          <span>•</span>
+          <a href="#" className="hover:text-amber-500">RTA</a>
+        </div>
+
+        <p className="text-zinc-600 text-[10px]">© FLIXES.COM 2016-2026</p>
+      </footer>
     </main>
   );
 }
