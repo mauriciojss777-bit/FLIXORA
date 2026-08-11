@@ -50,7 +50,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Menú Pro Completo al 100% */}
+      {/* Menú Pro con la función de Subir Videos incluida */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setMenuOpen(false)}>
           <div className="bg-zinc-950 border-r border-zinc-800 w-80 h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -63,6 +63,10 @@ export default function Home() {
               <div className="flex flex-col space-y-2">
                 <button onClick={() => { setShowFavoritesOnly(false); setMenuOpen(false); }} className="text-left p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">🏠 Inicio</button>
                 <a href="/fotos" className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">📸 Fotos y Álbumes</a>
+                <a href="/fotos/admin" className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2 text-amber-500">⚙️ Admin Fotos</a>
+                {/* Botón de Subir/Administrar Vídeos */}
+                <a href="/admin" className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-sm flex items-center gap-2">📤 Subir y Administrar Vídeos</a>
+                
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Contenido VIP'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-amber-400 flex items-center gap-2">💎 Contenido VIP</a>
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Sección Patrocinada activa'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">⭐ Secciones Patrocinadas</a>
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Redirigiendo a solicitudes de video'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">💸 Solicitar Video</a>
@@ -73,7 +77,6 @@ export default function Home() {
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Filtros avanzados activos'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">🔍 Filtros Premium</a>
                 <button onClick={() => { setShowFavoritesOnly(true); setMenuOpen(false); }} className="text-left p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-red-400 flex items-center gap-2">❤️ Mis Favoritos ({favorites.length})</button>
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Estrenos y Agenda'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">📅 Estrenos (Agenda)</a>
-                {/* Nueva opción añadida: Programa de Afiliados */}
                 <a href="#" onClick={(e) => { e.preventDefault(); alert('Aquí irá tu enlace de Afiliados / CPA'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-emerald-400 flex items-center gap-2">🔥 Apps / Enlaces Afiliados</a>
               </div>
             </div>
