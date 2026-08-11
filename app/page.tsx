@@ -60,7 +60,6 @@ export default function Home() {
   const [prodImage, setProdImage] = useState('');
   const [prodBuyUrl, setProdBuyUrl] = useState('');
 
-  // Comentarios interactivos simulados por video
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({
     default: [
       { id: '1', user: 'Carlos99', text: 'Excelente calidad de video, gracias por compartir!', created_at: 'Hace 2 horas' },
@@ -70,7 +69,6 @@ export default function Home() {
   const [newCommentUser, setNewCommentUser] = useState('');
   const [newCommentText, setNewCommentText] = useState('');
 
-  // Etiquetas actualizadas para nombres y tipos de contenido
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Jovencitas', 'Caseros'];
 
   useEffect(() => {
@@ -87,7 +85,6 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // SEO: Título dinámico en la pestaña según el video activo
   useEffect(() => {
     if (selectedVideo) {
       document.title = `${selectedVideo.title} | Flixes`;
@@ -128,7 +125,6 @@ export default function Home() {
     setSelectedVideo(video);
     window.history.pushState(null, '', `?v=${video.id}`);
     
-    // Guardar en Historial Local
     const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 10);
     setHistory(updatedHistory);
     localStorage.setItem('flixes_history', JSON.stringify(updatedHistory));
@@ -182,7 +178,7 @@ export default function Home() {
       setShowAdminProd(false);
       setProdTitle(''); setProdPrice(''); setProdImage(''); setProdBuyUrl(''); setAdminPassword('');
       fetchProducts();
-      alert('¡Producto agregado con éxito!');
+      alert('¡Producto de afiliado agregado con éxito!');
     }
   };
 
@@ -226,7 +222,6 @@ export default function Home() {
     );
   }
 
-  // Filtrado optimizado para búsqueda por texto, etiquetas y categoría
   const filteredVideos = videos.filter(v => {
     const matchesTag = activeTag === 'Todos' || v.category === activeTag || (v.tags && v.tags.some(t => t.toLowerCase() === activeTag.toLowerCase()));
     const query = searchQuery.toLowerCase();
@@ -250,11 +245,12 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
-            <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ Apoyame</a>
+            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">🛍️ Tienda</button>
             <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 text-zinc-200 px-3 py-1.5 rounded-full border border-zinc-800 font-bold hover:border-amber-500">+ SUBIR</button>
           </div>
         </nav>
 
+        {/* MENÚ LATERAL RESTAURADO CON TODAS LAS OPCIONES */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -270,11 +266,21 @@ export default function Home() {
 
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
-                <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
+                <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda / Afiliados</button>
                 <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">☕ Apóyame (PayPal)</a>
                 <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
+                {/* Categorías adicionales en el menú */}
+                <div className="pt-2 border-t border-zinc-900 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
+                  {defaultTags.filter(t => t !== 'Todos').map(t => (
+                    <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white">
+                      #{t}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="pt-2">
                   <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-amber-500 text-black font-black text-center">+ Subir Video (Admin)</button>
                 </div>
@@ -300,7 +306,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SKELETON LOADING O GRILLA DE VIDEOS */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -333,7 +338,10 @@ export default function Home() {
           <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
             <div className="max-w-4xl mx-auto">
               <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-900">
-                <h2 className="text-2xl font-black text-white">🛍️ Mi Tienda Exclusiva</h2>
+                <div>
+                  <h2 className="text-2xl font-black text-white">🛍️ Recomendados y Afiliados</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Explora nuestros productos recomendados de Amazon y más.</p>
+                </div>
                 <div className="flex gap-3 items-center">
                   <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:border-amber-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
                   <button onClick={() => setShowStore(false)} className="bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
@@ -349,12 +357,12 @@ export default function Home() {
                     <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-amber-500 font-black text-sm">{p.price}</span>
-                      <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Comprar</span>
+                      <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
                     </div>
                   </a>
                 ))}
                 {products.length === 0 && (
-                  <p className="col-span-full text-center text-zinc-500 py-12">No hay productos disponibles en la tienda todavía.</p>
+                  <p className="col-span-full text-center text-zinc-500 py-12">No hay productos recomendados todavía.</p>
                 )}
               </div>
             </div>
@@ -364,15 +372,15 @@ export default function Home() {
         {showAdminProd && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
-              <h2 className="text-xl font-bold text-white">Panel Admin - Nuevo Producto</h2>
+              <h2 className="text-xl font-bold text-white">Panel Admin - Producto de Afiliado</h2>
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-              <input type="text" placeholder="Precio (ej. $10.00 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="Precio (ej. $19.99 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-              <input type="text" placeholder="URL de compra o pago (PayPal, Telegram, etc.)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="Enlace de afiliado (ej. https://amzn.to/...)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Guardar Producto</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Guardar Afiliado</button>
               </div>
             </form>
           </div>
@@ -387,7 +395,6 @@ export default function Home() {
                 <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
                 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                  {/* Botón Donar en sustitución de Reportar */}
                   <a 
                     href="https://paypal.me/TU_USUARIO_PAYPAL" 
                     target="_blank" 
@@ -415,14 +422,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Apartado de Descripción Personalizada & Etiquetas */}
               <div className="p-4 bg-zinc-900/50 border-t border-zinc-800 text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
                   <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixes.'}</p>
                 </div>
                 
-                {/* Etiquetas interactivas del video */}
                 <div className="flex flex-wrap gap-2 pt-1">
                   {(selectedVideo.tags || [selectedVideo.category, 'HD']).map(t => (
                     <button 
@@ -436,7 +441,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Carrusel de Videos Relacionados */}
               <div className="p-4 bg-zinc-950 border-t border-zinc-800">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Videos Relacionados</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
@@ -451,13 +455,11 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Apartado de Comentarios Estilo YouTube */}
               <div className="p-4 bg-zinc-900 border-t border-zinc-800 space-y-4">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
                 </h3>
 
-                {/* Formulario para agregar comentario */}
                 <form onSubmit={(e) => handleAddComment(selectedVideo.id, e)} className="space-y-2">
                   <div className="flex gap-2">
                     <input 
@@ -480,7 +482,6 @@ export default function Home() {
                   </div>
                 </form>
 
-                {/* Listado de comentarios */}
                 <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
                   {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
                     <div key={c.id} className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/60 text-xs space-y-1">
@@ -494,7 +495,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Espacio Publicitario Híbrido */}
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
                 <div className="text-xs text-zinc-600 bg-zinc-950 border border-zinc-900 w-full py-4 rounded-xl text-center">
                   [ Espacio para Banner Publicitario Híbrido ]
@@ -527,7 +527,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer / Aviso Legal */}
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO</h3>
