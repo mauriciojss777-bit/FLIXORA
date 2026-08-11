@@ -1,233 +1,136 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-interface Video {
-  id: string;
-  title: string;
-  category: string;
-  voe_url: string;
-  cover_url: string;
-}
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || '', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '');
 
 export default function Home() {
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [activeTag, setActiveTag] = useState<string>('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [ageAccepted, setAgeAccepted] = useState(false);
+  const [videos, setVideos] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const [adminPassword, setAdminPassword] = useState('');
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('HD');
-  const [voeUrl, setVoeUrl] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
-
-  const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
-      setAgeAccepted(true);
-    }
-    fetchVideos();
+    const savedFavs = localStorage.getItem('flixora_favs');
+    if (savedFavs) setFavorites(JSON.parse(savedFavs));
+
+    supabase.from('videos').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      if (data) setVideos(data);
+    });
   }, []);
 
-  const fetchVideos = async () => {
-    try {
-      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
-      if (data) setVideos(data);
-    } catch (e) { console.error(e); }
+  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    let updatedFavs = favorites.includes(id) 
+      ? favorites.filter(favId => favId !== id) 
+      : [...favorites, id];
+    
+    setFavorites(updatedFavs);
+    localStorage.setItem('flixora_favs', JSON.stringify(updatedFavs));
   };
 
-  const handleSaveVideo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminPassword !== 'flixes2026#Admin#Pass') {
-      alert('Contraseña incorrecta');
-      return;
+  const filteredVideos = videos.filter(v => {
+    const matchesSearch = v.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (showFavoritesOnly) {
+      return matchesSearch && favorites.includes(v.id);
     }
-    const { error } = await supabase.from('videos').insert([{ title, category, voe_url: voeUrl, cover_url: coverUrl }]);
-    if (error) { alert('Error: ' + error.message); } else {
-      setShowAdminModal(false);
-      setTitle(''); setVoeUrl(''); setCoverUrl(''); setAdminPassword('');
-      fetchVideos();
-    }
-  };
-
-  const handleShare = (video: Video) => {
-    if (navigator.share) {
-      navigator.share({
-        title: video.title,
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('¡Enlace copiado al portapapeles!');
-    }
-  };
-
-  if (!ageAccepted) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6">
-        <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
-          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ORA</span></h1>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500">INGRESAR (+18)</button>
-        </div>
-      </div>
-    );
-  }
+    return matchesSearch;
+  });
 
   return (
-    <main className="min-h-screen bg-[#050505] text-zinc-200 relative">
-      <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
+    <main className="min-h-screen bg-black text-white">
+      <nav className="sticky top-0 z-40 bg-black/90 backdrop-blur-md p-4 flex justify-between items-center border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)} 
-            className="text-zinc-300 hover:text-white p-1 focus:outline-none flex flex-col justify-center gap-1.5 w-6 h-6"
-            aria-label="Abrir menú"
-          >
-            <span className="block h-0.5 w-full bg-current rounded-full"></span>
-            <span className="block h-0.5 w-full bg-current rounded-full"></span>
-            <span className="block h-0.5 w-full bg-current rounded-full"></span>
-          </button>
-
-          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>
-            FLIX<span className="text-amber-500">ORA</span>
-          </h1>
+          <button onClick={() => setMenuOpen(true)} className="text-2xl focus:outline-none">☰</button>
+          <h1 className="font-black text-xl tracking-wider">FLIX<span className="text-amber-500">ORA</span></h1>
         </div>
-
         <div className="flex items-center gap-2">
-          <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ DONAR</a>
-          <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">+ SUBIR VÍDEO</button>
+          <a href="https://paypal.me/TU_USUARIO" target="_blank" className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">☕ Apoyame</a>
         </div>
       </nav>
 
-      {/* Menú Desplegable Completo de las 3 rayitas */}
+      {/* Menú Pro Completo al 100% */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setMenuOpen(false)}>
-          <div className="bg-zinc-950 border-r border-zinc-800 w-72 h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-zinc-950 border-r border-zinc-800 w-80 h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-                <h2 className="text-xl font-black text-white">MENÚ</h2>
+                <h2 className="text-xl font-black text-white">MENÚ PRO</h2>
                 <button onClick={() => setMenuOpen(false)} className="text-zinc-400 hover:text-white font-bold text-lg">✕</button>
               </div>
               
-              <div className="flex flex-col space-y-3">
-                <a href="/" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-bold text-sm flex items-center gap-3">
-                  🏠 Inicio (Vídeos)
-                </a>
-                <a href="/fotos" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 font-bold text-sm flex items-center gap-3">
-                  📸 Fotos y Álbumes
-                </a>
-                <a href="/fotos/admin" onClick={() => setMenuOpen(false)} className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 font-bold text-sm flex items-center gap-3">
-                  ⚙️ Admin Fotos
-                </a>
-                <a href="https://t.me/TuCanal" target="_blank" rel="noopener noreferrer" className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-sm flex items-center gap-3">
-                  📢 Canal de Telegram
-                </a>
+              <div className="flex flex-col space-y-2">
+                <button onClick={() => { setShowFavoritesOnly(false); setMenuOpen(false); }} className="text-left p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">🏠 Inicio</button>
+                <a href="/fotos" className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">📸 Fotos y Álbumes</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Contenido VIP'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-amber-400 flex items-center gap-2">💎 Contenido VIP</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Sección Patrocinada activa'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">⭐ Secciones Patrocinadas</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Redirigiendo a solicitudes de video'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">💸 Solicitar Video</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Mi Tienda'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">🛍️ Mi Tienda</a>
+                <a href="https://paypal.me/TU_USUARIO" target="_blank" className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 font-bold text-sm flex items-center gap-2">☕ Apóyame (PayPal)</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Registro / Perfil'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">👤 Registro / Mi Perfil</a>
+                <a href="https://t.me/TuCanal" target="_blank" className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">📢 Contacto y Publicidad</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Filtros avanzados activos'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">🔍 Filtros Premium</a>
+                <button onClick={() => { setShowFavoritesOnly(true); setMenuOpen(false); }} className="text-left p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-red-400 flex items-center gap-2">❤️ Mis Favoritos ({favorites.length})</button>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Estrenos y Agenda'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm flex items-center gap-2">📅 Estrenos (Agenda)</a>
+                {/* Nueva opción añadida: Programa de Afiliados */}
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Aquí irá tu enlace de Afiliados / CPA'); }} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-bold text-sm text-emerald-400 flex items-center gap-2">🔥 Apps / Enlaces Afiliados</a>
               </div>
             </div>
 
             <div className="pt-4 border-t border-zinc-800 text-center text-xs text-zinc-500">
-              FLIXORA © 2026
+              FLIXORA PRO © 2026
             </div>
           </div>
-          <div className="flex-1 bg-black/60 backdrop-blur-xs"></div>
+          <div className="flex-1 bg-black/60"></div>
         </div>
       )}
 
-      <section className="px-4 pt-6 pb-2">
+      {/* Barra de Búsqueda */}
+      <section className="p-4 space-y-3">
         <input 
           type="text" 
-          placeholder="Buscar contenido..." 
-          onChange={(e) => setSearchQuery(e.target.value)} 
-          className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none mb-4" 
+          placeholder="Buscar videos..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none" 
         />
-        <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-          {defaultTags.map(tag => (
-            <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-400'}`}>
-              {tag}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="px-4 pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
-            <div key={video.id} onClick={() => setSelectedVideo(video)} className="group cursor-pointer">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900">
-                <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-              </div>
-              <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)}>
-          <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
-            
-            <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
-              <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
-              
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                <button 
-                  type="button" 
-                  onClick={() => handleShare(selectedVideo)} 
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1"
-                >
-                  🔗 Compartir
-                </button>
-
-                <a 
-                  href="https://paypal.me/TU_USUARIO_PAYPAL" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-amber-500/20 flex items-center gap-1"
-                >
-                  ☕ Donar
-                </a>
-
-                <button 
-                  type="button" 
-                  onClick={() => setSelectedVideo(null)} 
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-xl font-bold"
-                >
-                  CERRAR
-                </button>
-              </div>
-            </div>
+        {showFavoritesOnly && (
+          <div className="flex justify-between items-center bg-zinc-900 px-4 py-2 rounded-xl text-xs">
+            <span className="text-amber-500 font-bold">Mostrando solo tus Favoritos ❤️</span>
+            <button onClick={() => setShowFavoritesOnly(false)} className="underline text-zinc-400">Ver todos</button>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {showAdminModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold">Panel Admin - Vídeos</h2>
-            <input type="password" placeholder="Clave" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
-            <input type="text" placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
-            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300">
-              {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <input type="text" placeholder="URL VOE" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
-            <input type="text" placeholder="URL Portada" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800" />
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800">Cancelar</button>
-              <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-bold">Publicar</button>
-            </div>
-          </form>
+      {/* Espacio Publicitario / Sección Patrocinada */}
+      <section className="px-4 pb-4">
+        <div className="bg-zinc-900/50 border border-zinc-800 border-dashed h-20 rounded-2xl flex items-center justify-center">
+          <span className="text-zinc-500 text-xs font-bold tracking-wider">ESPACIO PATROCINADO / ANUNCIOS</span>
         </div>
-      )}
+      </section>
+
+      {/* Cuadrícula de Videos */}
+      <section className="px-4 pb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {filteredVideos.map(v => (
+            <div key={v.id} className="bg-zinc-900 rounded-2xl overflow-hidden relative group border border-zinc-800/50">
+              <div className="aspect-video relative overflow-hidden bg-black">
+                <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                <button 
+                  onClick={(e) => toggleFavorite(v.id, e)}
+                  className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md text-sm transition-colors ${favorites.includes(v.id) ? 'bg-red-500/80 text-white' : 'bg-black/50 text-zinc-300'}`}
+                >
+                  ❤️
+                </button>
+              </div>
+              <div className="p-3">
+                <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 text-zinc-200">{v.title}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
