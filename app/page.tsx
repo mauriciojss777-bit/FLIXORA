@@ -13,6 +13,7 @@ interface Video {
   category: string;
   voe_url: string;
   cover_url: string;
+  description?: string;
 }
 
 interface Product {
@@ -26,6 +27,7 @@ interface Product {
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,12 +37,14 @@ export default function Home() {
   const [showAdminProd, setShowAdminProd] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
+  const [history, setHistory] = useState<Video[]>([]);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('HD');
   const [voeUrl, setVoeUrl] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
+  const [description, setDescription] = useState('');
 
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
@@ -50,12 +54,27 @@ export default function Home() {
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
-      setAgeAccepted(true);
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('age_verified') === 'true') {
+        setAgeAccepted(true);
+      }
+      const savedHistory = localStorage.getItem('flixes_history');
+      if (savedHistory) {
+        try { setHistory(JSON.parse(savedHistory)); } catch (e) {}
+      }
     }
     fetchVideos();
     fetchProducts();
   }, []);
+
+  // SEO: Título dinámico en la pestaña según el video activo
+  useEffect(() => {
+    if (selectedVideo) {
+      document.title = `${selectedVideo.title} | Flixes`;
+    } else {
+      document.title = 'Flixes - Streaming Pro';
+    }
+  }, [selectedVideo]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -68,9 +87,14 @@ export default function Home() {
 
   const fetchVideos = async () => {
     try {
+      setLoading(true);
       const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
       if (data) setVideos(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchProducts = async () => {
@@ -83,11 +107,20 @@ export default function Home() {
   const handleSelectVideo = (video: Video) => {
     setSelectedVideo(video);
     window.history.pushState(null, '', `?v=${video.id}`);
+    
+    // Guardar en Historial Local
+    const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 10);
+    setHistory(updatedHistory);
+    localStorage.setItem('flixes_history', JSON.stringify(updatedHistory));
   };
 
   const handleCloseVideo = () => {
     setSelectedVideo(null);
     window.history.pushState(null, '', '/');
+  };
+
+  const handleReportVideo = (video: Video) => {
+    alert(`Reporte enviado para el video: "${video.title}". El equipo lo revisará pronto.`);
   };
 
   const handleSaveVideo = async (e: React.FormEvent) => {
@@ -96,10 +129,18 @@ export default function Home() {
       alert('Contraseña incorrecta');
       return;
     }
-    const { error } = await supabase.from('videos').insert([{ title, category, voe_url: voeUrl, cover_url: coverUrl }]);
-    if (error) { alert('Error: ' + error.message); } else {
+    const { error } = await supabase.from('videos').insert([{ 
+      title, 
+      category, 
+      voe_url: voeUrl, 
+      cover_url: coverUrl,
+      description: description || 'Sin descripción disponible.'
+    }]);
+    if (error) { 
+      alert('Error: ' + error.message); 
+    } else {
       setShowAdminModal(false);
-      setTitle(''); setVoeUrl(''); setCoverUrl(''); setAdminPassword('');
+      setTitle(''); setVoeUrl(''); setCoverUrl(''); setDescription(''); setAdminPassword('');
       fetchVideos();
     }
   };
@@ -183,17 +224,10 @@ export default function Home() {
 
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
-                <button onClick={() => { alert('Sección de Fotos y Álbumes próximamente'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📸 Fotos y Álbumes</button>
-                <button onClick={() => { alert('Contenido VIP exclusivo'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">💎 Contenido VIP</button>
-                <button onClick={() => { setActiveTag('Destacados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Secciones Patrocinadas</button>
-                <button onClick={() => { prompt('Escribe el título o detalles del video que deseas solicitar:'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🌿 Solicitar Video</button>
                 <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
                 <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">☕ Apóyame (PayPal)</a>
-                <button onClick={() => { alert('Panel de Perfil de Usuario'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">👤 Registro / Mi Perfil</button>
+                <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
-                <button onClick={() => { setActiveTag('HD'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🔍 Filtros Premium</button>
-                <button onClick={() => { alert('No tienes videos favoritos guardados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">❤️ Mis Favoritos (0)</button>
-                <button onClick={() => { alert('Próximos estrenos en cartelera'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📅 Estrenos (Agenda)</button>
                 
                 <div className="pt-2">
                   <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-amber-500 text-black font-black text-center">+ Subir Video (Admin)</button>
@@ -220,17 +254,33 @@ export default function Home() {
           </div>
         </section>
 
+        {/* SKELETON LOADING O GRILLA DE VIDEOS */}
         <section className="px-4 pb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
-              <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer">
-                <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/50">
-                  <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                <div key={n} className="animate-pulse flex flex-col space-y-2">
+                  <div className="aspect-video rounded-2xl bg-zinc-900 border border-zinc-800/50"></div>
+                  <div className="h-4 bg-zinc-900 rounded w-3/4"></div>
+                  <div className="h-3 bg-zinc-900 rounded w-1/2"></div>
                 </div>
-                <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
+                <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer">
+                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/50">
+                    <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <span className="absolute top-2 left-2 bg-black/75 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                      {video.category}
+                    </span>
+                  </div>
+                  <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {showStore && (
@@ -283,8 +333,8 @@ export default function Home() {
         )}
 
         {selectedVideo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={handleCloseVideo}>
-            <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
+            <div className="bg-zinc-900 w-full min-h-screen md:min-h-0 md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col my-auto" onClick={e => e.stopPropagation()}>
               <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
               
               <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
@@ -293,20 +343,19 @@ export default function Home() {
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
                   <button 
                     type="button" 
+                    onClick={() => handleReportVideo(selectedVideo)} 
+                    className="bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-red-500/20"
+                  >
+                    🚩 Reportar
+                  </button>
+
+                  <button 
+                    type="button" 
                     onClick={() => handleShare(selectedVideo)} 
-                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1"
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-xl font-bold"
                   >
                     🔗 Compartir
                   </button>
-
-                  <a 
-                    href="https://paypal.me/TU_USUARIO_PAYPAL" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs px-3 py-2 rounded-xl font-bold border border-amber-500/20 flex items-center gap-1"
-                  >
-                    ☕ Donar
-                  </a>
 
                   <button 
                     type="button" 
@@ -316,6 +365,12 @@ export default function Home() {
                     CERRAR
                   </button>
                 </div>
+              </div>
+
+              {/* Apartado de Descripción del Video */}
+              <div className="p-4 bg-zinc-900/50 border-t border-zinc-800 text-xs text-zinc-300 space-y-1">
+                <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
+                <p>{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixes.'}</p>
               </div>
 
               {/* Espacio Publicitario Híbrido */}
@@ -338,6 +393,7 @@ export default function Home() {
               <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-amber-500">
                 {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
               </select>
+              <textarea placeholder="Descripción del video (opcional)" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500 resize-none" />
               <input type="text" placeholder="URL VOE del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <div className="flex gap-2 pt-2">
