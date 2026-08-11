@@ -245,6 +245,14 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+            <a 
+              href="https://paypal.me/TU_USUARIO_PAYPAL" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-amber-500 text-black hover:bg-amber-400 text-xs px-3 py-1.5 rounded-full font-black flex items-center gap-1"
+            >
+              ☕ Donar
+            </a>
             <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-amber-500/10 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/20">🛍️ Tienda</button>
             <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-900 text-zinc-200 px-3 py-1.5 rounded-full border border-zinc-800 font-bold hover:border-amber-500">+ SUBIR</button>
           </div>
