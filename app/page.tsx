@@ -15,12 +15,24 @@ interface Video {
   cover_url: string;
 }
 
+interface Product {
+  id: string;
+  title: string;
+  price: string;
+  image_url: string;
+  buy_url: string;
+}
+
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
+  
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showStore, setShowStore] = useState(false);
+  const [showAdminProd, setShowAdminProd] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
@@ -30,6 +42,12 @@ export default function Home() {
   const [voeUrl, setVoeUrl] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
 
+  // Estados para nuevo producto de la tienda
+  const [prodTitle, setProdTitle] = useState('');
+  const [prodPrice, setProdPrice] = useState('');
+  const [prodImage, setProdImage] = useState('');
+  const [prodBuyUrl, setProdBuyUrl] = useState('');
+
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
@@ -37,12 +55,20 @@ export default function Home() {
       setAgeAccepted(true);
     }
     fetchVideos();
+    fetchProducts();
   }, []);
 
   const fetchVideos = async () => {
     try {
       const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
       if (data) setVideos(data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (data) setProducts(data);
     } catch (e) { console.error(e); }
   };
 
@@ -57,6 +83,29 @@ export default function Home() {
       setShowAdminModal(false);
       setTitle(''); setVoeUrl(''); setCoverUrl(''); setAdminPassword('');
       fetchVideos();
+    }
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPassword !== 'flixes2026#Admin#Pass') {
+      alert('Contraseña incorrecta');
+      return;
+    }
+    const { error } = await supabase.from('products').insert([{ 
+      title: prodTitle, 
+      price: prodPrice, 
+      image_url: prodImage, 
+      buy_url: prodBuyUrl 
+    }]);
+    
+    if (error) { 
+      alert('Error: ' + error.message); 
+    } else {
+      setShowAdminProd(false);
+      setProdTitle(''); setProdPrice(''); setProdImage(''); setProdBuyUrl(''); setAdminPassword('');
+      fetchProducts();
+      alert('¡Producto agregado con éxito!');
     }
   };
 
@@ -76,7 +125,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
-          <h1 className="text-4xl font-black text-white">FLIX<span className="text-amber-500">ORA</span></h1>
+          <h1 className="text-4xl font-black text-white">FLI<span className="text-amber-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
           <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-amber-500 transition-colors">INGRESAR</button>
         </div>
@@ -94,7 +143,7 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLIX<span className="text-amber-500">ORA</span></h1>
+          <h1 className="text-2xl font-black text-white cursor-pointer" onClick={() => setActiveTag('Todos')}>FLI<span className="text-amber-500">XES</span></h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -123,7 +172,7 @@ export default function Home() {
               <button onClick={() => { alert('Contenido VIP exclusivo'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">💎 Contenido VIP</button>
               <button onClick={() => { setActiveTag('Destacados'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Secciones Patrocinadas</button>
               <button onClick={() => { prompt('Escribe el título o detalles del video que deseas solicitar:'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🌿 Solicitar Video</button>
-              <button onClick={() => { alert('Tienda en mantenimiento'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
+              <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Mi Tienda</button>
               <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">☕ Apóyame (PayPal)</a>
               <button onClick={() => { alert('Panel de Perfil de Usuario'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">👤 Registro / Mi Perfil</button>
               <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
@@ -170,6 +219,57 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Modal de la Tienda */}
+      {showStore && (
+        <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-900">
+              <h2 className="text-2xl font-black text-white">🛍️ Mi Tienda Exclusiva</h2>
+              <div className="flex gap-3 items-center">
+                <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:border-amber-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
+                <button onClick={() => setShowStore(false)} className="bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              {products.map(p => (
+                <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:border-amber-500 transition-all flex flex-col group">
+                  <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 mb-3">
+                    <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-amber-500 font-black text-sm">{p.price}</span>
+                    <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Comprar</span>
+                  </div>
+                </a>
+              ))}
+              {products.length === 0 && (
+                <p className="col-span-full text-center text-zinc-500 py-12">No hay productos disponibles en la tienda todavía.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Admin para Agregar Productos */}
+      {showAdminProd && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+          <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
+            <h2 className="text-xl font-bold text-white">Panel Admin - Nuevo Producto</h2>
+            <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+            <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+            <input type="text" placeholder="Precio (ej. $10.00 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+            <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+            <input type="text" placeholder="URL de compra o pago (PayPal, Telegram, etc.)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+            <div className="flex gap-2 pt-2">
+              <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
+              <button type="submit" className="w-full p-3 rounded-xl bg-amber-500 text-black font-black hover:bg-amber-400">Guardar Producto</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Modal de Reproducción */}
       {selectedVideo && (
