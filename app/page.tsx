@@ -128,7 +128,7 @@ export default function Home() {
   };
 
   const handleShare = (video: Video) => {
-    const shareUrl = window.location.href;
+    const shareUrl = 'https://flixes.vercel.app/?v=' + video.id;
     if (navigator.share) {
       navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
     } else {
