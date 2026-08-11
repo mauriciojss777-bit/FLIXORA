@@ -435,8 +435,7 @@ export default function Home() {
                 <iframe 
                   src={selectedVideo.voe_url} 
                   className="w-full h-full border-0" 
-                  allowFullScreen 
-                  sandbox="allow-scripts allow-same-origin allow-forms"
+                  allowFullScreen
                 />
               </div>
 
