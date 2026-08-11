@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -134,7 +132,7 @@ export default function Home() {
       }
     } catch (e) { 
       console.error(e); 
-    } fontally {
+    } finally {
       setLoading(false);
     }
   };
@@ -434,7 +432,12 @@ export default function Home() {
             <div className="bg-zinc-950 w-full min-h-screen md:min-h-0 md:max-w-4xl md:rounded-3xl border border-zinc-900 overflow-hidden flex flex-col my-auto" onClick={e => e.stopPropagation()}>
               
               <div className="relative w-full aspect-video bg-zinc-950 flex items-center justify-center border-b border-zinc-900">
-                <iframe src={selectedVideo.voe_url} className="w-full h-full border-0" allowFullScreen />
+                <iframe 
+                  src={selectedVideo.voe_url} 
+                  className="w-full h-full border-0" 
+                  allowFullScreen 
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                />
               </div>
 
               <div className="px-4 pt-3 pb-2 space-y-3">
