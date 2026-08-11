@@ -15,6 +15,7 @@ interface Video {
   cover_url: string;
   description?: string;
   tags?: string[];
+  views?: number;
 }
 
 interface Product {
@@ -85,6 +86,23 @@ export default function Home() {
     fetchProducts();
   }, []);
 
+  // Simulación de vistas en tiempo real con intervalos que aumentan aleatoriamente
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVideos(prevVideos =>
+        prevVideos.map(v => {
+          // Aumentar aleatoriamente las vistas en algunos videos para simular actividad en vivo
+          const shouldIncrease = Math.random() > 0.4;
+          if (!shouldIncrease) return v;
+          const randomIncrement = Math.floor(Math.random() * 5) + 1;
+          const currentViews = v.views ?? Math.floor(Math.random() * 5000) + 200;
+          return { ...v, views: currentViews + randomIncrement };
+        })
+      );
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (selectedVideo) {
       document.title = `${selectedVideo.title} | Flixes`;
@@ -106,7 +124,14 @@ export default function Home() {
     try {
       setLoading(true);
       const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
-      if (data) setVideos(data);
+      if (data) {
+        // Inicializar vistas aleatorias si no existen
+        const initialized = data.map(v => ({
+          ...v,
+          views: v.views ?? Math.floor(Math.random() * 8000) + 500
+        }));
+        setVideos(initialized);
+      }
     } catch (e) { 
       console.error(e); 
     } finally {
@@ -122,10 +147,12 @@ export default function Home() {
   };
 
   const handleSelectVideo = (video: Video) => {
-    setSelectedVideo(video);
+    // Incrementar vistas al abrir el video
+    const updatedVideo = { ...video, views: (video.views ?? 1000) + 1 };
+    setSelectedVideo(updatedVideo);
     window.history.pushState(null, '', `?v=${video.id}`);
     
-    const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 10);
+    const updatedHistory = [updatedVideo, ...history.filter(h => h.id !== video.id)].slice(0, 10);
     setHistory(updatedHistory);
     localStorage.setItem('flixes_history', JSON.stringify(updatedHistory));
   };
@@ -148,7 +175,8 @@ export default function Home() {
       voe_url: voeUrl, 
       cover_url: coverUrl,
       description: description || 'Disfruta de este contenido en alta definición disponible en Flixes.',
-      tags: parsedTags.length > 0 ? parsedTags : [category, 'HD']
+      tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
+      views: Math.floor(Math.random() * 200) + 50
     }]);
     if (error) { 
       alert('Error: ' + error.message); 
@@ -258,7 +286,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MENÚ LATERAL RESTAURADO CON TODAS LAS OPCIONES */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -279,7 +306,6 @@ export default function Home() {
                 <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
-                {/* Categorías adicionales en el menú */}
                 <div className="pt-2 border-t border-zinc-900 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
@@ -333,6 +359,10 @@ export default function Home() {
                     <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <span className="absolute top-2 left-2 bg-black/75 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                       {video.category}
+                    </span>
+                    {/* CONTEO DE VISTAS EN TIEMPO REAL */}
+                    <span className="absolute bottom-2 right-2 bg-black/80 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 backdrop-blur-sm">
+                      👁️ {video.views?.toLocaleString()}
                     </span>
                   </div>
                   <h3 className="mt-2 text-base font-semibold text-zinc-200 line-clamp-2">{video.title}</h3>
@@ -400,7 +430,10 @@ export default function Home() {
               <div className="aspect-video w-full"><iframe src={selectedVideo.voe_url} className="w-full h-full" allowFullScreen /></div>
               
               <div className="p-4 bg-zinc-950 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-zinc-800">
-                <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
+                <div className="w-full sm:w-1/2">
+                  <h2 className="font-bold text-white text-base sm:text-lg truncate">{selectedVideo.title}</h2>
+                  <p className="text-xs text-amber-500/90 font-bold mt-0.5">👁️ {selectedVideo.views?.toLocaleString()} reproducciones</p>
+                </div>
                 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
                   <a 
@@ -456,6 +489,9 @@ export default function Home() {
                     <div key={v.id} onClick={() => handleSelectVideo(v)} className="min-w-[160px] max-w-[160px] cursor-pointer group flex-shrink-0">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
                         <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <span className="absolute bottom-1 right-1 bg-black/80 text-zinc-300 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          👁️ {v.views?.toLocaleString()}
+                        </span>
                       </div>
                       <p className="mt-1 text-xs font-semibold text-zinc-300 line-clamp-1">{v.title}</p>
                     </div>
