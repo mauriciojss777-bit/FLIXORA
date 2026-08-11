@@ -34,7 +34,9 @@ export default function Home() {
   const [showStore, setShowStore] = useState(false);
   const [showAdminProd, setShowAdminProd] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [ageAccepted, setAgeAccepted] = useState(false);
+  
+  // Cambiamos a null inicialmente para evitar que parpadee el aviso si ya está verificado
+  const [ageAccepted, setAgeAccepted] = useState<boolean | null>(null);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -42,7 +44,6 @@ export default function Home() {
   const [voeUrl, setVoeUrl] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
 
-  // Estados para nuevo producto de la tienda
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
   const [prodImage, setProdImage] = useState('');
@@ -51,8 +52,12 @@ export default function Home() {
   const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR'];
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('age_verified') === 'true') {
-      setAgeAccepted(true);
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('age_verified') === 'true') {
+        setAgeAccepted(true);
+      } else {
+        setAgeAccepted(false);
+      }
     }
     fetchVideos();
     fetchProducts();
@@ -121,6 +126,11 @@ export default function Home() {
     }
   };
 
+  // Mientras lee el almacenamiento local, muestra una pantalla negra limpia para evitar el parpadeo
+  if (ageAccepted === null) {
+    return <div className="min-h-screen bg-black"></div>;
+  }
+
   if (!ageAccepted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
@@ -135,7 +145,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-zinc-200">
-      {/* Barra de Navegación Principal */}
       <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => setShowMenu(true)} className="text-zinc-200 focus:outline-none p-1">
@@ -152,7 +161,6 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Menú Pro Desplegable Lateral */}
       {showMenu && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -188,7 +196,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Buscador y Etiquetas */}
       <section className="px-4 pt-6 pb-2">
         <input 
           type="text" 
@@ -206,7 +213,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cuadrícula de Videos */}
       <section className="px-4 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {videos.filter(v => (activeTag === 'Todos' || v.category === activeTag) && v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((video) => (
@@ -220,7 +226,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Modal de la Tienda */}
       {showStore && (
         <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
@@ -253,7 +258,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal Admin para Agregar Productos */}
       {showAdminProd && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
           <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
@@ -271,7 +275,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal de Reproducción */}
       {selectedVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)}>
           <div className="bg-zinc-900 w-full h-full md:h-auto md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
@@ -311,7 +314,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal Panel Admin / Subir Videos */}
       {showAdminModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
           <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
