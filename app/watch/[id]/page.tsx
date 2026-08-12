@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
@@ -23,7 +23,6 @@ interface Video {
 
 export default function WatchPage() {
   const params = useParams();
-  const router = useRouter();
   const videoId = params?.id as string;
 
   const [video, setVideo] = useState<Video | null>(null);
@@ -55,7 +54,6 @@ export default function WatchPage() {
   const fetchVideoData = async (id: string) => {
     try {
       setLoading(true);
-      // Obtener el video actual
       const { data: currentVideo, error } = await supabase
         .from('videos')
         .select('*')
@@ -70,7 +68,6 @@ export default function WatchPage() {
         setLikes(currentVideo.likes || 0);
         document.title = `${currentVideo.title} | Flixes`;
 
-        // Obtener videos relacionados
         const { data: related } = await supabase
           .from('videos')
           .select('*')
@@ -81,7 +78,7 @@ export default function WatchPage() {
       }
     } catch (e) {
       console.error(e);
-    } flex {
+    } finally {
       setLoading(false);
     }
   };
@@ -126,7 +123,6 @@ export default function WatchPage() {
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-zinc-200">
-      {/* NAVEGACIÓN SIMPLE */}
       <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="text-2xl font-black text-white">
           FLI<span className="text-amber-500">XES</span>
@@ -137,7 +133,6 @@ export default function WatchPage() {
       </nav>
 
       <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* COLUMNA PRINCIPAL - REPRODUCTOR Y DETALLES */}
         <div className="lg:col-span-2 space-y-4">
           <div className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden border border-zinc-800">
             {!adWatched ? (
@@ -167,7 +162,6 @@ export default function WatchPage() {
 
           <h1 className="text-xl font-bold text-white">{video.title}</h1>
 
-          {/* ACCIONES Y BOTONES */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-sm">F</div>
@@ -192,7 +186,6 @@ export default function WatchPage() {
             </div>
           </div>
 
-          {/* DESCRIPCIÓN Y ETIQUETAS */}
           <div className="bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800/80 text-xs space-y-3">
             <p className="text-zinc-300 leading-relaxed">{video.description || 'Disfruta de este video exclusivo en Flixes.'}</p>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -204,13 +197,11 @@ export default function WatchPage() {
             </div>
           </div>
 
-          {/* BANNER NATIVO DE ADSTERRA */}
           <div className="bg-black p-4 rounded-2xl border border-zinc-900 flex justify-center">
             <div ref={nativeAdRef} className="w-full flex justify-center items-center min-h-[100px]"></div>
           </div>
         </div>
 
-        {/* COLUMNA LATERAL - VIDEOS RECOMENDADOS */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Más recomendados</h3>
           <div className="space-y-3">
