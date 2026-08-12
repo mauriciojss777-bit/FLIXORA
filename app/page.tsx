@@ -142,7 +142,7 @@ export default function Home() {
 
   const handleSelectVideo = (video: Video) => {
     setSelectedVideo(video);
-    setAdWatched(false); // Reinicia la capa de publicidad para el nuevo video
+    setAdWatched(false); // Reinicia anuncio para requerir clic y activar monetización por reproducción
     window.history.pushState(null, '', `?v=${video.id}`);
     
     const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 10);
@@ -271,7 +271,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MENÚ LATERAL RESTAURADO CON TODAS LAS OPCIONES */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -292,7 +291,6 @@ export default function Home() {
                 <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
-                {/* Categorías adicionales en el menú */}
                 <div className="pt-2 border-t border-zinc-900 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
@@ -409,9 +407,9 @@ export default function Home() {
 
         {selectedVideo && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
-            <div id="video-modal-container" className="bg-zinc-900 w-full min-h-screen md:min-h-0 md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col my-auto" onClick={e => e.stopPropagation()}>
+            <div id="modal-content-wrapper" className="bg-zinc-900 w-full min-h-screen md:min-h-0 md:max-w-4xl md:rounded-3xl overflow-hidden flex flex-col my-auto" onClick={e => e.stopPropagation()}>
               
-              {/* REPRODUCTOR CON CAPA DE MONETIZACIÓN SMARTLINK DE ADSTERRA */}
+              {/* REPRODUCTOR CON KEY ÚNICA PARA FORZAR RECARGA AUTOMÁTICA AL CAMBIAR DE VIDEO */}
               <div className="relative aspect-video w-full bg-black">
                 {!adWatched ? (
                   <div className="absolute inset-0 z-10 bg-zinc-950/95 flex flex-col justify-center items-center text-white p-6 text-center">
@@ -431,6 +429,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <iframe 
+                    key={selectedVideo.id}
                     src={selectedVideo.voe_url} 
                     className="w-full h-full border-0" 
                     allowFullScreen 
@@ -490,25 +489,26 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* VIDEOS RELACIONADOS CON REPRODUCCIÓN AL CLIC E INTERACCIÓN TIPO YOUTUBE */}
+              {/* CARRUSEL DE VIDEOS RELACIONADOS TOTALMENTE FUNCIONAL */}
               <div className="p-4 bg-zinc-950 border-t border-zinc-800">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Videos Relacionados</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
-                    <div 
+                    <button 
                       key={v.id} 
+                      type="button"
                       onClick={() => {
                         handleSelectVideo(v);
-                        const container = document.getElementById('video-modal-container');
-                        if (container) container.scrollTop = 0;
+                        const wrapper = document.getElementById('modal-content-wrapper');
+                        if (wrapper) wrapper.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
                       }} 
-                      className="min-w-[160px] max-w-[160px] cursor-pointer group flex-shrink-0"
+                      className="min-w-[160px] max-w-[160px] text-left cursor-pointer group flex-shrink-0 focus:outline-none"
                     >
-                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 group-hover:border-amber-500/50 transition-colors">
                         <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       </div>
-                      <p className="mt-1 text-xs font-semibold text-zinc-300 line-clamp-1">{v.title}</p>
-                    </div>
+                      <p className="mt-1.5 text-xs font-semibold text-zinc-300 line-clamp-1 group-hover:text-amber-400 transition-colors">{v.title}</p>
+                    </button>
                   ))}
                 </div>
               </div>
