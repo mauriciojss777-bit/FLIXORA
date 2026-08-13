@@ -838,12 +838,8 @@ export default function Home() {
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
-                    <div 
-                      key={`carousel-${v.id}`}
-                      onClick={() => handleSelectVideo(v)}
-                      className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group flex-shrink-0 flex flex-col"
-                    >
-                      <div className="aspect-video w-full bg-black relative overflow-hidden">
+                   <a key={`carousel-${v.id}`} href={`/watch/${v.id}`} className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 overflow-hidden rounded-xl block">
+                     <div className="aspect-video w-full bg-black relative overflow-hidden">
                         <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-1 right-1 bg-black/80 text-amber-400 text-[9px] font-bold px-1 rounded">
                           {v.category}
