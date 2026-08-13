@@ -718,7 +718,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="relative aspect-video w-full bg-black">
+              <div className={`relative w-full bg-black ${selectedVideo.is_short ? 'aspect-[9/16] max-h-[80vh] mx-auto sm:max-w-sm' : 'aspect-video'}`}>
                 <iframe 
                   src={selectedVideo.voe_url} 
                   className="w-full h-full border-0" 
@@ -774,7 +774,7 @@ export default function Home() {
               <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3 box-border">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
-                  <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixora.'}</p>
+                  <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible in Flixora.'}</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -839,9 +839,9 @@ export default function Home() {
                     <div 
                       key={`carousel-${v.id}`} 
                       onClick={() => handleSelectVideo(v)}
-                      className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 overflow-hidden rounded-xl cursor-pointer group flex-shrink-0"
+                      className={`bg-zinc-900 border border-zinc-800 overflow-hidden rounded-xl cursor-pointer group flex-shrink-0 ${v.is_short ? 'min-w-[110px] max-w-[110px]' : 'min-w-[160px] max-w-[160px]'}`}
                     >
-                      <div className="aspect-video w-full bg-black relative overflow-hidden">
+                      <div className={`w-full bg-black relative overflow-hidden ${v.is_short ? 'aspect-[9/16]' : 'aspect-video'}`}>
                         <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-1 right-1 bg-black/80 text-amber-400 text-[9px] font-bold px-1 rounded">
                           {v.category}
