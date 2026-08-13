@@ -300,7 +300,7 @@ export default function Home() {
 
   if (!ageAccepted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="text-amber-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
@@ -326,20 +326,21 @@ export default function Home() {
     });
 
   return (
-    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between transition-colors duration-300`}>
-      <div>
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full overflow-x-hidden transition-colors duration-300`}>
+      <div className="w-full">
+        {/* NAVEGACIÓN PRINCIPAL */}
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full">
+          <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
-              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none"
+              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0"
               aria-label="Abrir Menú"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-2xl font-black text-white cursor-pointer tracking-tight" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
+            <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
               FLI<span className="text-amber-500">XES</span>
             </h1>
           </div>
@@ -357,16 +358,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowWatchLaterModal(true)} className="relative bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all">
-              ⭐ Guardados {watchLater.length > 0 && <span className="ml-1 bg-amber-500 text-black px-1.5 py-0.2 rounded-full text-[10px] font-black">{watchLater.length}</span>}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap">
+              ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-amber-500 text-black px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
             </button>
-            <button onClick={() => setShowDonateModal(true)} className="bg-amber-500 hover:bg-amber-400 text-black text-xs px-3.5 py-1.5 rounded-full font-black transition-all">☕ Donar</button>
-            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-zinc-800 text-amber-400 text-xs px-3.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
-            <button onClick={() => setShowAdminModal(true)} className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all">+ SUBIR</button>
+            <button onClick={() => setShowDonateModal(true)} className="bg-amber-500 hover:bg-amber-400 text-black text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
+            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text-amber-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
+            <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ SUBIR</button>
           </div>
         </nav>
 
+        {/* MENÚ LATERAL DESPLEGABLE */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -405,56 +407,59 @@ export default function Home() {
           </div>
         )}
 
-        <section className="px-4 pt-4 pb-2">
-          <div className="sm:hidden mb-3">
+        {/* BARRA DE BÚSQUEDA MÓVIL Y FILTROS FIJOS SIN DESBORDAMIENTO */}
+        <section className="px-3 pt-3 pb-2 w-full max-w-full overflow-hidden">
+          <div className="sm:hidden mb-2.5 w-full">
             <input 
               type="text" 
               placeholder="Buscar por título, categoría o etiqueta..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)} 
-              className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-sm focus:border-amber-500 outline-none text-zinc-200" 
+              className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:border-amber-500 outline-none text-zinc-200" 
             />
           </div>
 
-          {/* ORDENADO: Selector de orden (Más recientes / gustados) arriba de forma independiente */}
-          <div className="flex items-center justify-between gap-4 mb-3 pb-2 border-b border-zinc-800/60">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Filtrar por orden:</span>
-            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs">
-              <button onClick={() => setSortBy('recent')} className={`px-3 py-1.5 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
-              <button onClick={() => setSortBy('likes')} className={`px-3 py-1.5 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+          {/* Selector de orden limpio y compacto para evitar desbordes */}
+          <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
+            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
+            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
+              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
+              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
 
-          {/* Carrusel de Categorías / Etiquetas separadas abajo */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar w-full">
+          {/* Categorías con contenedor fluido sin forzar ancho */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
-              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
                 {tag}
               </button>
             ))}
           </div>
         </section>
 
-        <section className="px-4 pb-12">
+        {/* REJILLA DE CONTENIDO Y ANUNCIO INTEGRADO */}
+        <section className="px-3 pb-12 w-full max-w-full overflow-hidden">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                 <div key={n} className="animate-pulse flex flex-col space-y-3">
-                  <div className="aspect-video rounded-xl bg-zinc-800"></div>
+                  <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
                   <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
                   <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
               
-              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px]">
+              {/* BANNER DE ANUNCIO ADSTERRA INTEGRADO EN LA CUADRÍCULA */}
+              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px] w-full overflow-hidden">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
                   <span className="text-[9px] text-zinc-500">Adsterra</span>
                 </div>
-                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950">
+                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950 w-full">
                   <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
                 </div>
               </div>
@@ -463,9 +468,9 @@ export default function Home() {
                 const isSaved = watchLater.some(v => v.id === video.id);
 
                 return (
-                  <div key={video.id} className="flex flex-col">
-                    <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative">
-                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
+                  <div key={video.id} className="flex flex-col w-full">
+                    <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative w-full">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 w-full">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-2 right-2 bg-black/80 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
                           {video.category}
@@ -479,13 +484,13 @@ export default function Home() {
                           ⭐
                         </button>
                       </div>
-                      <div className="mt-3 flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">
+                      <div className="mt-2.5 flex gap-2.5 w-full">
+                        <div className="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
                           F
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <h3 className="text-xs sm:text-sm font-semibold text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">{video.title}</h3>
-                          <p className="text-xs text-zinc-400 mt-1">Flixes • HD • 👍 {likesMap[video.id] || 0}</p>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <h3 className="text-xs font-semibold text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">{video.title}</h3>
+                          <p className="text-[11px] text-zinc-400 mt-0.5">Flixes • HD • 👍 {likesMap[video.id] || 0}</p>
                         </div>
                       </div>
                     </div>
@@ -496,6 +501,35 @@ export default function Home() {
           )}
         </section>
 
+        {/* SECCIÓN ESTILO SHORTS (BANNER INFERIOR DISCRETO Y ORIGINAL) */}
+        <section className="px-3 py-6 border-t border-zinc-900 bg-black/40 w-full">
+          <div className="max-w-7xl mx-auto flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
+                ⚡ Destacados / Shorts Rápidos
+              </h3>
+              <span className="text-[10px] text-zinc-500">Contenido Vertical y Casero</span>
+            </div>
+            
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+              {videos.slice(0, 6).map((v) => (
+                <div 
+                  key={`short-${v.id}`} 
+                  onClick={() => handleSelectVideo(v)}
+                  className="min-w-[110px] max-w-[110px] sm:min-w-[130px] sm:max-w-[130px] aspect-[9/16] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative cursor-pointer group flex-shrink-0 shadow-lg"
+                >
+                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
+                    <span className="text-[9px] font-bold text-amber-400 uppercase">Short HD</span>
+                    <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight mt-0.5">{v.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* MODALES Y REPRODUCTOR PRINCIPAL */}
         {selectedVideo && isPipActive && (
           <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
@@ -809,7 +843,7 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6">
+      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
