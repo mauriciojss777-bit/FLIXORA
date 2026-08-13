@@ -36,16 +36,24 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra robusto adaptado al nuevo Native Banner
-function AdsterraBlock({ zoneId }: { zoneId: string }) {
+// Componente Adsterra dinámico corregido para inyección real en Next.js
+function AdsterraBlock() {
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (bannerRef.current && !bannerRef.current.firstChild) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.dataset.cfasync = 'false';
+      script.src = '//pl30814143.effectivecpmnetwork.com/df896f70ade366b92d50697ad57088aa/invoke.js';
+      
+      bannerRef.current.appendChild(script);
+    }
+  }, []);
+
   return (
     <div className="w-full flex flex-col justify-center items-center min-h-[250px] relative overflow-hidden">
-      <script 
-        async={true} 
-        data-cfasync="false" 
-        src={`//pl30814143.effectivecpmnetwork.com/${zoneId}/invoke.js`}
-      ></script>
-      <div id={`container-${zoneId}`}></div>
+      <div ref={bannerRef} id="container-df896f70ade366b92d50697ad57088aa" className="w-full flex justify-center items-center"></div>
     </div>
   );
 }
@@ -414,7 +422,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA Y CARRUSEL DE VIDEOS CON TARJETA PATROCINADA RESPALDO */}
+        {/* REJILLA Y CARRUSEL DE VIDEOS CON NATIVE BANNER INYECTADO */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -433,7 +441,7 @@ export default function Home() {
 
                 return (
                   <div key={video.id} className="flex flex-col">
-                    {/* TARJETA PATROCINADA CON NUEVO NATIVE BANNER */}
+                    {/* TARJETA PATROCINADA CON SCRIPT REAL */}
                     {index === 1 && (
                       <div className="mb-6 sm:mb-0 col-span-1 flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all">
                         {featuredProduct ? (
@@ -460,7 +468,7 @@ export default function Home() {
                               <span className="text-[9px] text-zinc-500">Adsterra</span>
                             </div>
                             <div className="flex-1 flex items-center justify-center">
-                              <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                              <AdsterraBlock />
                             </div>
                           </div>
                         )}
@@ -785,7 +793,7 @@ export default function Home() {
               </div>
 
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
-                <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                <AdsterraBlock />
               </div>
 
             </div>
