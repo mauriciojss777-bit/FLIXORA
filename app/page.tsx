@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import Script from 'next/script';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
@@ -36,7 +39,6 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra integrado usando un contenedor div estándar y cargando el script nativamente
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -326,7 +328,6 @@ export default function Home() {
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between transition-colors duration-300`}>
       <div>
-        {/* NAVEGACIÓN PRINCIPAL */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button 
@@ -366,7 +367,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MENÚ LATERAL DESPLEGABLE */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -405,7 +405,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* BÚSQUEDA MÓVIL Y FILTROS */}
         <section className="px-4 pt-4 pb-2">
           <div className="sm:hidden mb-3">
             <input 
@@ -433,7 +432,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA DE VIDEOS CON ANUNCIO DIRECTO INTEGRADO EN LA PRIMERA POSICIÓN */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -448,7 +446,6 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
               
-              {/* TARJETA DE ANUNCIO DIRECTO ADSTERRA (SE MUESTRA EL ANUNCIO AUTOMÁTICAMENTE SIN ENTRAR) */}
               <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px]">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
@@ -464,7 +461,6 @@ export default function Home() {
 
                 return (
                   <div key={video.id} className="flex flex-col">
-                    {/* TARJETA DE VIDEO ORGÁNICA */}
                     <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -497,7 +493,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* MODALES Y REPRODUCTOR PRINCIPAL */}
         {selectedVideo && isPipActive && (
           <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
