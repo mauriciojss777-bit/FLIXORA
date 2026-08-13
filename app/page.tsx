@@ -22,6 +22,7 @@ interface Video {
   views?: number;
   likes?: number;
   created_at?: string;
+  is_short?: boolean; // Nuevo campo para diferenciar Shorts de Videos Horizontales
 }
 
 interface Product {
@@ -68,7 +69,7 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center overflow-hidden bg-transparent">
-      <div ref={containerRef} className="flex justify-center items-center w-[300px] h-[250px]" />
+      <div ref={containerRef} className="flex justify-center items-center max-w-full h-[250px] overflow-hidden" />
     </div>
   );
 }
@@ -106,6 +107,7 @@ export default function Home() {
   const [coverUrl, setCoverUrl] = useState('');
   const [description, setDescription] = useState('');
   const [videoTagsInput, setVideoTagsInput] = useState('HD, Latino, Casero');
+  const [isShortVideo, setIsShortVideo] = useState(false); // Checkbox para indicar si es Short al subir
 
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
@@ -236,13 +238,14 @@ export default function Home() {
       voe_url: voeUrl, 
       cover_url: coverUrl,
       description: description || 'Disfruta de este contenido en alta definición disponible en Flixes.',
-      tags: parsedTags.length > 0 ? parsedTags : [category, 'HD']
+      tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
+      is_short: isShortVideo
     }]);
     if (error) { 
       alert('Error: ' + error.message); 
     } else {
       setShowAdminModal(false);
-      setTitle(''); setVoeUrl(''); setCoverUrl(''); setDescription(''); setVideoTagsInput('HD, Latino, Casero'); setAdminPassword('');
+      setTitle(''); setVoeUrl(''); setCoverUrl(''); setDescription(''); setVideoTagsInput('HD, Latino, Casero'); setIsShortVideo(false); setAdminPassword('');
       fetchVideos();
     }
   };
@@ -300,7 +303,7 @@ export default function Home() {
 
   if (!ageAccepted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-hidden">
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="text-amber-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
@@ -310,6 +313,7 @@ export default function Home() {
     );
   }
 
+  // Filtrado general de videos
   const filteredVideos = videos
     .filter(v => {
       const matchesTag = activeTag === 'Todos' || v.category === activeTag || (v.tags && v.tags.some(t => t.toLowerCase() === activeTag.toLowerCase()));
@@ -325,11 +329,15 @@ export default function Home() {
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
+  // Separar en dos colecciones: Horizontales y Shorts Verticales
+  const horizontalVideos = filteredVideos.filter(v => !v.is_short);
+  const verticalShorts = filteredVideos.filter(v => v.is_short);
+
   return (
-    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full overflow-x-hidden transition-colors duration-300`}>
-      <div className="w-full">
+    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
+      <div className="w-full max-w-[100vw] overflow-x-hidden">
         {/* NAVEGACIÓN PRINCIPAL */}
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full">
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
@@ -370,9 +378,9 @@ export default function Home() {
 
         {/* MENÚ LATERAL DESPLEGABLE */}
         {showMenu && (
-          <div className="fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
-            <div className="relative bg-[#0f0f0f] border-r border-zinc-800 w-80 h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
+            <div className="relative bg-[#0f0f0f] border-r border-zinc-800 w-80 max-w-[85vw] h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <h2 className="text-lg font-black text-white tracking-wider">MENÚ PRINCIPAL</h2>
                 <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2">
@@ -407,19 +415,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* BARRA DE BÚSQUEDA MÓVIL Y FILTROS FIJOS SIN DESBORDAMIENTO */}
-        <section className="px-3 pt-3 pb-2 w-full max-w-full overflow-hidden">
+        {/* BARRA DE BÚSQUEDA MÓVIL Y FILTROS FIJOS */}
+        <section className="px-3 pt-3 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
           <div className="sm:hidden mb-2.5 w-full">
             <input 
               type="text" 
               placeholder="Buscar por título, categoría o etiqueta..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)} 
-              className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:border-amber-500 outline-none text-zinc-200" 
+              className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:border-amber-500 outline-none text-zinc-200 box-border" 
             />
           </div>
 
-          {/* Selector de orden limpio y compacto para evitar desbordes */}
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
@@ -428,7 +435,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Categorías con contenedor fluido sin forzar ancho */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
               <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
@@ -438,12 +444,57 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA DE CONTENIDO Y ANUNCIO INTEGRADO */}
-        <section className="px-3 pb-12 w-full max-w-full overflow-hidden">
+        {/* SECCIÓN 1: ÁREA DE VIDEOS VERTICALES (SHORTS) */}
+        <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-black text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
+              ⚡ Shorts Verticales ({verticalShorts.length})
+            </h3>
+            <span className="text-[10px] text-zinc-500">Contenido en formato vertical</span>
+          </div>
+
+          {loading ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+              {[1, 2, 3, 4, 5].map(n => (
+                <div key={`load-short-${n}`} className="min-w-[130px] max-w-[130px] aspect-[9/16] rounded-2xl bg-zinc-800 animate-pulse flex-shrink-0"></div>
+              ))}
+            </div>
+          ) : verticalShorts.length === 0 ? (
+            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-4 text-center">
+              <p className="text-xs text-zinc-500">No hay videos verticales en esta categoría. Puedes subir uno marcando la casilla "Video Vertical (Short)".</p>
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+              {verticalShorts.map((v) => (
+                <div 
+                  key={`short-${v.id}`} 
+                  onClick={() => handleSelectVideo(v)}
+                  className="min-w-[130px] max-w-[130px] sm:min-w-[150px] sm:max-w-[150px] aspect-[9/16] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative cursor-pointer group flex-shrink-0 shadow-lg"
+                >
+                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2.5">
+                    <span className="text-[9px] font-bold text-amber-400 uppercase">Short HD</span>
+                    <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight mt-0.5">{v.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* SECCIÓN 2: ÁREA DE VIDEOS HORIZONTALES (PRINCIPAL) */}
+        <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+          <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
+            <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
+              📺 Videos Horizontales ({horizontalVideos.length})
+            </h3>
+            <span className="text-[10px] text-zinc-500">Streaming Estándar</span>
+          </div>
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                <div key={n} className="animate-pulse flex flex-col space-y-3">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                <div key={n} className="animate-pulse flex flex-col space-y-3 w-full">
                   <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
                   <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
                   <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
@@ -451,10 +502,10 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
               
-              {/* BANNER DE ANUNCIO ADSTERRA INTEGRADO EN LA CUADRÍCULA */}
-              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px] w-full overflow-hidden">
+              {/* BANNER DE ANUNCIO ADSTERRA */}
+              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px] w-full max-w-full overflow-hidden box-border">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
                   <span className="text-[9px] text-zinc-500">Adsterra</span>
@@ -464,11 +515,11 @@ export default function Home() {
                 </div>
               </div>
 
-              {filteredVideos.map((video) => {
+              {horizontalVideos.map((video) => {
                 const isSaved = watchLater.some(v => v.id === video.id);
 
                 return (
-                  <div key={video.id} className="flex flex-col w-full">
+                  <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden">
                     <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative w-full">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 w-full">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -501,37 +552,9 @@ export default function Home() {
           )}
         </section>
 
-        {/* SECCIÓN ESTILO SHORTS (BANNER INFERIOR DISCRETO Y ORIGINAL) */}
-        <section className="px-3 py-6 border-t border-zinc-900 bg-black/40 w-full">
-          <div className="max-w-7xl mx-auto flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
-                ⚡ Destacados / Shorts Rápidos
-              </h3>
-              <span className="text-[10px] text-zinc-500">Contenido Vertical y Casero</span>
-            </div>
-            
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
-              {videos.slice(0, 6).map((v) => (
-                <div 
-                  key={`short-${v.id}`} 
-                  onClick={() => handleSelectVideo(v)}
-                  className="min-w-[110px] max-w-[110px] sm:min-w-[130px] sm:max-w-[130px] aspect-[9/16] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative cursor-pointer group flex-shrink-0 shadow-lg"
-                >
-                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
-                    <span className="text-[9px] font-bold text-amber-400 uppercase">Short HD</span>
-                    <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight mt-0.5">{v.title}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* MODALES Y REPRODUCTOR PRINCIPAL */}
         {selectedVideo && isPipActive && (
-          <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
               <iframe 
                 src={selectedVideo.voe_url} 
@@ -732,7 +755,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-4 bg-zinc-900/60 text-xs text-zinc-300 space-y-3">
+              <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
                   <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixes.'}</p>
@@ -747,28 +770,6 @@ export default function Home() {
                     >
                       #{t}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#0f0f0f] border-t border-zinc-800">
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Carrusel de Videos Relacionados</h3>
-                <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
-                  {videos.filter(v => v.id !== selectedVideo.id).map(v => (
-                    <div 
-                      key={v.id} 
-                      onClick={() => {
-                        handleSelectVideo(v);
-                        const container = document.getElementById('video-modal-container');
-                        if (container) container.scrollTop = 0;
-                      }} 
-                      className="min-w-[160px] max-w-[160px] cursor-pointer group flex-shrink-0"
-                    >
-                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
-                        <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                      </div>
-                      <p className="mt-1 text-xs font-semibold text-zinc-300 line-clamp-1 group-hover:text-amber-400">{v.title}</p>
-                    </div>
                   ))}
                 </div>
               </div>
@@ -831,6 +832,21 @@ export default function Home() {
                 {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
               </select>
               <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500 resize-none" />
+              
+              {/* Checkbox para definir si es Short Vertical */}
+              <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                <input 
+                  type="checkbox" 
+                  id="shortCheckbox" 
+                  checked={isShortVideo} 
+                  onChange={(e) => setIsShortVideo(e.target.checked)} 
+                  className="w-4 h-4 accent-amber-500 cursor-pointer" 
+                />
+                <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
+                  ¿Es un Video Vertical / Short? (Se mostrará en la sección superior)
+                </label>
+              </div>
+
               <input type="text" placeholder="Etiquetas (separadas por coma: HD, Rubias, etc.)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="URL StreamHG / Embed del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
@@ -843,7 +859,7 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full">
+      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
