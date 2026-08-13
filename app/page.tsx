@@ -473,53 +473,51 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
-              {filteredVideos.map((video, index) => {
+              {/* TARJETA PATROCINADA FIJA AL INICIO DE LA CUADRÍCULA */}
+              <div className="flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all min-h-[300px]">
+                {featuredProduct ? (
+                  <a href={featuredProduct.buy_url} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full justify-between">
+                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-2">
+                      <img src={featuredProduct.image_url} alt={featuredProduct.title} className="w-full h-full object-cover" />
+                      <span className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded shadow">
+                        PATROCINADO
+                      </span>
+                    </div>
+                    <div className="flex-1 my-1">
+                      <h3 className="text-xs font-bold text-white line-clamp-2 leading-tight">{featuredProduct.title}</h3>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">Recomendado en Flixes Store</p>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between pt-2 border-t border-zinc-800/80">
+                      <span className="text-amber-400 font-black text-xs sm:text-sm">{featuredProduct.price}</span>
+                      <span className="bg-amber-500 text-black text-[11px] font-bold px-3 py-1 rounded-full hover:bg-amber-400">Ver Oferta ➔</span>
+                    </div>
+                  </a>
+                ) : (
+                  <div className="flex flex-col h-full justify-between text-center p-2">
+                    <div className="flex justify-between items-center w-full mb-1">
+                      <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase">PATROCINADO</span>
+                      <span className="text-[9px] text-zinc-500">Adsterra</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center">
+                      <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                    </div>
+                    <a 
+                      href="https://www.highperformanceformat.com/df896f70ade366b92d50697ad57088aa/invoke.js" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="mt-2 text-[11px] bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black py-1.5 rounded-xl font-bold transition-colors block"
+                    >
+                      Ver Anuncio Patrocinado ➔
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {filteredVideos.map((video) => {
                 const isSaved = watchLater.some(v => v.id === video.id);
 
                 return (
                   <div key={video.id} className="flex flex-col">
-                    {/* TARJETA PATROCINADA CON RESPALDO SEGURO */}
-                    {index === 1 && (
-                      <div className="mb-6 sm:mb-0 col-span-1 flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all">
-                        {featuredProduct ? (
-                          <a href={featuredProduct.buy_url} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full justify-between">
-                            <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-2">
-                              <img src={featuredProduct.image_url} alt={featuredProduct.title} className="w-full h-full object-cover" />
-                              <span className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded shadow">
-                                PATROCINADO
-                              </span>
-                            </div>
-                            <div className="flex-1 my-1">
-                              <h3 className="text-xs font-bold text-white line-clamp-2 leading-tight">{featuredProduct.title}</h3>
-                              <p className="text-[11px] text-zinc-400 mt-0.5">Recomendado en Flixes Store</p>
-                            </div>
-                            <div className="mt-2 flex items-center justify-between pt-2 border-t border-zinc-800/80">
-                              <span className="text-amber-400 font-black text-xs sm:text-sm">{featuredProduct.price}</span>
-                              <span className="bg-amber-500 text-black text-[11px] font-bold px-3 py-1 rounded-full hover:bg-amber-400">Ver Oferta ➔</span>
-                            </div>
-                          </a>
-                        ) : (
-                          <div className="flex flex-col h-full justify-between text-center p-2 min-h-[220px]">
-                            <div className="flex justify-between items-center w-full mb-1">
-                              <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase">PATROCINADO</span>
-                              <span className="text-[9px] text-zinc-500">Adsterra</span>
-                            </div>
-                            <div className="flex-1 flex items-center justify-center">
-                              <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
-                            </div>
-                            <a 
-                              href="https://www.highperformanceformat.com/df896f70ade366b92d50697ad57088aa/invoke.js" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="mt-2 text-[11px] bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black py-1.5 rounded-xl font-bold transition-colors block"
-                            >
-                              Ver Anuncio Patrocinado ➔
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
                     {/* TARJETA DE VIDEO ORGÁNICA */}
                     <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
