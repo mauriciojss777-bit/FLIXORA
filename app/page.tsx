@@ -36,8 +36,8 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra aislado mediante iframe con srcDoc para garantizar renderizado fluido en Next.js
-function AdsterraBlock({ zoneId }: { zoneId: string }) {
+// Componente Adsterra adaptado correctamente para Banner Nativo
+function AdsterraBlock() {
   const adHtml = `
     <!DOCTYPE html>
     <html>
@@ -57,30 +57,20 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
         </style>
       </head>
       <body>
-        <script type="text/javascript">
-          atOptions = {
-            'key' : '${zoneId}',
-            'format' : 'iframe',
-            'height' : 250,
-            'width' : 300,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="//www.highperformanceformat.com/${zoneId}/invoke.js"></script>
+        <script async="async" data-cfasync="false" src="https://pl30814143.effectivecpmnetwork.com/df896f70ade366b92d5f509ddfef3a78/invoke.js"></script>
+        <div id="container-df896f70ade366b92d5f509ddfef3a78"></div>
       </body>
     </html>
   `;
 
   return (
-    <div className="w-full flex justify-center items-center min-h-[250px]">
+    <div className="w-full flex justify-center items-center min-h-[200px]">
       <iframe
         srcDoc={adHtml}
-        width="300"
-        height="250"
+        className="w-full h-[220px] border-0 overflow-hidden"
         scrolling="no"
         frameBorder="0"
-        className="border-0 overflow-hidden"
-        title="Adsterra Banner"
+        title="Adsterra Native Banner"
       />
     </div>
   );
@@ -186,7 +176,7 @@ export default function Home() {
       if (data) setVideos(data);
     } catch (e) { 
       console.error(e); 
-    } fontally {
+    } finally {
       setLoading(false);
     }
   };
@@ -501,7 +491,7 @@ export default function Home() {
                         ) : (
                           <div className="flex flex-col h-full justify-center items-center text-center p-2 min-h-[180px]">
                             <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-2">PATROCINADO</span>
-                            <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                            <AdsterraBlock />
                           </div>
                         )}
                       </div>
@@ -849,7 +839,7 @@ export default function Home() {
 
               {/* BANNER NATIVO DE ADSTERRA */}
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
-                <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                <AdsterraBlock />
               </div>
 
             </div>
