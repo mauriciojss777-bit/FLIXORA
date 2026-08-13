@@ -170,9 +170,9 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedVideo) {
-      document.title = `${selectedVideo.title} | Flixora`;
+      document.title = `${selectedVideo.title} | Flixes`;
     } else {
-      document.title = 'Flixora - Streaming Pro';
+      document.title = 'Flixes - Streaming Pro';
     }
   }, [selectedVideo]);
 
@@ -372,7 +372,7 @@ export default function Home() {
               </svg>
             </button>
             <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
-              FLI<span className="text-amber-500">XORA</span>
+              FLI<span className="text-amber-500">XES</span>
             </h1>
           </div>
 
