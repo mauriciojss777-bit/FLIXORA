@@ -67,8 +67,8 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center overflow-hidden bg-transparent">
-      <div ref={containerRef} className="flex justify-center items-center max-w-full h-[250px] overflow-hidden" />
+    <div className="w-full max-w-full flex flex-col justify-center items-center overflow-hidden bg-transparent box-border">
+      <div ref={containerRef} className="flex justify-center items-center w-full max-w-full h-[250px] overflow-hidden" />
     </div>
   );
 }
@@ -93,8 +93,8 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full flex justify-center items-center overflow-hidden bg-transparent my-2">
-      <div ref={containerRef} className="w-full flex justify-center items-center" />
+    <div className="w-full max-w-full flex justify-center items-center overflow-hidden bg-transparent my-2 box-border">
+      <div ref={containerRef} className="w-full max-w-full flex justify-center items-center overflow-hidden" />
     </div>
   );
 }
@@ -328,7 +328,7 @@ export default function Home() {
 
   if (!ageAccepted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full max-w-[100vw] overflow-x-hidden box-border">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="text-amber-500">XORA</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
@@ -357,9 +357,9 @@ export default function Home() {
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
   return (
-    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
-      <div className="w-full max-w-[100vw] overflow-x-hidden">
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
+    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden box-border transition-colors duration-300`}>
+      <div className="w-full max-w-[100vw] overflow-x-hidden box-border">
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw] box-border">
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
@@ -382,7 +382,7 @@ export default function Home() {
                 placeholder="Buscar en Flixora..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:border-amber-500 outline-none" 
+                className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:border-amber-500 outline-none box-border" 
               />
               <button className="absolute right-3 top-2.5 text-zinc-400">🔍</button>
             </div>
@@ -399,9 +399,9 @@ export default function Home() {
         </nav>
 
         {showMenu && (
-          <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
+          <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden box-border">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
-            <div className="relative bg-[#0f0f0f] border-r border-zinc-800 w-80 max-w-[85vw] h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
+            <div className="relative bg-[#0f0f0f] border-r border-zinc-800 w-80 max-w-[85vw] h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4 box-border">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <h2 className="text-lg font-black text-white tracking-wider">MENÚ PRINCIPAL</h2>
                 <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2">
@@ -473,7 +473,7 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full max-w-full">
               {[1, 2, 3, 4, 5].map(n => (
                 <div key={`load-short-${n}`} className="min-w-[130px] max-w-[130px] aspect-[9/16] rounded-2xl bg-zinc-800 animate-pulse flex-shrink-0"></div>
               ))}
@@ -483,7 +483,7 @@ export default function Home() {
               <p className="text-xs text-zinc-500">No hay videos verticales en esta categoría. Puedes subir uno marcando la casilla "Video Vertical (Short)".</p>
             </div>
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full max-w-full">
               {verticalShorts.map((v) => (
                 <div 
                   key={`short-${v.id}`} 
@@ -510,9 +510,9 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                <div key={n} className="animate-pulse flex flex-col space-y-3 w-full">
+                <div key={n} className="animate-pulse flex flex-col space-y-3 w-full max-w-full">
                   <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
                   <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
                   <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
@@ -520,14 +520,14 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full box-border">
               
               <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px] w-full max-w-full overflow-hidden box-border">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
                   <span className="text-[9px] text-zinc-500">Adsterra</span>
                 </div>
-                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950 w-full">
+                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950 w-full max-w-full">
                   <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                 </div>
               </div>
@@ -536,9 +536,9 @@ export default function Home() {
                 const isSaved = watchLater.some(v => v.id === video.id);
 
                 return (
-                  <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden">
-                    <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative w-full">
-                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 w-full">
+                  <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden box-border">
+                    <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative w-full max-w-full">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 w-full max-w-full">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-2 right-2 bg-black/80 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
                           {video.category}
@@ -552,7 +552,7 @@ export default function Home() {
                           ⭐
                         </button>
                       </div>
-                      <div className="mt-2.5 flex gap-2.5 w-full">
+                      <div className="mt-2.5 flex gap-2.5 w-full max-w-full">
                         <div className="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
                           F
                         </div>
@@ -570,7 +570,7 @@ export default function Home() {
         </section>
 
         {selectedVideo && isPipActive && (
-          <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col box-border">
             <div className="relative aspect-video w-full bg-black">
               <iframe 
                 src={selectedVideo.voe_url} 
@@ -594,8 +594,8 @@ export default function Home() {
         )}
 
         {showWatchLaterModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm box-border" onClick={() => setShowWatchLaterModal(false)}>
+            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto box-border" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <h2 className="text-xl font-black text-white">⭐ Videos Guardados</h2>
                 <button onClick={() => setShowWatchLaterModal(false)} className="text-xs text-zinc-400 hover:text-white">CERRAR</button>
@@ -624,8 +624,8 @@ export default function Home() {
         )}
 
         {showDonateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm box-border" onClick={() => setShowDonateModal(false)}>
+            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center box-border" onClick={e => e.stopPropagation()}>
               <h2 className="text-2xl font-black text-white">☕ Apóyame con una Donación</h2>
               <p className="text-xs text-zinc-400">Si te gusta el contenido de Flixora, tu apoyo ayuda a mantener los servidores y traer nuevos videos diariamente.</p>
               <a 
@@ -642,8 +642,8 @@ export default function Home() {
         )}
 
         {showStore && (
-          <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
-            <div className="max-w-4xl mx-auto">
+          <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto box-border">
+            <div className="max-w-4xl mx-auto w-full">
               <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-900">
                 <div>
                   <h2 className="text-2xl font-black text-white">🛍️ Recomendados y Afiliados</h2>
@@ -655,7 +655,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 w-full">
                 {products.map(p => (
                   <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:border-amber-500 transition-all flex flex-col group">
                     <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 mb-3">
@@ -677,8 +677,8 @@ export default function Home() {
         )}
 
         {showAdminProd && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-            <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm box-border">
+            <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 box-border">
               <h2 className="text-xl font-bold text-white">Panel Admin - Producto de Afiliado</h2>
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
@@ -694,8 +694,8 @@ export default function Home() {
         )}
 
         {selectedVideo && !isPipActive && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
-            <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300`} onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto box-border" onClick={handleCloseVideo}>
+            <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300 box-border`} onClick={e => e.stopPropagation()}>
               
               <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
@@ -728,7 +728,7 @@ export default function Home() {
                 />
               </div>
               
-              <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
+              <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800 box-border">
                 <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
                 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
@@ -771,7 +771,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
+              <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3 box-border">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
                   <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixora.'}</p>
@@ -790,7 +790,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
+              <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4 box-border">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
                 </h3>
@@ -830,11 +830,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
+              <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3 box-border">
                 <h3 className="text-xs font-black text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
                   🔥 Más videos recomendados
                 </h3>
-                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
+                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full max-w-full">
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
                     <div 
                       key={`carousel-${v.id}`} 
@@ -856,7 +856,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-4 bg-black flex flex-col justify-center items-center border-t border-zinc-900">
+              <div className="p-4 bg-black flex flex-col justify-center items-center border-t border-zinc-900 w-full max-w-full overflow-hidden box-border">
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                 <AdsterraNativeBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
               </div>
@@ -866,8 +866,8 @@ export default function Home() {
         )}
 
         {showAdminModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-            <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm box-border">
+            <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto box-border">
               <h2 className="text-xl font-bold text-white">Panel Admin - Subir Video</h2>
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
@@ -901,7 +901,7 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
+      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden box-border">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
