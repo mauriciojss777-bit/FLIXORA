@@ -167,7 +167,7 @@ interface Video {
     {video.category || 'HD'}
   </span>
 </di
-            <div className="flex items-center gap-2">
+            <div> className="flex items-center gap-2">
               <button
                 onClick={handleLike}
 ,                className={`flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-bold transition-colors ${
