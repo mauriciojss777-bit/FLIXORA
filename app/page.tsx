@@ -36,37 +36,12 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra robusto con respaldo visual si el script es bloqueado
+// Componente Adsterra integrado directamente para que se vea el anuncio sin clics adicionales
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
-  const [adLoaded, setAdLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAdLoaded(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const adHtml = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-            overflow: hidden;
-          }
-        </style>
-      </head>
-      <body>
-        <script type="text/javascript">
+  return (
+    <div className="w-full h-full flex flex-col justify-center items-center overflow-hidden bg-transparent">
+      <script type="text/javascript">
+        {`
           atOptions = {
             'key' : '${zoneId}',
             'format' : 'iframe',
@@ -74,23 +49,9 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
             'width' : 300,
             'params' : {}
           };
-        </script>
-        <script type="text/javascript" src="//www.highperformanceformat.com/${zoneId}/invoke.js"></script>
-      </body>
-    </html>
-  `;
-
-  return (
-    <div className="w-full flex flex-col justify-center items-center min-h-[250px] relative">
-      <iframe
-        srcDoc={adHtml}
-        width="300"
-        height="250"
-        scrolling="no"
-        frameBorder="0"
-        className="border-0 overflow-hidden"
-        title="Adsterra Banner"
-      />
+        `}
+      </script>
+      <script type="text/javascript" src={`//www.highperformanceformat.com/${zoneId}/invoke.js`}></script>
     </div>
   );
 }
@@ -347,8 +308,6 @@ export default function Home() {
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
-  const featuredProduct = products.length > 0 ? products[0] : null;
-
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between transition-colors duration-300`}>
       <div>
@@ -459,7 +418,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA Y CARRUSEL DE VIDEOS CON TARJETA PATROCINADA RESPALDO */}
+        {/* REJILLA DE VIDEOS CON ANUNCIO DIRECTO INTEGRADO EN LA PRIMERA POSICIÓN */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -473,44 +432,16 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
-              {/* TARJETA PATROCINADA FIJA AL INICIO DE LA CUADRÍCULA */}
-              <div className="flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all min-h-[300px]">
-                {featuredProduct ? (
-                  <a href={featuredProduct.buy_url} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full justify-between">
-                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-2">
-                      <img src={featuredProduct.image_url} alt={featuredProduct.title} className="w-full h-full object-cover" />
-                      <span className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded shadow">
-                        PATROCINADO
-                      </span>
-                    </div>
-                    <div className="flex-1 my-1">
-                      <h3 className="text-xs font-bold text-white line-clamp-2 leading-tight">{featuredProduct.title}</h3>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">Recomendado en Flixes Store</p>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between pt-2 border-t border-zinc-800/80">
-                      <span className="text-amber-400 font-black text-xs sm:text-sm">{featuredProduct.price}</span>
-                      <span className="bg-amber-500 text-black text-[11px] font-bold px-3 py-1 rounded-full hover:bg-amber-400">Ver Oferta ➔</span>
-                    </div>
-                  </a>
-                ) : (
-                  <div className="flex flex-col h-full justify-between text-center p-2">
-                    <div className="flex justify-between items-center w-full mb-1">
-                      <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase">PATROCINADO</span>
-                      <span className="text-[9px] text-zinc-500">Adsterra</span>
-                    </div>
-                    <div className="flex-1 flex items-center justify-center">
-                      <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
-                    </div>
-                    <a 
-                      href="https://www.highperformanceformat.com/df896f70ade366b92d50697ad57088aa/invoke.js" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="mt-2 text-[11px] bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black py-1.5 rounded-xl font-bold transition-colors block"
-                    >
-                      Ver Anuncio Patrocinado ➔
-                    </a>
-                  </div>
-                )}
+              
+              {/* TARJETA DE ANUNCIO DIRECTO ADSTERRA (SE MUESTRA EL ANUNCIO AUTOMÁTICAMENTE SIN ENTRAR) */}
+              <div className="flex flex-col rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-2 shadow-xl min-h-[280px]">
+                <div className="flex justify-between items-center mb-1 px-1">
+                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
+                  <span className="text-[9px] text-zinc-500">Adsterra</span>
+                </div>
+                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-black/40">
+                  <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
+                </div>
               </div>
 
               {filteredVideos.map((video) => {
