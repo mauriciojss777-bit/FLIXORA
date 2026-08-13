@@ -190,7 +190,7 @@ interface Video {
           <div className="bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800/80 text-xs space-y-3">
             <p className="text-zinc-300 leading-relaxed">{video.description || 'Disfruta de este video exclusivo en Flixes.'}</p>
             <div className="flex flex-wrap gap-2 pt-1">
-              {(video.tags || [video.category, 'HD']).map(t => (
+              {(Array.isArray(video.tags) ? video.tags : [video.category, 'HD']).map(t => 
                 <span key={t} className="bg-zinc-800 text-amber-400 text-[11px] font-bold px-3 py-1 rounded-full">
                   #{t}
                 </span>
