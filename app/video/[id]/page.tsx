@@ -31,7 +31,8 @@ export default async function VideoPage({ params }: PageProps) {
         
         <h1 className="text-2xl font-bold">{video.titulo}</h1>
         
-        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden border border-neutral-800">
+        <div className={`relative w-full ${video.categoria?.toLowerCase().includes('short') || video.categoria?.toLowerCase().includes('vertical') ? 'aspect-[9/16] max-w-sm mx-auto' : 'aspect-video'} bg-black rounded-lg overflow-hidden border border-neutral-800`}>
+
           {embedUrl ? (
             <iframe
               src={embedUrl}
