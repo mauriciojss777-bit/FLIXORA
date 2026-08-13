@@ -340,11 +340,11 @@ export default function Home() {
 
   const filteredVideos = videos
     .filter(v => {
-      const matchesTag = activeTag === 'Todos' || v.category === activeTag || (v.tags && v.tags.some(t => t.toLowerCase() === activeTag.toLowerCase()));
+      const matchesTag = activeTag === 'Todos' || v.category === activeTag || (Array.isArray(v.tags) && v.tags.some(t => t.toLowerCase() === activeTag.toLowerCase()));
       const query = searchQuery.toLowerCase();
       const matchesSearch = v.title.toLowerCase().includes(query) || 
                             (v.category && v.category.toLowerCase().includes(query)) ||
-                            (v.tags && v.tags.some(t => t.toLowerCase().includes(query)));
+                            (Array.isArray(v.tags) && v.tags.some(t => t.toLowerCase().includes(query)));
       return matchesTag && matchesSearch;
     })
     .sort((a, b) => {
@@ -357,9 +357,9 @@ export default function Home() {
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
   return (
-    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
-      <div className="w-full max-w-[100vw] overflow-x-hidden">
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
+    <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-full overflow-x-hidden transition-colors duration-300 box-border`}>
+      <div className="w-full max-w-full overflow-x-hidden box-border">
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-full box-border">
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
@@ -399,7 +399,7 @@ export default function Home() {
         </nav>
 
         {showMenu && (
-          <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
+          <div className="fixed inset-0 z-50 flex max-w-full overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
             <div className="relative bg-[#0f0f0f] border-r border-zinc-800 w-80 max-w-[85vw] h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
@@ -436,7 +436,7 @@ export default function Home() {
           </div>
         )}
 
-        <section className="px-3 pt-3 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+        <section className="px-3 pt-3 pb-2 w-full max-w-full overflow-x-hidden box-border">
           <div className="sm:hidden mb-2.5 w-full">
             <input 
               type="text" 
@@ -464,7 +464,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+        <section className="px-3 py-4 w-full max-w-full overflow-x-hidden box-border">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-black text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
               ⚡ Shorts Verticales ({verticalShorts.length})
@@ -480,7 +480,7 @@ export default function Home() {
             </div>
           ) : verticalShorts.length === 0 ? (
             <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-4 text-center">
-              <p className="text-xs text-zinc-500">No hay videos verticales en esta categoría. Puedes subir uno marcando la casilla "Video Vertical (Short)".</p>
+              <p className="text-xs text-zinc-500">No hay videos verticales en esta categoría. Puedes subir uno marcando la casilla &quot;Video Vertical (Short)&quot;.</p>
             </div>
           ) : (
             <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
@@ -501,7 +501,7 @@ export default function Home() {
           )}
         </section>
 
-        <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+        <section className="px-3 pb-12 pt-2 w-full max-w-full overflow-x-hidden box-border">
           <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
             <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
               📺 Videos Horizontales ({horizontalVideos.length})
@@ -770,13 +770,15 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+
               <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
                   <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixora.'}</p>
                 </div>
                 
-               {(Array.isArray(selectedVideo.tags) ? selectedVideo.tags : [selectedVideo.category, 'HD']).map(t => 
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {(Array.isArray(selectedVideo.tags) ? selectedVideo.tags : [selectedVideo.category, 'HD']).map(t => (
                     <button 
                       key={t} 
                       onClick={() => { setActiveTag(t); handleCloseVideo(); }} 
@@ -900,7 +902,7 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
+      <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-full overflow-x-hidden box-border">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
@@ -923,3 +925,4 @@ export default function Home() {
     </main>
   );
 }
+
