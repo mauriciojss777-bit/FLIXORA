@@ -20,7 +20,7 @@ export default async function VideoPage({ params }: PageProps) {
     notFound()
   }
 
-  const embedUrl = video.embed_url || video.url
+  const embedUrl = video.embed_url || video.video_url || video.url
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white p-4 flex flex-col items-center">
