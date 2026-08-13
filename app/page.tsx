@@ -190,7 +190,7 @@ export default function Home() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false }).limit(24);
       if (data) setVideos(data);
     } catch (e) { 
       console.error(e); 
@@ -198,6 +198,7 @@ export default function Home() {
       setLoading(false);
     }
   };
+
 
   const fetchProducts = async () => {
     try {
