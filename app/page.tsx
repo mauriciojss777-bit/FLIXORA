@@ -53,13 +53,12 @@ export default function Home() {
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
-  // Estados de Experiencia Premium (Mejores que YouTube)
+  // Estados de Experiencia Premium
   const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
   const [isPipActive, setIsPipActive] = useState(false);
   const [autoPlayNext, setAutoPlayNext] = useState(true);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
 
   // Interacción estilo YouTube
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
@@ -68,6 +67,7 @@ export default function Home() {
   // Estados para Monetización
   const [adWatched, setAdWatched] = useState(false);
   const nativeAdRef = useRef<HTMLDivElement>(null);
+  const feedAdRef = useRef<HTMLDivElement>(null);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -119,7 +119,7 @@ export default function Home() {
     }
   }, [selectedVideo]);
 
-  // Carga script del banner nativo cuando se selecciona un video
+  // Carga script del banner nativo cuando se abre la ventana modal del video
   useEffect(() => {
     if (selectedVideo && nativeAdRef.current && !nativeAdRef.current.querySelector('script')) {
       const script = document.createElement('script');
@@ -129,6 +129,17 @@ export default function Home() {
       nativeAdRef.current.appendChild(script);
     }
   }, [selectedVideo]);
+
+  // Carga anuncio del Feed In-Line (Estilo YouTube)
+  useEffect(() => {
+    if (feedAdRef.current && !feedAdRef.current.querySelector('script')) {
+      const script = document.createElement('script');
+      script.src = 'https://pl30814143.effectivecpmnetwork.com/df896f70ade366b92d50697ad57088aa/invoke.js';
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+      feedAdRef.current.appendChild(script);
+    }
+  }, [videos]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -309,6 +320,9 @@ export default function Home() {
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
+  // Selección de producto patrocinado destacado para el feed estilo YouTube
+  const featuredProduct = products.length > 0 ? products[0] : null;
+
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between transition-colors duration-300`}>
       <div>
@@ -372,8 +386,6 @@ export default function Home() {
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Tienda / Recomendados</button>
                 <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">☕ Apóyame con una Donación</button>
-                <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
-                <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
@@ -382,10 +394,6 @@ export default function Home() {
                       #{t}
                     </button>
                   ))}
-                </div>
-
-                <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-amber-500 text-black font-black text-center hover:bg-amber-400">+ Subir Video (Admin)</button>
                 </div>
               </div>
             </div>
@@ -413,7 +421,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* FILTROS DE ORDENACIÓN (MEJOR QUE YOUTUBE) */}
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs">
               <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-zinc-800 text-amber-400' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
               <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-zinc-800 text-amber-400' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
@@ -421,7 +428,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA Y CARRUSEL DE VIDEOS */}
+        {/* REJILLA DE VIDEOS CON TARJETA DE MONETIZACIÓN PATROCINADA ESTILO YOUTUBE */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -435,32 +442,64 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
-              {filteredVideos.map((video) => {
+              {filteredVideos.map((video, index) => {
                 const isSaved = watchLater.some(v => v.id === video.id);
-                return (
-                  <div key={video.id} onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col relative">
-                    <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
-                      <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      <span className="absolute bottom-2 right-2 bg-black/80 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        {video.category}
-                      </span>
 
-                      {/* BOTÓN RÁPIDO PARA GUARDAR */}
-                      <button 
-                        onClick={(e) => toggleWatchLater(video, e)}
-                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bg-amber-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
-                        title={isSaved ? "Quitar de guardados" : "Guardar para después"}
-                      >
-                        ⭐
-                      </button>
-                    </div>
-                    <div className="mt-3 flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">
-                        F
+                return (
+                  <div key={video.id} className="contents">
+                    {/* INYECCIÓN DE TARJETA PATROCINADA ESTILO YOUTUBE (En la posición 1 o cada 8 items) */}
+                    {index === 1 && (
+                      <div className="flex flex-col relative rounded-2xl bg-zinc-900/90 border border-amber-500/30 p-3 shadow-xl hover:border-amber-500 transition-all">
+                        {featuredProduct ? (
+                          <a href={featuredProduct.buy_url} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full justify-between">
+                            <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-2">
+                              <img src={featuredProduct.image_url} alt={featuredProduct.title} className="w-full h-full object-cover" />
+                              <span className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded shadow">
+                                PATROCINADO
+                              </span>
+                            </div>
+                            <div>
+                              <h3 className="text-xs font-bold text-white line-clamp-2 leading-snug">{featuredProduct.title}</h3>
+                              <p className="text-[11px] text-zinc-400 mt-1">Recomendado en Flixes Store</p>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between pt-2 border-t border-zinc-800">
+                              <span className="text-amber-400 font-black text-sm">{featuredProduct.price}</span>
+                              <span className="bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-full hover:bg-amber-400">Ver Oferta ➔</span>
+                            </div>
+                          </a>
+                        ) : (
+                          <div className="flex flex-col h-full justify-center items-center text-center p-2">
+                            <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-1">PATROCINADO</span>
+                            <div ref={feedAdRef} className="w-full min-h-[120px] flex items-center justify-center"></div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex flex-col">
-                        <h3 className="text-sm font-semibold text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">{video.title}</h3>
-                        <p className="text-xs text-zinc-400 mt-1">Flixes • HD • 👍 {likesMap[video.id] || 0}</p>
+                    )}
+
+                    {/* TARJETA DE VIDEO ORGÁNICA */}
+                    <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col relative">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
+                        <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <span className="absolute bottom-2 right-2 bg-black/80 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          {video.category}
+                        </span>
+
+                        <button 
+                          onClick={(e) => toggleWatchLater(video, e)}
+                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bg-amber-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
+                          title={isSaved ? "Quitar de guardados" : "Guardar para después"}
+                        >
+                          ⭐
+                        </button>
+                      </div>
+                      <div className="mt-3 flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">
+                          F
+                        </div>
+                        <div className="flex flex-col">
+                          <h3 className="text-sm font-semibold text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">{video.title}</h3>
+                          <p className="text-xs text-zinc-400 mt-1">Flixes • HD • 👍 {likesMap[video.id] || 0}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -563,13 +602,10 @@ export default function Home() {
                     <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-amber-500 font-black text-sm">{p.price}</span>
-                      <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
+                      <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md font-bold">Ver Oferta</span>
                     </div>
                   </a>
                 ))}
-                {products.length === 0 && (
-                  <p className="col-span-full text-center text-zinc-500 py-12">No hay productos recomendados todavía.</p>
-                )}
               </div>
             </div>
           </div>
@@ -593,12 +629,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL DEL REPRODUCTOR PRINCIPAL CON CONTROLES AVANZADOS */}
+        {/* MODAL DEL REPRODUCTOR PRINCIPAL */}
         {selectedVideo && !isPipActive && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
             <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300`} onClick={e => e.stopPropagation()}>
               
-              {/* BARRA DE HERRAMIENTAS PREMIUM SOBRE EL VIDEO */}
               <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
                   <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-amber-500 text-black border-amber-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
@@ -620,7 +655,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* REPRODUCTOR DE VIDEO */}
               <div className="relative aspect-video w-full bg-black">
                 {!adWatched ? (
                   <div className="absolute inset-0 z-10 bg-zinc-950/95 flex flex-col justify-center items-center text-white p-6 text-center">
@@ -649,7 +683,6 @@ export default function Home() {
                 )}
               </div>
               
-              {/* ACCIONES DEL VIDEO */}
               <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
                 <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
                 
@@ -693,7 +726,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* DESCRIPCIÓN Y ETIQUETAS */}
               <div className="p-4 bg-zinc-900/60 text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
@@ -713,7 +745,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE VIDEOS RELACIONADOS */}
               <div className="p-4 bg-[#0f0f0f] border-t border-zinc-800">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Carrusel de Videos Relacionados</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
@@ -736,7 +767,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SECCIÓN DE COMENTARIOS */}
               <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
@@ -777,7 +807,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* BANNER NATIVO DE ADSTERRA */}
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
                 <div ref={nativeAdRef} id="container-adsterra-native" className="w-full flex justify-center items-center min-h-[100px]"></div>
               </div>
