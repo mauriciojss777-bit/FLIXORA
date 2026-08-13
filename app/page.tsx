@@ -770,15 +770,13 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-
               <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
                   <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixora.'}</p>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {(selectedVideo.tags || [selectedVideo.category, 'HD']).map(t => (
+               {(Array.isArray(selectedVideo.tags) ? selectedVideo.tags : [selectedVideo.category, 'HD']).map(t => 
                     <button 
                       key={t} 
                       onClick={() => { setActiveTag(t); handleCloseVideo(); }} 
