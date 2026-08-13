@@ -36,22 +36,37 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra integrado directamente para que se vea el anuncio sin clics adicionales
+// Componente Adsterra integrado usando un contenedor div estándar y cargando el script nativamente
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.innerHTML = '';
+
+    const confScript = document.createElement('script');
+    confScript.type = 'text/javascript';
+    confScript.text = `
+      atOptions = {
+        'key' : '${zoneId}',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    `;
+
+    const invokeScript = document.createElement('script');
+    invokeScript.type = 'text/javascript';
+    invokeScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
+
+    containerRef.current.appendChild(confScript);
+    containerRef.current.appendChild(invokeScript);
+  }, [zoneId]);
+
   return (
     <div className="w-full h-full flex flex-col justify-center items-center overflow-hidden bg-transparent">
-      <script type="text/javascript">
-        {`
-          atOptions = {
-            'key' : '${zoneId}',
-            'format' : 'iframe',
-            'height' : 250,
-            'width' : 300,
-            'params' : {}
-          };
-        `}
-      </script>
-      <script type="text/javascript" src={`//www.highperformanceformat.com/${zoneId}/invoke.js`}></script>
+      <div ref={containerRef} className="flex justify-center items-center w-[300px] h-[250px]" />
     </div>
   );
 }
@@ -434,12 +449,12 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
               
               {/* TARJETA DE ANUNCIO DIRECTO ADSTERRA (SE MUESTRA EL ANUNCIO AUTOMÁTICAMENTE SIN ENTRAR) */}
-              <div className="flex flex-col rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-2 shadow-xl min-h-[280px]">
+              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px]">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
                   <span className="text-[9px] text-zinc-500">Adsterra</span>
                 </div>
-                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-black/40">
+                <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950">
                   <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
                 </div>
               </div>
