@@ -35,10 +35,11 @@ interface Video {
   const nativeAdRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (videoId) {
-      fetchVideoData(videoId);
-    }
-  }, [videoId]);
+  if (videoid) {
+    fetchVideoData(videoid);
+  }
+}, [videoid]);
+
 
   // Carga Banner Nativo de Adsterra
   useEffect(() => {
