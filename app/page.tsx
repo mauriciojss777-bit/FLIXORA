@@ -36,8 +36,8 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra adaptado correctamente para Banner Nativo
-function AdsterraBlock() {
+// Componente Adsterra aislado mediante iframe con srcDoc para garantizar renderizado fluido en Next.js
+function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const adHtml = `
     <!DOCTYPE html>
     <html>
@@ -57,20 +57,30 @@ function AdsterraBlock() {
         </style>
       </head>
       <body>
-        <script async="async" data-cfasync="false" src="https://pl30814143.effectivecpmnetwork.com/df896f70ade366b92d5f509ddfef3a78/invoke.js"></script>
-        <div id="container-df896f70ade366b92d5f509ddfef3a78"></div>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '${zoneId}',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/${zoneId}/invoke.js"></script>
       </body>
     </html>
   `;
 
   return (
-    <div className="w-full flex justify-center items-center min-h-[200px]">
+    <div className="w-full flex justify-center items-center min-h-[250px]">
       <iframe
         srcDoc={adHtml}
-        className="w-full h-[220px] border-0 overflow-hidden"
+        width="300"
+        height="250"
         scrolling="no"
         frameBorder="0"
-        title="Adsterra Native Banner"
+        className="border-0 overflow-hidden"
+        title="Adsterra Banner"
       />
     </div>
   );
@@ -103,9 +113,6 @@ export default function Home() {
   // Interacción estilo YouTube
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [userLikedMap, setUserLikedMap] = useState<Record<string, boolean>>({});
-
-  // Estados para Monetización
-  const [adWatched, setAdWatched] = useState(false);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -164,7 +171,6 @@ export default function Home() {
       const video = videos.find(v => v.id === vId);
       if (video) {
         setSelectedVideo(video);
-        setAdWatched(false);
       }
     }
   }, [videos]);
@@ -190,7 +196,6 @@ export default function Home() {
 
   const handleSelectVideo = (video: Video) => {
     setSelectedVideo(video);
-    setAdWatched(false);
     setIsPipActive(false);
     window.history.pushState(null, '', `?v=${video.id}`);
     
@@ -201,7 +206,6 @@ export default function Home() {
 
   const handleCloseVideo = () => {
     setSelectedVideo(null);
-    setAdWatched(false);
     setIsPipActive(false);
     setIsCinemaMode(false);
     window.history.pushState(null, '', '/');
@@ -491,7 +495,7 @@ export default function Home() {
                         ) : (
                           <div className="flex flex-col h-full justify-center items-center text-center p-2 min-h-[180px]">
                             <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-2">PATROCINADO</span>
-                            <AdsterraBlock />
+                            <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
                           </div>
                         )}
                       </div>
@@ -534,7 +538,13 @@ export default function Home() {
         {selectedVideo && isPipActive && (
           <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
-              <iframe src={selectedVideo.voe_url} className="w-full h-full border-0" allowFullScreen title={selectedVideo.title} />
+              <iframe 
+                src={selectedVideo.voe_url} 
+                className="w-full h-full border-0" 
+                allowFullScreen 
+                scrolling="no"
+                title={selectedVideo.title}
+              />
               <button 
                 onClick={() => setIsPipActive(false)} 
                 className="absolute top-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full hover:bg-red-600 transition-colors"
@@ -680,33 +690,15 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* REPRODUCTOR DE VIDEO */}
+              {/* REPRODUCTOR DE VIDEO LIMPIO */}
               <div className="relative aspect-video w-full bg-black">
-                {!adWatched ? (
-                  <div className="absolute inset-0 z-10 bg-zinc-950/95 flex flex-col justify-center items-center text-white p-6 text-center">
-                    <h3 className="text-2xl font-black mb-2">ANUNCIO PATROCINADO</h3>
-                    <p className="text-xs text-zinc-400 mb-6 max-w-xs">
-                      Haz clic abajo para iniciar la reproducción limpia del video.
-                    </p>
-                    <button
-                      onClick={() => {
-                        window.open('https://www.effectivecpmnetwork.com/u9xtrrbj?key=5e1242fb44358ba404f094359ad59a45', '_blank');
-                        setAdWatched(true);
-                      }}
-                      className="bg-amber-500 hover:bg-amber-400 text-black font-black py-3.5 px-8 rounded-full cursor-pointer transition-transform active:scale-95 shadow-lg flex items-center gap-2 text-sm"
-                    >
-                      ▶ Ver Video
-                    </button>
-                  </div>
-                ) : (
-                  <iframe 
-                    src={selectedVideo.voe_url} 
-                    className="w-full h-full border-0" 
-                    allowFullScreen 
-                    scrolling="no"
-                    title={selectedVideo.title}
-                  />
-                )}
+                <iframe 
+                  src={selectedVideo.voe_url} 
+                  className="w-full h-full border-0" 
+                  allowFullScreen 
+                  scrolling="no"
+                  title={selectedVideo.title}
+                />
               </div>
               
               {/* ACCIONES DEL VIDEO */}
@@ -839,7 +831,7 @@ export default function Home() {
 
               {/* BANNER NATIVO DE ADSTERRA */}
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
-                <AdsterraBlock />
+                <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
               </div>
 
             </div>
@@ -858,7 +850,7 @@ export default function Home() {
               </select>
               <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500 resize-none" />
               <input type="text" placeholder="Etiquetas (separadas por coma: HD, Rubias, etc.)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
-              <input type="text" placeholder="URL VOE del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
+              <input type="text" placeholder="URL StreamHG / Embed del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
