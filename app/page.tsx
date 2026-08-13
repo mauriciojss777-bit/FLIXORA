@@ -36,24 +36,61 @@ interface Comment {
   created_at: string;
 }
 
-// Componente Adsterra dinámico corregido para inyección real en Next.js
-function AdsterraBlock() {
-  const bannerRef = useRef<HTMLDivElement>(null);
+// Componente Adsterra robusto con respaldo visual si el script es bloqueado
+function AdsterraBlock({ zoneId }: { zoneId: string }) {
+  const [adLoaded, setAdLoaded] = useState(false);
 
   useEffect(() => {
-    if (bannerRef.current && !bannerRef.current.firstChild) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.dataset.cfasync = 'false';
-      script.src = '//pl30814143.effectivecpmnetwork.com/df896f70ade366b92d50697ad57088aa/invoke.js';
-      
-      bannerRef.current.appendChild(script);
-    }
+    const timer = setTimeout(() => {
+      setAdLoaded(true);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, []);
 
+  const adHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
+          }
+        </style>
+      </head>
+      <body>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '${zoneId}',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/${zoneId}/invoke.js"></script>
+      </body>
+    </html>
+  `;
+
   return (
-    <div className="w-full flex flex-col justify-center items-center min-h-[250px] relative overflow-hidden">
-      <div ref={bannerRef} id="container-df896f70ade366b92d50697ad57088aa" className="w-full flex justify-center items-center"></div>
+    <div className="w-full flex flex-col justify-center items-center min-h-[250px] relative">
+      <iframe
+        srcDoc={adHtml}
+        width="300"
+        height="250"
+        scrolling="no"
+        frameBorder="0"
+        className="border-0 overflow-hidden"
+        title="Adsterra Banner"
+      />
     </div>
   );
 }
@@ -422,7 +459,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* REJILLA Y CARRUSEL DE VIDEOS CON NATIVE BANNER INYECTADO */}
+        {/* REJILLA Y CARRUSEL DE VIDEOS CON TARJETA PATROCINADA RESPALDO */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -441,7 +478,7 @@ export default function Home() {
 
                 return (
                   <div key={video.id} className="flex flex-col">
-                    {/* TARJETA PATROCINADA CON SCRIPT REAL */}
+                    {/* TARJETA PATROCINADA CON RESPALDO SEGURO */}
                     {index === 1 && (
                       <div className="mb-6 sm:mb-0 col-span-1 flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all">
                         {featuredProduct ? (
@@ -468,8 +505,16 @@ export default function Home() {
                               <span className="text-[9px] text-zinc-500">Adsterra</span>
                             </div>
                             <div className="flex-1 flex items-center justify-center">
-                              <AdsterraBlock />
+                              <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
                             </div>
+                            <a 
+                              href="https://www.highperformanceformat.com/df896f70ade366b92d50697ad57088aa/invoke.js" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="mt-2 text-[11px] bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black py-1.5 rounded-xl font-bold transition-colors block"
+                            >
+                              Ver Anuncio Patrocinado ➔
+                            </a>
                           </div>
                         )}
                       </div>
@@ -793,7 +838,7 @@ export default function Home() {
               </div>
 
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
-                <AdsterraBlock />
+                <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
               </div>
 
             </div>
