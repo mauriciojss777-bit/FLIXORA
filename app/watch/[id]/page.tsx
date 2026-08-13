@@ -21,6 +21,7 @@ interface Video {
   likes?: number;
 }
 
+  export default function WatchPage() {
   const params = useParams();
   const videoid = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : '';
 
