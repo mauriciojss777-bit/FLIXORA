@@ -22,7 +22,7 @@ interface Video {
   views?: number;
   likes?: number;
   created_at?: string;
-  is_short?: boolean; // Nuevo campo para diferenciar Shorts de Videos Horizontales
+  is_short?: boolean;
 }
 
 interface Product {
@@ -107,7 +107,7 @@ export default function Home() {
   const [coverUrl, setCoverUrl] = useState('');
   const [description, setDescription] = useState('');
   const [videoTagsInput, setVideoTagsInput] = useState('HD, Latino, Casero');
-  const [isShortVideo, setIsShortVideo] = useState(false); // Checkbox para indicar si es Short al subir
+  const [isShortVideo, setIsShortVideo] = useState(false);
 
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
@@ -313,7 +313,6 @@ export default function Home() {
     );
   }
 
-  // Filtrado general de videos
   const filteredVideos = videos
     .filter(v => {
       const matchesTag = activeTag === 'Todos' || v.category === activeTag || (v.tags && v.tags.some(t => t.toLowerCase() === activeTag.toLowerCase()));
@@ -329,14 +328,12 @@ export default function Home() {
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
-  // Separar en dos colecciones: Horizontales y Shorts Verticales
   const horizontalVideos = filteredVideos.filter(v => !v.is_short);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
-        {/* NAVEGACIÓN PRINCIPAL */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
@@ -376,7 +373,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MENÚ LATERAL DESPLEGABLE */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -415,7 +411,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* BARRA DE BÚSQUEDA MÓVIL Y FILTROS FIJOS */}
         <section className="px-3 pt-3 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
           <div className="sm:hidden mb-2.5 w-full">
             <input 
@@ -444,7 +439,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECCIÓN 1: ÁREA DE VIDEOS VERTICALES (SHORTS) */}
         <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-black text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
@@ -482,7 +476,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* SECCIÓN 2: ÁREA DE VIDEOS HORIZONTALES (PRINCIPAL) */}
         <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
           <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
             <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
@@ -504,7 +497,6 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
               
-              {/* BANNER DE ANUNCIO ADSTERRA */}
               <div className="flex flex-col rounded-2xl bg-zinc-900/95 border border-amber-500/40 p-2 shadow-xl min-h-[280px] w-full max-w-full overflow-hidden box-border">
                 <div className="flex justify-between items-center mb-1 px-1">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Patrocinado</span>
@@ -552,7 +544,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* MODALES Y REPRODUCTOR PRINCIPAL */}
         {selectedVideo && isPipActive && (
           <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
@@ -833,7 +824,6 @@ export default function Home() {
               </select>
               <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-amber-500 resize-none" />
               
-              {/* Checkbox para definir si es Short Vertical */}
               <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
                 <input 
                   type="checkbox" 
