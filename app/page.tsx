@@ -416,19 +416,22 @@ export default function Home() {
             />
           </div>
 
-          <div className="flex items-center justify-between gap-4 mb-3 flex-wrap">
-            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar flex-1">
-              {defaultTags.map(tag => (
-                <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
-                  {tag}
-                </button>
-              ))}
-            </div>
-
+          {/* ORDENADO: Selector de orden (Más recientes / gustados) arriba de forma independiente */}
+          <div className="flex items-center justify-between gap-4 mb-3 pb-2 border-b border-zinc-800/60">
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Filtrar por orden:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs">
-              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-zinc-800 text-amber-400' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
-              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-zinc-800 text-amber-400' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+              <button onClick={() => setSortBy('recent')} className={`px-3 py-1.5 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
+              <button onClick={() => setSortBy('likes')} className={`px-3 py-1.5 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-amber-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
+          </div>
+
+          {/* Carrusel de Categorías / Etiquetas separadas abajo */}
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar w-full">
+            {defaultTags.map(tag => (
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${activeTag === tag ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+                {tag}
+              </button>
+            ))}
           </div>
         </section>
 
