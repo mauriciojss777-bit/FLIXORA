@@ -849,20 +849,17 @@ export default function Home() {
                         <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight">{v.title}</p>
                         <span className="text-[10px] text-zinc-400 mt-1">Flixora • 👍 {likesMap[v.id] || 0}</span>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+                      </div>
+                     </a
+                  </div>
               <div className="p-4 bg-black flex flex-col justify-center items-center border-t border-zinc-900">
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                 <AdsterraNativeBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
               </div>
-
             </div>
-          </div>
-        )}
-
+            }) 
+          }
+        </div>
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
