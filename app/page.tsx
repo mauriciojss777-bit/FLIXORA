@@ -199,7 +199,6 @@ export default function Home() {
     }
   };
 
-
   const fetchProducts = async () => {
     try {
       const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
@@ -831,15 +830,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE VIDEOS RECOMENDADOS ESTILO YOUTUBE (JUSTO DEBAJO DE LOS COMENTARIOS) */}
+              {/* CARRUSEL DE VIDEOS RECOMENDADOS ESTILO YOUTUBE */}
               <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
                 <h3 className="text-xs font-black text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
                   🔥 Más videos recomendados
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
-                   <a key={`carousel-${v.id}`} href={`/watch/${v.id}`} className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 overflow-hidden rounded-xl block">
-                     <div className="aspect-video w-full bg-black relative overflow-hidden">
+                    <div 
+                      key={`carousel-${v.id}`} 
+                      onClick={() => handleSelectVideo(v)}
+                      className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 overflow-hidden rounded-xl cursor-pointer group flex-shrink-0"
+                    >
+                      <div className="aspect-video w-full bg-black relative overflow-hidden">
                         <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-1 right-1 bg-black/80 text-amber-400 text-[9px] font-bold px-1 rounded">
                           {v.category}
@@ -849,17 +852,20 @@ export default function Home() {
                         <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight">{v.title}</p>
                         <span className="text-[10px] text-zinc-400 mt-1">Flixora • 👍 {likesMap[v.id] || 0}</span>
                       </div>
-                      </div>
-                     </a
-                  </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="p-4 bg-black flex flex-col justify-center items-center border-t border-zinc-900">
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                 <AdsterraNativeBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
               </div>
+
             </div>
-            }) 
-          }
-        </div>
+          </div>
+        )}
+
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
@@ -919,4 +925,3 @@ export default function Home() {
     </main>
   );
 }
-
