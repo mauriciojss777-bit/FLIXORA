@@ -36,39 +36,52 @@ interface Comment {
   created_at: string;
 }
 
-// COMPONENTE DEDICADO A CARGAR EL ANUNCIO DE ADSTERRA
+// Componente Adsterra aislado mediante iframe con srcDoc para garantizar renderizado fluido en Next.js
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
-  const bannerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (bannerRef.current && !bannerRef.current.querySelector('script')) {
-      const container = bannerRef.current;
-
-      const atOptionsScript = document.createElement('script');
-      atOptionsScript.type = 'text/javascript';
-      atOptionsScript.innerHTML = `
-        atOptions = {
-          'key' : '${zoneId}',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      `;
-
-      const invokeScript = document.createElement('script');
-      invokeScript.type = 'text/javascript';
-      invokeScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
-      invokeScript.async = true;
-
-      container.appendChild(atOptionsScript);
-      container.appendChild(invokeScript);
-    }
-  }, [zoneId]);
+  const adHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
+          }
+        </style>
+      </head>
+      <body>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '${zoneId}',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/${zoneId}/invoke.js"></script>
+      </body>
+    </html>
+  `;
 
   return (
     <div className="w-full flex justify-center items-center min-h-[250px]">
-      <div ref={bannerRef} />
+      <iframe
+        srcDoc={adHtml}
+        width="300"
+        height="250"
+        scrolling="no"
+        frameBorder="0"
+        className="border-0 overflow-hidden"
+        title="Adsterra Banner"
+      />
     </div>
   );
 }
@@ -90,17 +103,19 @@ export default function Home() {
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
+  // Estados de Experiencia Premium
   const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
   const [isPipActive, setIsPipActive] = useState(false);
   const [autoPlayNext, setAutoPlayNext] = useState(true);
 
+  // Interacción estilo YouTube
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [userLikedMap, setUserLikedMap] = useState<Record<string, boolean>>({});
 
+  // Estados para Monetización
   const [adWatched, setAdWatched] = useState(false);
-  const nativeAdRef = useRef<HTMLDivElement>(null);
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -153,16 +168,6 @@ export default function Home() {
   }, [selectedVideo]);
 
   useEffect(() => {
-    if (selectedVideo && nativeAdRef.current && !nativeAdRef.current.querySelector('script')) {
-      const script = document.createElement('script');
-      script.src = 'https://pl30814143.effectivecpmnetwork.com/df896f70ade366b92d50697ad57088aa/invoke.js';
-      script.async = true;
-      script.setAttribute('data-cfasync', 'false');
-      nativeAdRef.current.appendChild(script);
-    }
-  }, [selectedVideo]);
-
-  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const vId = params.get('v');
     if (vId && videos.length > 0) {
@@ -181,7 +186,7 @@ export default function Home() {
       if (data) setVideos(data);
     } catch (e) { 
       console.error(e); 
-    } finally {
+    } fontally {
       setLoading(false);
     }
   };
@@ -346,6 +351,7 @@ export default function Home() {
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between transition-colors duration-300`}>
       <div>
+        {/* NAVEGACIÓN PRINCIPAL */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button 
@@ -362,6 +368,7 @@ export default function Home() {
             </h1>
           </div>
 
+          {/* BARRA DE BÚSQUEDA CENTRADA */}
           <div className="hidden sm:flex items-center flex-1 max-w-xl mx-4">
             <div className="relative w-full">
               <input 
@@ -385,6 +392,7 @@ export default function Home() {
           </div>
         </nav>
 
+        {/* MENÚ LATERAL DESPLEGABLE */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -423,6 +431,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* BÚSQUEDA MÓVIL Y FILTROS */}
         <section className="px-4 pt-4 pb-2">
           <div className="sm:hidden mb-3">
             <input 
@@ -450,6 +459,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* REJILLA Y CARRUSEL DE VIDEOS CON TARJETA PATROCINADA */}
         <section className="px-4 pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
@@ -468,6 +478,7 @@ export default function Home() {
 
                 return (
                   <div key={video.id} className="flex flex-col">
+                    {/* TARJETA PATROCINADA ADAPTATIVA */}
                     {index === 1 && (
                       <div className="mb-6 sm:mb-0 col-span-1 flex flex-col justify-between rounded-2xl bg-zinc-900/90 border border-amber-500/40 p-3 shadow-xl hover:border-amber-500 transition-all">
                         {featuredProduct ? (
@@ -488,7 +499,7 @@ export default function Home() {
                             </div>
                           </a>
                         ) : (
-                          <div className="flex flex-col h-full justify-center items-center text-center p-2">
+                          <div className="flex flex-col h-full justify-center items-center text-center p-2 min-h-[180px]">
                             <span className="text-[10px] font-bold text-amber-500 tracking-wider uppercase mb-2">PATROCINADO</span>
                             <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
                           </div>
@@ -496,6 +507,7 @@ export default function Home() {
                       </div>
                     )}
 
+                    {/* TARJETA DE VIDEO ORGÁNICA */}
                     <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -528,6 +540,7 @@ export default function Home() {
           )}
         </section>
 
+        {/* REPRODUCTOR EN MINIVENTANA / PiP FLOTANTE */}
         {selectedVideo && isPipActive && (
           <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-950 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
@@ -546,6 +559,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* MODAL LISTA DE GUARDADOS */}
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -576,6 +590,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* MODAL DE DONACIONES */}
         {showDonateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center" onClick={e => e.stopPropagation()}>
@@ -594,6 +609,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* MODAL / SECCIÓN DE TIENDA */}
         {showStore && (
           <div className="fixed inset-0 z-50 bg-black/95 p-6 overflow-y-auto">
             <div className="max-w-4xl mx-auto">
@@ -629,6 +645,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* MODAL ADMIN PRODUCTO */}
         {showAdminProd && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
@@ -646,10 +663,12 @@ export default function Home() {
           </div>
         )}
 
+        {/* MODAL DEL REPRODUCTOR PRINCIPAL CON CONTROLES AVANZADOS */}
         {selectedVideo && !isPipActive && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
             <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300`} onClick={e => e.stopPropagation()}>
               
+              {/* BARRA DE HERRAMIENTAS PREMIUM SOBRE EL VIDEO */}
               <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
                   <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-amber-500 text-black border-amber-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
@@ -671,6 +690,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* REPRODUCTOR DE VIDEO */}
               <div className="relative aspect-video w-full bg-black">
                 {!adWatched ? (
                   <div className="absolute inset-0 z-10 bg-zinc-950/95 flex flex-col justify-center items-center text-white p-6 text-center">
@@ -699,6 +719,7 @@ export default function Home() {
                 )}
               </div>
               
+              {/* ACCIONES DEL VIDEO */}
               <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
                 <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
                 
@@ -742,6 +763,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* DESCRIPCIÓN Y ETIQUETAS */}
               <div className="p-4 bg-zinc-900/60 text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
@@ -761,6 +783,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* CARRUSEL DE VIDEOS RELACIONADOS */}
               <div className="p-4 bg-[#0f0f0f] border-t border-zinc-800">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Carrusel de Videos Relacionados</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
@@ -783,6 +806,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* SECCIÓN DE COMENTARIOS */}
               <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
@@ -823,14 +847,16 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* BANNER NATIVO DE ADSTERRA */}
               <div className="p-4 bg-black flex justify-center border-t border-zinc-900">
-                <div ref={nativeAdRef} id="container-adsterra-native" className="w-full flex justify-center items-center min-h-[100px]"></div>
+                <AdsterraBlock zoneId="df896f70ade366b92d50697ad57088aa" />
               </div>
 
             </div>
           </div>
         )}
 
+        {/* MODAL ADMIN SUBIR VIDEO */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
@@ -853,6 +879,7 @@ export default function Home() {
         )}
       </div>
 
+      {/* FOOTER */}
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
