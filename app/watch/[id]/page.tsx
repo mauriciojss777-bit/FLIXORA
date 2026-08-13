@@ -161,21 +161,16 @@ interface Video {
             )}
           </div>
 
-          <h1 className="text-xl font-bold text-white">{video.title}</h1>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-sm">F</div>
-              <div>
-                <p className="text-xs font-bold text-white">Flixes Official</p>
-                <p className="text-[10px] text-zinc-400">Canal verificado</p>
-              </div>
-            </div>
-
+          <h1 className="text-xl font-bold text-white">{video.title}</h1> 
+          <div className="flex flex-wrap gap-2 pt-1">
+  <span className="bg-zinc-800 text-amber-400 text-[11px] font-bold px-3 py-1 rounded-full">
+    {video.category || 'HD'}
+  </span>
+</di
             <div className="flex items-center gap-2">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-bold transition-colors ${
+,                className={`flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-bold transition-colors ${
                   hasLiked ? 'bg-amber-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'
                 }`}
               >
