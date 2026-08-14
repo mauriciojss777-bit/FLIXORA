@@ -539,9 +539,9 @@ export default function Home() {
                 return (
                   <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden">
                     <div onClick={() => handleSelectVideo(video)} className="group cursor-pointer flex flex-col h-full relative w-full">
-                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 w-full">
+                      <div className="relative aspect-video overflow-hidden bg-zinc-900 border border-zinc-800 w-full">
                         <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute bottom-2 right-2 bg-black/80 text--400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                        <span className="absolute bottom-2 right-2 bg-black/80 text--400 text-[10px] font-bold px-1.5 py-0.">
                           {video.category}
                         </span>
 
