@@ -330,9 +330,9 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
-          <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="textindigo-500">XORA</span></h1>
+          <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="textblue-500">XORA</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bgindigo-500 hover:bg--400 text-black font-black py-4 rounded-xl transition-colors">INGRESAR</button>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bgblue-500 hover:bg--400 text-black font-black py-4 rounded-xl transition-colors">INGRESAR</button>
         </div>
       </div>
     );
@@ -371,7 +371,7 @@ export default function Home() {
               </svg>
             </button>
             <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
-              FLI<span className="textindigo-500">XES</span>
+              FLI<span className="textblue-500">XES</span>
             </h1>
           </div>
 
@@ -382,7 +382,7 @@ export default function Home() {
                 placeholder="Buscar en Flixora..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:borderindigo-500 outline-none" 
+                className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:borderblue-500 outline-none" 
               />
               <button className="absolute right-3 top-2.5 text-zinc-400">🔍</button>
             </div>
@@ -390,9 +390,9 @@ export default function Home() {
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap">
-              ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bgindigo-500 text-black px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
+              ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bgblue-500 text-black px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
             </button>
-            <button onClick={() => setShowDonateModal(true)} className="bgindigo-500 hover:bg--400 text-black text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
+            <button onClick={() => setShowDonateModal(true)} className="bgblue-500 hover:bg--400 text-black text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
             <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text--400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
             <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ SUBIR</button>
           </div>
@@ -415,7 +415,7 @@ export default function Home() {
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Tienda / Recomendados</button>
-                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bgindigo-500/10 text--400 border borderindigo-500/20 font-bold">☕ Apóyame con una Donación</button>
+                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bgblue-500/10 text--400 border borderblue-500/20 font-bold">☕ Apóyame con una Donación</button>
                 <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
@@ -429,7 +429,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bgindigo-500 text-black font-black text-center hover:bg--400">+ Subir Video (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bgblue-500 text-black font-black text-center hover:bg--400">+ Subir Video (Admin)</button>
                 </div>
               </div>
             </div>
@@ -443,21 +443,21 @@ export default function Home() {
               placeholder="Buscar por título, categoría o etiqueta..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)} 
-              className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:borderindigo-500 outline-none text-zinc-200 box-border" 
+              className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:borderblue-500 outline-none text-zinc-200 box-border" 
             />
           </div>
 
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
-              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bgindigo-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
-              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bgindigo-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bgblue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
+              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bgblue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
 
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
-              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bgindigo-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bgblue-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
                 {tag}
               </button>
             ))}
@@ -466,7 +466,7 @@ export default function Home() {
 
         <section className="px-3 py-4 w-full max-w-full overflow-x-hidden box-border">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-black textindigo-500 tracking-wider uppercase flex items-center gap-1.5">
+            <h3 className="text-xs font-black textblue-500 tracking-wider uppercase flex items-center gap-1.5">
               ⚡ Shorts Verticales ({verticalShorts.length})
             </h3>
             <span className="text-[10px] text-zinc-500">Contenido en formato vertical</span>
@@ -522,9 +522,9 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
               
-              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border borderindigo-500/40 p-2 shadow-xl min-h-[280px] w-full max-w-full overflow-hidden box-border">
+              <div className="flex flex-col rounded-2xl bg-zinc-900/95 border borderblue-500/40 p-2 shadow-xl min-h-[280px] w-full max-w-full overflow-hidden box-border">
                 <div className="flex justify-between items-center mb-1 px-1">
-                  <span className="text-[10px] font-bold textindigo-500 uppercase tracking-wider">Patrocinado</span>
+                  <span className="text-[10px] font-bold textblue-500 uppercase tracking-wider">Patrocinado</span>
                   <span className="text-[9px] text-zinc-500">Adsterra</span>
                 </div>
                 <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-zinc-950 w-full">
@@ -546,14 +546,14 @@ export default function Home() {
 
                         <button 
                           onClick={(e) => toggleWatchLater(video, e)}
-                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bgindigo-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
+                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bgblue-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
                           title={isSaved ? "Quitar de guardados" : "Guardar para después"}
                         >
                           ⭐
                         </button>
                       </div>
                       <div className="mt-2.5 flex gap-2.5 w-full">
-                        <div className="w-7 h-7 rounded-full bgindigo-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
+                        <div className="w-7 h-7 rounded-full bgblue-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
                           F
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
@@ -570,7 +570,7 @@ export default function Home() {
         </section>
 
         {selectedVideo && isPipActive && (
-          <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border borderindigo-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="fixed bottom-4 right-4 z-50 w-80 max-w-[90vw] bg-zinc-950 border borderblue-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative aspect-video w-full bg-black">
               <iframe 
                 src={selectedVideo.voe_url} 
@@ -611,7 +611,7 @@ export default function Home() {
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
-                          <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bgindigo-500 text-black px-2 py-1 rounded font-bold">Ver</button>
+                          <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bgblue-500 text-black px-2 py-1 rounded font-bold">Ver</button>
                           <button onClick={() => toggleWatchLater(v)} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Eliminar</button>
                         </div>
                       </div>
@@ -632,7 +632,7 @@ export default function Home() {
                 href="https://paypal.me/TU_USUARIO_PAYPAL" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block w-full bgindigo-500 hover:bg--400 text-black font-black py-3.5 rounded-xl text-sm transition-all"
+                className="block w-full bgblue-500 hover:bg--400 text-black font-black py-3.5 rounded-xl text-sm transition-all"
               >
                 Donar con PayPal
               </a>
@@ -650,21 +650,21 @@ export default function Home() {
                   <p className="text-xs text-zinc-400 mt-1">Explora nuestros productos recomendados de Amazon y más.</p>
                 </div>
                 <div className="flex gap-3 items-center">
-                  <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:borderindigo-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
+                  <button onClick={() => setShowAdminProd(true)} className="text-xs bg-zinc-900 hover:borderblue-500 border border-zinc-800 text-zinc-200 px-4 py-2 rounded-xl font-bold">+ Agregar Producto</button>
                   <button onClick={() => setShowStore(false)} className="bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                 {products.map(p => (
-                  <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:borderindigo-500 transition-all flex flex-col group">
+                  <a key={p.id} href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-zinc-900/60 p-3 rounded-2xl border border-zinc-800 hover:borderblue-500 transition-all flex flex-col group">
                     <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 mb-3">
                       <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="textindigo-500 font-black text-sm">{p.price}</span>
-                      <span className="text-[10px] bgindigo-500/10 textindigo-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
+                      <span className="textblue-500 font-black text-sm">{p.price}</span>
+                      <span className="text-[10px] bgblue-500/10 textblue-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
                     </div>
                   </a>
                 ))}
@@ -680,14 +680,14 @@ export default function Home() {
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveProduct} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4">
               <h2 className="text-xl font-bold text-white">Panel Admin - Producto de Afiliado</h2>
-              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="Precio (ej. $19.99 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="Enlace de afiliado (ej. https://amzn.to/...)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="Nombre del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="Precio (ej. $19.99 USD)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="Enlace de afiliado (ej. https://amzn.to/...)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bgindigo-500 text-black font-black hover:bg--400">Guardar Afiliado</button>
+                <button type="submit" className="w-full p-3 rounded-xl bgblue-500 text-black font-black hover:bg--400">Guardar Afiliado</button>
               </div>
             </form>
           </div>
@@ -699,7 +699,7 @@ export default function Home() {
               
               <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bgindigo-500 text-black borderindigo-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
+                  <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bgblue-500 text-black borderblue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
                     🎬 Modo Cine
                   </button>
                   <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800">
@@ -709,10 +709,10 @@ export default function Home() {
                 
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 font-semibold select-none">
-                    <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accentindigo-500" />
+                    <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accentblue-500" />
                     Autoplay Siguiente
                   </label>
-                  <button onClick={handleNextVideo} className="bgindigo-500 text-black font-black px-3 py-1 rounded-lg hover:bg--400">
+                  <button onClick={handleNextVideo} className="bgblue-500 text-black font-black px-3 py-1 rounded-lg hover:bg--400">
                     Siguiente ➔
                   </button>
                 </div>
@@ -734,21 +734,21 @@ export default function Home() {
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
                   <button 
                     onClick={() => handleLike(selectedVideo.id)}
-                    className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bgindigo-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
+                    className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bgblue-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
                   >
                     👍 {likesMap[selectedVideo.id] || 0}
                   </button>
 
                   <button 
                     onClick={() => toggleWatchLater(selectedVideo)} 
-                    className={`text-xs px-3.5 py-2 rounded-full font-bold border transition-colors ${watchLater.some(v => v.id === selectedVideo.id) ? 'bgindigo-500 text-black borderindigo-500' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'}`}
+                    className={`text-xs px-3.5 py-2 rounded-full font-bold border transition-colors ${watchLater.some(v => v.id === selectedVideo.id) ? 'bgblue-500 text-black borderblue-500' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'}`}
                   >
                     ⭐ {watchLater.some(v => v.id === selectedVideo.id) ? 'Guardado' : 'Guardar'}
                   </button>
 
                   <button 
                     onClick={() => setShowDonateModal(true)} 
-                    className="bgindigo-500 text-black hover:bg--400 text-xs px-4 py-2 rounded-full font-black"
+                    className="bgblue-500 text-black hover:bg--400 text-xs px-4 py-2 rounded-full font-black"
                   >
                     ☕ Donar
                   </button>
@@ -782,7 +782,7 @@ export default function Home() {
                     <button 
                       key={t} 
                       onClick={() => { setActiveTag(t); handleCloseVideo(); }} 
-                      className="bg-zinc-800 hover:bgindigo-500 hover:text-black text--400 text-[11px] font-bold px-3 py-1 rounded-full transition-colors"
+                      className="bg-zinc-800 hover:bgblue-500 hover:text-black text--400 text-[11px] font-bold px-3 py-1 rounded-full transition-colors"
                     >
                       #{t}
                     </button>
@@ -802,7 +802,7 @@ export default function Home() {
                       placeholder="Tu usuario..." 
                       value={newCommentUser} 
                       onChange={(e) => setNewCommentUser(e.target.value)} 
-                      className="w-1/3 bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:borderindigo-500" 
+                      className="w-1/3 bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:borderblue-500" 
                     />
                   </div>
                   <div className="flex gap-2">
@@ -811,9 +811,9 @@ export default function Home() {
                       placeholder="Añade un comentario..." 
                       value={newCommentText} 
                       onChange={(e) => setNewCommentText(e.target.value)} 
-                      className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:borderindigo-500" 
+                      className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:borderblue-500" 
                     />
-                    <button type="submit" className="bgindigo-500 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg--400">Comentar</button>
+                    <button type="submit" className="bgblue-500 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg--400">Comentar</button>
                   </div>
                 </form>
 
@@ -821,7 +821,7 @@ export default function Home() {
                   {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
                     <div key={c.id} className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/60 text-xs space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-bold textindigo-500">{c.user}</span>
+                        <span className="font-bold textblue-500">{c.user}</span>
                         <span className="text-[10px] text-zinc-500">{c.created_at}</span>
                       </div>
                       <p className="text-zinc-300">{c.text}</p>
@@ -832,7 +832,7 @@ export default function Home() {
 
               {/* CARRUSEL DE VIDEOS RECOMENDADOS ESTILO YOUTUBE */}
               <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
-                <h3 className="text-xs font-black textindigo-500 uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-xs font-black textblue-500 uppercase tracking-wider flex items-center gap-1.5">
                   🔥 Más videos recomendados
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
@@ -870,12 +870,12 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold text-white">Panel Admin - Subir Video</h2>
-              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:borderindigo-500">
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:borderblue-500">
                 {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
               </select>
-              <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500 resize-none" />
+              <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500 resize-none" />
               
               <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
                 <input 
@@ -883,19 +883,19 @@ export default function Home() {
                   id="shortCheckbox" 
                   checked={isShortVideo} 
                   onChange={(e) => setIsShortVideo(e.target.checked)} 
-                  className="w-4 h-4 accentindigo-500 cursor-pointer" 
+                  className="w-4 h-4 accentblue-500 cursor-pointer" 
                 />
                 <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
                   ¿Es un Video Vertical / Short? (Se mostrará en la sección superior)
                 </label>
               </div>
 
-              <input type="text" placeholder="Etiquetas (separadas por coma: HD, Rubias, etc.)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="URL StreamHG / Embed del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
-              <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderindigo-500" />
+              <input type="text" placeholder="Etiquetas (separadas por coma: HD, Rubias, etc.)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="URL StreamHG / Embed del video" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
+              <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bgindigo-500 text-black font-black hover:bg--400">Publicar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bgblue-500 text-black font-black hover:bg--400">Publicar</button>
               </div>
             </form>
           </div>
@@ -911,13 +911,13 @@ export default function Home() {
         </div>
 
         <div className="flex justify-center gap-6 font-semibold text-zinc-400 flex-wrap">
-          <a href="#" className="hover:textindigo-500">Política Y privacidad</a>
+          <a href="#" className="hover:textblue-500">Política Y privacidad</a>
           <span>•</span>
-          <a href="#" className="hover:textindigo-500">DMCA</a>
+          <a href="#" className="hover:textblue-500">DMCA</a>
           <span>•</span>
-          <a href="#" className="hover:textindigo-500">2257</a>
+          <a href="#" className="hover:textblue-500">2257</a>
           <span>•</span>
-          <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:textindigo-500">Contacto</a>
+          <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:textblue-500">Contacto</a>
         </div>
 
         <p className="text-zinc-600 text-[10px]">© FLIXORA.COM 2016-2026</p>
