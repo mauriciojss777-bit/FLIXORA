@@ -710,7 +710,11 @@ export default function Home() {
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
                     <div 
                       key={`carousel-${v.id}`}
-                      onClick={() => handleSelectVideo(v)}
+                      onClick={() => {
+                        handleSelectVideo(v);
+                        const modalContainer = document.getElementById('video-modal-container');
+                        if (modalContainer) modalContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
                       className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group flex-shrink-0 flex flex-col"
                     >
                       <div className="aspect-video w-full bg-black relative overflow-hidden flex items-center justify-center">
@@ -849,3 +853,4 @@ export default function Home() {
     </main>
   );
 }
+
