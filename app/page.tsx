@@ -300,7 +300,8 @@ export default function Home() {
 
   const handleShare = (video: Video) => {
     const shareUrl = window.location.href;
-    if (navigator.share) {
+    if
+ (navigator.share) {
       navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
     } else {
       navigator.clipboard.writeText(shareUrl);
@@ -371,7 +372,7 @@ export default function Home() {
               </svg>
             </button>
             <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
-              FLI<span className="textblue-500">XES</span>
+              FLI<span className="text-blue-500">XES</span>
             </h1>
           </div>
 
