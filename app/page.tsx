@@ -579,11 +579,11 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* REPRODUCTOR DINÁMICO SEGÚN SI ES SHORT O VIDEO HORIZONTAL */}
+              {/* REPRODUCTOR DINÁMICO SEGÚN SI ES SHORT O VIDEO HORIZONTAL (CON AUTOPLAY FORZADO EN EL IFRAME) */}
               <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4 bg-black' : 'aspect-video'}`}>
                 <div className={`w-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'h-full'}`}>
                   <iframe 
-                    src={selectedVideo.voe_url} 
+                    src={`${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1`}
                     className="w-full h-full border-0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     allowFullScreen 
@@ -701,7 +701,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE RECOMENDADOS */}
+              {/* CARRUSEL DE RECOMENDADOS QUE ABRE Y REPRODUCE AUTOMÁTICAMENTE AL HACER CLIC */}
               <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
                 <h3 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
                   🔥 Más videos recomendados
@@ -853,4 +853,3 @@ export default function Home() {
     </main>
   );
 }
-
