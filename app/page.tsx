@@ -364,7 +364,7 @@ export default function Home() {
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
-              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0"
+              className="text-zinc-200 hover:bg-zinc-800 p-2 transition-colors focus:outline-none flex-shrink-0"
               aria-label="Abrir Menú"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
