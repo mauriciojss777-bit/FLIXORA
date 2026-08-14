@@ -491,7 +491,7 @@ export default function Home() {
                   onClick={() => handleSelectVideo(v)}
                   className="min-w-[130px] max-w-[130px] sm:min-w-[150px] sm:max-w-[150px] aspect-[9/16] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative cursor-pointer group flex-shrink-0 shadow-lg"
                 >
-                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2.5">
                     <span className="text-[9px] font-bold text--400 uppercase">Short HD</span>
                     <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight mt-0.5">{v.title}</p>
