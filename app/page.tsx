@@ -467,7 +467,7 @@ export default function Home() {
                   onClick={() => handleSelectVideo(v)}
                   className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                 >
-                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-contain bg-black group-hover:scale-105 transition-transform duration-300" />
+                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                     <span className="absolute top-2 left-2 bg-blue-600/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                       Short
@@ -516,7 +516,8 @@ export default function Home() {
                   <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group">
                     <div onClick={() => handleSelectVideo(video)} className="cursor-pointer flex flex-col h-full relative w-full">
                       <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
-                        <img src={video.cover_url} alt={video.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                        {/* SE CAMBIó object-contain por object-cover PARA LLENAR LA TARJETA */}
+                        <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
                           {video.category}
                         </span>
@@ -712,7 +713,7 @@ export default function Home() {
                       className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group flex-shrink-0 flex flex-col"
                     >
                       <div className="aspect-video w-full bg-black relative overflow-hidden flex items-center justify-center">
-                        <img src={v.cover_url} alt={v.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                        <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-1 right-1 bg-black/80 text-blue-400 text-[9px] font-bold px-1 rounded">
                           {v.category}
                         </span>
@@ -770,7 +771,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {watchLater.map(v => (
                     <div key={v.id} className="bg-zinc-900 p-2 rounded-xl flex gap-3 items-center border border-zinc-800">
-                      <img src={v.cover_url} alt={v.title} className="w-20 aspect-video rounded-lg object-contain bg-black" />
+                      <img src={v.cover_url} alt={v.title} className="w-20 aspect-video rounded-lg object-cover bg-black" />
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
