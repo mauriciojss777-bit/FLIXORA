@@ -332,7 +332,7 @@ export default function Home() {
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="textblue-500">XORA</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bgblue-500 hover:bg--400 text-black font-black py-4 rounded-xl transition-colors">INGRESAR</button>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-500 hover:bg--400 text-black font-black py-4 rounded-xl transition-colors">INGRESAR</button>
         </div>
       </div>
     );
@@ -390,9 +390,9 @@ export default function Home() {
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap">
-              ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bgblue-500 text-black px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
+              ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-blue-500 text-black px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
             </button>
-            <button onClick={() => setShowDonateModal(true)} className="bgblue-500 hover:bg--400 text-black text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
+            <button onClick={() => setShowDonateModal(true)} className="bg-blue-500 hover:bg--400 text-black text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
             <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text--400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
             <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ SUBIR</button>
           </div>
@@ -415,7 +415,7 @@ export default function Home() {
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowStore(true); setShowMenu(false); fetchProducts(); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🛍️ Tienda / Recomendados</button>
-                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bgblue-500/10 text--400 border borderblue-500/20 font-bold">☕ Apóyame con una Donación</button>
+                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-500/10 text--400 border borderblue-500/20 font-bold">☕ Apóyame con una Donación</button>
                 <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
@@ -429,7 +429,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bgblue-500 text-black font-black text-center hover:bg--400">+ Subir Video (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-500 text-black font-black text-center hover:bg--400">+ Subir Video (Admin)</button>
                 </div>
               </div>
             </div>
@@ -450,14 +450,14 @@ export default function Home() {
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
-              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bgblue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
-              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bgblue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
+              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-500 text-black' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
 
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
-              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bgblue-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bg-blue-500 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
                 {tag}
               </button>
             ))}
@@ -546,14 +546,14 @@ export default function Home() {
 
                         <button 
                           onClick={(e) => toggleWatchLater(video, e)}
-                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bgblue-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
+                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bg-blue-500 text-black' : 'bg-black/60 text-white hover:bg-black'}`}
                           title={isSaved ? "Quitar de guardados" : "Guardar para después"}
                         >
                           ⭐
                         </button>
                       </div>
                       <div className="mt-2.5 flex gap-2.5 w-full">
-                        <div className="w-7 h-7 rounded-full bgblue-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
+                        <div className="w-7 h-7 rounded-full bg-blue-500 text-black font-black flex items-center justify-center flex-shrink-0 text-[11px]">
                           F
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
@@ -611,7 +611,7 @@ export default function Home() {
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
-                          <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bgblue-500 text-black px-2 py-1 rounded font-bold">Ver</button>
+                          <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bg-blue-500 text-black px-2 py-1 rounded font-bold">Ver</button>
                           <button onClick={() => toggleWatchLater(v)} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Eliminar</button>
                         </div>
                       </div>
@@ -632,7 +632,7 @@ export default function Home() {
                 href="https://paypal.me/TU_USUARIO_PAYPAL" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block w-full bgblue-500 hover:bg--400 text-black font-black py-3.5 rounded-xl text-sm transition-all"
+                className="block w-full bg-blue-500 hover:bg--400 text-black font-black py-3.5 rounded-xl text-sm transition-all"
               >
                 Donar con PayPal
               </a>
@@ -664,7 +664,7 @@ export default function Home() {
                     <h3 className="text-sm font-semibold text-white line-clamp-2 flex-grow">{p.title}</h3>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="textblue-500 font-black text-sm">{p.price}</span>
-                      <span className="text-[10px] bgblue-500/10 textblue-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
+                      <span className="text-[10px] bg-blue-500/10 textblue-500 px-2 py-1 rounded-md font-bold">Ver en Amazon</span>
                     </div>
                   </a>
                 ))}
@@ -687,7 +687,7 @@ export default function Home() {
               <input type="text" placeholder="Enlace de afiliado (ej. https://amzn.to/...)" value={prodBuyUrl} onChange={e => setProdBuyUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminProd(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bgblue-500 text-black font-black hover:bg--400">Guardar Afiliado</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-500 text-black font-black hover:bg--400">Guardar Afiliado</button>
               </div>
             </form>
           </div>
@@ -699,7 +699,7 @@ export default function Home() {
               
               <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bgblue-500 text-black borderblue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
+                  <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-500 text-black borderblue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
                     🎬 Modo Cine
                   </button>
                   <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800">
@@ -712,7 +712,7 @@ export default function Home() {
                     <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accentblue-500" />
                     Autoplay Siguiente
                   </label>
-                  <button onClick={handleNextVideo} className="bgblue-500 text-black font-black px-3 py-1 rounded-lg hover:bg--400">
+                  <button onClick={handleNextVideo} className="bg-blue-500 text-black font-black px-3 py-1 rounded-lg hover:bg--400">
                     Siguiente ➔
                   </button>
                 </div>
@@ -734,21 +734,21 @@ export default function Home() {
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
                   <button 
                     onClick={() => handleLike(selectedVideo.id)}
-                    className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bgblue-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
+                    className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
                   >
                     👍 {likesMap[selectedVideo.id] || 0}
                   </button>
 
                   <button 
                     onClick={() => toggleWatchLater(selectedVideo)} 
-                    className={`text-xs px-3.5 py-2 rounded-full font-bold border transition-colors ${watchLater.some(v => v.id === selectedVideo.id) ? 'bgblue-500 text-black borderblue-500' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'}`}
+                    className={`text-xs px-3.5 py-2 rounded-full font-bold border transition-colors ${watchLater.some(v => v.id === selectedVideo.id) ? 'bg-blue-500 text-black borderblue-500' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'}`}
                   >
                     ⭐ {watchLater.some(v => v.id === selectedVideo.id) ? 'Guardado' : 'Guardar'}
                   </button>
 
                   <button 
                     onClick={() => setShowDonateModal(true)} 
-                    className="bgblue-500 text-black hover:bg--400 text-xs px-4 py-2 rounded-full font-black"
+                    className="bg-blue-500 text-black hover:bg--400 text-xs px-4 py-2 rounded-full font-black"
                   >
                     ☕ Donar
                   </button>
@@ -782,7 +782,7 @@ export default function Home() {
                     <button 
                       key={t} 
                       onClick={() => { setActiveTag(t); handleCloseVideo(); }} 
-                      className="bg-zinc-800 hover:bgblue-500 hover:text-black text--400 text-[11px] font-bold px-3 py-1 rounded-full transition-colors"
+                      className="bg-zinc-800 hover:bg-blue-500 hover:text-black text--400 text-[11px] font-bold px-3 py-1 rounded-full transition-colors"
                     >
                       #{t}
                     </button>
@@ -813,7 +813,7 @@ export default function Home() {
                       onChange={(e) => setNewCommentText(e.target.value)} 
                       className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:borderblue-500" 
                     />
-                    <button type="submit" className="bgblue-500 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg--400">Comentar</button>
+                    <button type="submit" className="bg-blue-500 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg--400">Comentar</button>
                   </div>
                 </form>
 
@@ -895,7 +895,7 @@ export default function Home() {
               <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:borderblue-500" />
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bgblue-500 text-black font-black hover:bg--400">Publicar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-500 text-black font-black hover:bg--400">Publicar</button>
               </div>
             </form>
           </div>
