@@ -330,7 +330,7 @@ export default function Home() {
   if (!ageAccepted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
-        <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6">
+        <div className="bg-zinc-950 border border-zinc-800 p-8 max-w-sm w-full text-center space-y-6">
           <h1 className="text-4xl font-black text-white tracking-tight">FLI<span className="textblue-500">XORA</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
           <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-500 hover:bg--400 text-black font-black py-4 rounded-xl transition-colors">INGRESAR</button>
