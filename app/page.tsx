@@ -163,9 +163,9 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedVideo) {
-      document.title = `${selectedVideo.title} | Flixes`;
+      document.title = `${selectedVideo.title} | Flixxes`;
     } else {
-      document.title = 'Flixes - Streaming Pro';
+      document.title = 'Flixxes - Streaming Pro';
     }
   }, [selectedVideo]);
 
@@ -255,7 +255,7 @@ export default function Home() {
       category, 
       voe_url: voeUrl, 
       cover_url: coverUrl,
-      description: description || 'Disfruta de este contenido en alta definición disponible en Flixes.',
+      description: description || 'Disfruta de este contenido en alta definición disponible en Flixxes.',
       tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
       is_short: isShortVideo
     }]);
@@ -300,7 +300,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
-          <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">ES</span></h1>
+          <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
           <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-colors">INGRESAR</button>
         </div>
@@ -344,7 +344,7 @@ export default function Home() {
               </svg>
             </button>
             <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
-              FLIX<span className="text-blue-500">ES</span>
+              FLIX<span className="text-blue-500">XES</span>
             </h1>
           </div>
 
@@ -352,7 +352,7 @@ export default function Home() {
             <div className="relative w-full">
               <input 
                 type="text" 
-                placeholder="Buscar en Flixes..." 
+                placeholder="Buscar en Flixxes..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
                 className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:border-blue-500 outline-none" 
@@ -537,7 +537,7 @@ export default function Home() {
                         <div className="flex flex-col min-w-0 flex-1">
                           <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
                           <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
-                            <span>Flixes</span>
+                            <span>Flixxes</span>
                             <span>•</span>
                             <span>HD</span>
                             <span>•</span>
@@ -639,7 +639,7 @@ export default function Home() {
               <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
                 <div>
                   <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
-                  <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixes.'}</p>
+                  <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixxes.'}</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -725,7 +725,7 @@ export default function Home() {
                       </div>
                       <div className="p-2 flex flex-col justify-between flex-grow">
                         <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight">{v.title}</p>
-                        <span className="text-[10px] text-zinc-400 mt-1">Flixes • 👍 {likesMap[v.id] || 0}</span>
+                        <span className="text-[10px] text-zinc-400 mt-1">Flixxes • 👍 {likesMap[v.id] || 0}</span>
                       </div>
                     </div>
                   ))}
@@ -747,7 +747,7 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
               <h2 className="text-2xl font-black text-white">☕ Apóyame con una Donación</h2>
-              <p className="text-xs text-zinc-400">Si te gusta el contenido de Flixes, tu apoyo ayuda a mantener los servidores y traer nuevos videos diariamente.</p>
+              <p className="text-xs text-zinc-400">Si te gusta el contenido de Flixxes, tu apoyo ayuda a mantener los servidores y traer nuevos videos diariamente.</p>
               <a 
                 href="https://paypal.me/TU_USUARIO_PAYPAL" 
                 target="_blank" 
@@ -834,7 +834,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
-            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixes es un sitio donde usted encontrará videos caseros, HD, latinos, entre otros. Prohibido el acceso a menores de 18 años.
+            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, entre otros. Prohibido el acceso a menores de 18 años.
           </p>
         </div>
 
@@ -848,7 +848,7 @@ export default function Home() {
           <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:text-blue-500">Contacto</a>
         </div>
 
-        <p className="text-zinc-600 text-[10px]">© FLIXES.COM 2016-2026</p>
+        <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
   );
