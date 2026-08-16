@@ -130,43 +130,6 @@ function HorizontalVideoCard({
   return (
     <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group relative">
       
-      {/* Botones externos situados en la esquina superior derecha de la tarjeta */}
-      <div className="absolute top-2 right-2 z-30 flex items-center gap-1.5">
-        <button 
-          onClick={handleShare}
-          className="bg-black/70 hover:bg-black text-white p-2 rounded-full backdrop-blur-md transition-all shadow-lg border border-zinc-700/50"
-          title="Compartir video"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-          </svg>
-        </button>
-
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDonateClick();
-          }}
-          className="bg-blue-600/90 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-md transition-all shadow-lg"
-          title="Donar cafecito"
-        >
-          ☕
-        </button>
-
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onToggleSave(video, e);
-          }}
-          className={`p-2 rounded-full backdrop-blur-md transition-all shadow-lg ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/70 text-white hover:bg-black border border-zinc-700/50'}`}
-          title={isSaved ? "Quitar de guardados" : "Guardar para después"}
-        >
-          ⭐
-        </button>
-      </div>
-
       <a 
         href={video.voe_url || '#'} 
         target="_blank" 
@@ -193,12 +156,51 @@ function HorizontalVideoCard({
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
-            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
-              <span>Flixxes</span>
-              <span>•</span>
-              <span>{video.is_photo ? 'Foto HD' : 'HD'}</span>
-              <span>•</span>
-              <span>👍 {likesCount}</span>
+            <div className="flex items-center justify-between mt-1.5 w-full">
+              <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-medium">
+                <span>Flixxes</span>
+                <span>•</span>
+                <span>{video.is_photo ? 'Foto HD' : 'HD'}</span>
+                <span>•</span>
+                <span>👍 {likesCount}</span>
+              </div>
+
+              {/* Botones externos situados abajo a la derecha de la tarjeta, fuera del reproductor */}
+              <div className="flex items-center gap-1.5 z-30" onClick={(e) => e.preventDefault()}>
+                <button 
+                  onClick={handleShare}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 p-1.5 rounded-lg transition-all border border-zinc-700/50 shadow-sm"
+                  title="Compartir video"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                </button>
+
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDonateClick();
+                  }}
+                  className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg transition-all shadow-sm text-xs"
+                  title="Donar cafecito"
+                >
+                  ☕
+                </button>
+
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onToggleSave(video, e);
+                  }}
+                  className={`p-1.5 rounded-lg transition-all shadow-sm ${isSaved ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700/50'}`}
+                  title={isSaved ? "Quitar de guardados" : "Guardar para después"}
+                >
+                  ⭐
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -826,4 +828,3 @@ export default function Home() {
     </main>
   );
 }
-
