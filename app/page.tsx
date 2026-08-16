@@ -129,7 +129,6 @@ function HorizontalVideoCard({
 
   return (
     <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group relative">
-      
       <a 
         href={video.voe_url || '#'} 
         target="_blank" 
@@ -165,7 +164,6 @@ function HorizontalVideoCard({
                 <span>👍 {likesCount}</span>
               </div>
 
-              {/* Botones externos situados abajo a la derecha de la tarjeta, fuera del reproductor */}
               <div className="flex items-center gap-1.5 z-30" onClick={(e) => e.preventDefault()}>
                 <button 
                   onClick={handleShare}
@@ -226,10 +224,18 @@ function VerticalShortModal({
     return () => clearTimeout(timer);
   }, [short, onNext]);
 
+  const getAutoplayUrl = (url: string) => {
+    if (!url) return '';
+    const separator = url.includes('?') ? '&' : '?';
+    if (!url.includes('autoplay=')) {
+      return `${url}${separator}autoplay=1&muted=1`;
+    }
+    return url;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-0 sm:p-4" onClick={onClose}>
       <div className="relative w-full max-w-sm h-full sm:h-[85vh] bg-black rounded-none sm:rounded-3xl overflow-hidden border border-zinc-800 flex flex-col justify-center items-center shadow-2xl" onClick={e => e.stopPropagation()}>
-        
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black text-white p-2.5 rounded-full backdrop-blur-md transition-all"
@@ -238,7 +244,7 @@ function VerticalShortModal({
         </button>
 
         <iframe 
-          src={short.voe_url} 
+          src={getAutoplayUrl(short.voe_url)} 
           className="w-full h-full border-0 pointer-events-auto"
           allow="autoplay; fullscreen"
           allowFullScreen
@@ -246,7 +252,6 @@ function VerticalShortModal({
 
         <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-none bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 rounded-b-3xl">
           <h4 className="text-white font-black text-sm line-clamp-2">{short.title}</h4>
-          <span className="text-[10px] text-blue-400 font-bold mt-1 inline-block">Cambio automático a 5s del final ⚡</span>
         </div>
       </div>
     </div>
@@ -259,7 +264,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [activeTag, setActiveTag] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
+  const [sortBy, setSortBy] = useState<'random' | 'popular' | 'likes'>('random');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed'>('video');
@@ -308,7 +313,7 @@ export default function Home() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      const { data } = await supabase.from('videos').select('*');
       if (data) setVideos(data);
     } catch (e) { 
       console.error(e); 
@@ -453,7 +458,7 @@ export default function Home() {
     .sort((a, b) => {
       if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
       if (sortBy === 'popular') return (b.views || 0) - (a.views || 0);
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      return Math.random() - 0.5; // Orden aleatorio genérico predeterminado
     });
 
   const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
@@ -552,7 +557,7 @@ export default function Home() {
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
-              <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
+              <button onClick={() => setSortBy('random')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'random' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Aleatorio</button>
               <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
