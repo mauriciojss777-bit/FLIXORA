@@ -322,12 +322,12 @@ export default function Home() {
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
   const [socialPosts, setSocialPosts] = useState<SocialPost[]>([
     { id: '1', user: 'Carlos99', content: '¡Hola a todos! Acabo de subir un nuevo video corto a mi perfil.', likes: 12, created_at: 'Hace 1 hora' },
-    { id: '2', user: 'FoxyUser', content: 'Excelente comunidad la que se está formando en Flixora 🚀', likes: 25, created_at: 'Hace 3 horas' }
+    { id: '2', user: 'FoxyUser', content: 'Excelente comunidad la que se está formando en Flixxes 🚀', likes: 25, created_at: 'Hace 3 horas' }
   ]);
   const [newPostText, setNewPostText] = useState('');
 
   const [chatMessages, setChatMessages] = useState<Comment[]>([
-    { id: '1', user: 'SoporteFlixora', text: '¡Bienvenidos al chat general de la comunidad!', created_at: 'Hace 10 min' }
+    { id: '1', user: 'SoporteFlixxes', text: '¡Bienvenidos al chat general de la comunidad!', created_at: 'Hace 10 min' }
   ]);
   const [chatInput, setChatInput] = useState('');
 
@@ -402,9 +402,9 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedVideo) {
-      document.title = `${selectedVideo.title} | Flixora`;
+      document.title = `${selectedVideo.title} | Flixxes`;
     } else {
-      document.title = 'Flixora - Streaming Pro';
+      document.title = 'Flixxes - Streaming Pro';
     }
   }, [selectedVideo]);
 
@@ -502,7 +502,7 @@ export default function Home() {
         category: 'Fotos',
         voe_url: '',
         cover_url: photoUrlInput,
-        description: 'Fotografía exclusiva en alta resolución disponible en Flixora.',
+        description: 'Fotografía exclusiva en alta resolución disponible en Flixxes.',
         tags: ['Fotos', 'HD'],
         is_photo: true,
         is_short: false,
@@ -529,7 +529,7 @@ export default function Home() {
       category, 
       voe_url: voeUrl, 
       cover_url: finalCoverUrl,
-      description: description || 'Disfruta de este contenido en alta definición disponible en Flixora.',
+      description: description || 'Disfruta de este contenido en alta definición disponible en Flixxes.',
       tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
       is_short: isShortVideo,
       is_photo: false,
@@ -617,7 +617,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
-          <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">ORA</span></h1>
+          <h1 className="text-4xl font-black text-white tracking-tight">FLIXX<span className="text-blue-500">ES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
           <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-colors">INGRESAR</button>
         </div>
@@ -667,7 +667,7 @@ export default function Home() {
 
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
             <h1 className="text-xl font-black text-white cursor-pointer tracking-tight" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
-              FLIX<span className="text-blue-500">ORA</span>
+              FLIXX<span className="text-blue-500">ES</span>
             </h1>
           </div>
 
@@ -814,7 +814,7 @@ export default function Home() {
                     </button>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400">Creador de contenido y miembro activo de la comunidad en Flixora.</p>
+                <p className="text-xs text-zinc-400">Creador de contenido y miembro activo de la comunidad en Flixxes.</p>
                 <div className="flex justify-center sm:justify-start gap-4 text-xs text-zinc-300 font-semibold pt-1">
                   <span>Videos subidos: <strong>{videos.filter(v => v.author === viewingProfile).length}</strong></span>
                   <span>•</span>
@@ -1196,7 +1196,7 @@ export default function Home() {
                 <div className="p-4 bg-[#0f0f0f] text-xs text-zinc-300 space-y-3">
                   <div>
                     <span className="font-bold text-zinc-400 uppercase tracking-wide text-[10px]">Descripción</span>
-                    <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixora.'}</p>
+                    <p className="mt-1 leading-relaxed text-zinc-200">{selectedVideo.description || 'Disfruta de este contenido en alta definición disponible en Flixxes.'}</p>
                   </div>
                   
                   <div className="flex flex-wrap gap-2 pt-1">
@@ -1270,7 +1270,7 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowStore(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h2 className="text-xl font-black text-white">🛍️ Tienda Oficial Flixora</h2>
+                <h2 className="text-xl font-black text-white">🛍️ Tienda Oficial Flixxes</h2>
                 <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white">CERRAR</button>
               </div>
 
@@ -1405,7 +1405,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
-            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixora es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 años.
+            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 años.
           </p>
         </div>
 
@@ -1419,7 +1419,7 @@ export default function Home() {
           <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:text-blue-500">Contacto</a>
         </div>
 
-        <p className="text-zinc-600 text-[10px]">© FLIXORA.COM 2016-2026</p>
+        <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
   );
