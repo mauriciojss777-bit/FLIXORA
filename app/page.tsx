@@ -424,7 +424,7 @@ export default function Home() {
       setLoading(true);
       const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
       if (data) {
-        const enriched = data.map(v => ({ ...v, author: v.author || 'FlixoraOfficial' }));
+        const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
         setVideos(enriched);
       }
     } catch (e) { 
@@ -617,7 +617,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
-          <h1 className="text-4xl font-black text-white tracking-tight">FLIXX<span className="text-blue-500">ES</span></h1>
+          <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
           <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-colors">INGRESAR</button>
         </div>
@@ -667,7 +667,7 @@ export default function Home() {
 
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
             <h1 className="text-xl font-black text-white cursor-pointer tracking-tight" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
-              FLIXX<span className="text-blue-500">ES</span>
+              FLIX<span className="text-blue-500">XES</span>
             </h1>
           </div>
 
@@ -1423,4 +1423,4 @@ export default function Home() {
       </footer>
     </main>
   );
-        }
+}
