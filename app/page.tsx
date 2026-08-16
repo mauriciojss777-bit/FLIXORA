@@ -175,7 +175,7 @@ export default function Home() {
   
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed'>('video');
-  const [setShowStore] = useState(false);
+  const [, setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
@@ -295,7 +295,7 @@ export default function Home() {
         title: embedTitle,
         category: embedCategory,
         voe_url: cleanUrl,
-        cover_url: finalCoverUrl, // Aquí respetará si dejaste la miniatura vacía para usar el fallback automático
+        cover_url: finalCoverUrl,
         description: 'Video incrustado de alta calidad disponible en Flixxes.',
         tags: [embedCategory, 'HD', 'Incrustado'],
         is_photo: false,
@@ -663,8 +663,8 @@ export default function Home() {
 
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               
-              {/* CAMPO DE URL DE MINIATURA DISPONIBLE EN TODAS LAS PESTAÑAS */}
-              <input type="text" placeholder="URL Portada / Miniatura (Opcional - Si se deja vacío se genera una)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              {/* CAMPO DE URL DE MINIATURA GLOBAL (Visible en Video, Embed y Foto) */}
+              <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
 
               {adminTab === 'photo' ? (
                 <>
