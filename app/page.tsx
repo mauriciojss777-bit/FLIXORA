@@ -589,6 +589,11 @@ export default function Home() {
           </div>
         </section>
 
+        {/* INTEGRACIÓN DE OPCIÓN 2 (Native Block) */}
+        <section className="px-3 py-2 w-full max-w-[100vw]">
+          <AdsterraNativeBlock zoneId="30814143" />
+        </section>
+
         {/* VIDEOS HORIZONTALES */}
         {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
           <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
@@ -770,3 +775,4 @@ export default function Home() {
     </main>
   );
 }
+
