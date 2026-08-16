@@ -261,15 +261,15 @@ function VerticalShortModal({
 
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
-  const [, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTag, setActiveTag] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'random' | 'popular' | 'likes'>('random');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed'>('video');
-  const [, setShowStore] = useState(false);
+  const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed' | 'product'>('video');
+  const [showStore, setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
@@ -294,6 +294,12 @@ export default function Home() {
   const [rawEmbedCode, setRawEmbedCode] = useState('');
   const [embedTitle, setEmbedTitle] = useState('');
   const [embedCategory, setEmbedCategory] = useState('HD');
+
+  // Campos para producto de afiliado
+  const [prodTitle, setProdTitle] = useState('');
+  const [prodPrice, setProdPrice] = useState('');
+  const [prodImage, setProdImage] = useState('');
+  const [prodUrl, setProdUrl] = useState('');
 
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
@@ -351,6 +357,32 @@ export default function Home() {
     }
 
     const finalCoverUrl = coverUrl.trim();
+
+    if (adminTab === 'product') {
+      if (!prodTitle.trim() || !prodUrl.trim()) {
+        alert('Por favor completa al menos el título y el enlace de compra del producto.');
+        return;
+      }
+      const { error } = await supabase.from('products').insert([{
+        title: prodTitle,
+        price: prodPrice || '$0.00',
+        image_url: prodImage || DEFAULT_COVER_IMAGE,
+        buy_url: prodUrl
+      }]);
+
+      if (error) {
+        alert('Error al guardar el producto: ' + error.message);
+      } else {
+        setShowAdminModal(false);
+        setProdTitle('');
+        setProdPrice('');
+        setProdImage('');
+        setProdUrl('');
+        setAdminPassword('');
+        fetchProducts();
+      }
+      return;
+    }
 
     if (adminTab === 'photo') {
       if (!photoUrlInput.trim() || !photoTitleInput.trim()) {
@@ -414,7 +446,6 @@ export default function Home() {
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
     let cleanVoeUrl = extractSrcFromIframe(voeUrl);
 
-    // AUTOMATIZACIÓN DE BUNNY.NET: Si escribes solo el nombre del archivo, le antepone la URL base automáticamente.
     if (cleanVoeUrl && !cleanVoeUrl.startsWith('http://') && !cleanVoeUrl.startsWith('https://')) {
       cleanVoeUrl = `${BUNNY_BASE_URL}${cleanVoeUrl}`;
     }
@@ -509,7 +540,7 @@ export default function Home() {
               ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-blue-500 text-white px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
             </button>
             <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
-            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
+            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all whitespace-nowrap">🛍️ Tienda</button>
           </div>
         </nav>
 
@@ -528,6 +559,7 @@ export default function Home() {
 
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
+                <button onClick={() => { setShowStore(true); fetchProducts(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-blue-400">🛍️ Tienda de Afiliados</button>
                 <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📷 Galería de Fotos</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold">☕ Apóyame con una Donación</button>
@@ -542,7 +574,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar / Incrustar (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar / Afiliados (Admin)</button>
                 </div>
               </div>
             </div>
@@ -701,6 +733,47 @@ export default function Home() {
           </section>
         )}
 
+        {showStore && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" onClick={() => setShowStore(false)}>
+            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-4xl w-full space-y-6 max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-black text-white">🛍️ Tienda de Productos Afiliados</h2>
+                </div>
+                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white font-bold bg-zinc-900 px-3 py-1.5 rounded-xl">CERRAR</button>
+              </div>
+
+              {products.length === 0 ? (
+                <p className="text-center text-zinc-500 py-12 text-xs">No hay productos de afiliados disponibles en este momento. Agrega algunos desde el panel de administración.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {products.map(p => (
+                    <div key={p.id} className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between group">
+                      <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
+                        <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg">
+                          {p.price}
+                        </span>
+                      </div>
+                      <div className="p-4 flex flex-col gap-3">
+                        <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">{p.title}</h4>
+                        <a 
+                          href={p.buy_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs text-center transition-all shadow-sm"
+                        >
+                          Ver Oferta / Comprar 🚀
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {showDonateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -754,39 +827,49 @@ export default function Home() {
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Panel Admin</h2>
-                <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold">
+                <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold overflow-x-auto">
                   <button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
-                  <button type="button" onClick={() => setAdminTab('embed')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'embed' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Embed Web</button>
+                  <button type="button" onClick={() => setAdminTab('embed')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'embed' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Embed</button>
                   <button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
+                  <button type="button" onClick={() => setAdminTab('product')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'product' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🛍️ Afiliado</button>
                 </div>
               </div>
 
-              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
               
-              <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              {adminTab !== 'product' && (
+                <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+              )}
 
-              {adminTab === 'photo' ? (
+              {adminTab === 'product' ? (
                 <>
-                  <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL directa de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="Título del producto / oferta" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="Precio (ej: $29.99 o Gratis)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="Tu enlace de afiliado (Enlace de compra)" value={prodUrl} onChange={e => setProdUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <p className="text-[10px] text-blue-400">💡 Este producto aparecerá automáticamente en la sección <b>🛍️ Tienda</b> para generar comisiones por afiliación.</p>
+                </>
+              ) : adminTab === 'photo' ? (
+                <>
+                  <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="URL directa de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <p className="text-[11px] text-zinc-500">Sube únicamente el enlace directo de la imagen (ej: .jpg, .png).</p>
                 </>
               ) : adminTab === 'embed' ? (
                 <>
-                  <input type="text" placeholder="Título del video incrustado" value={embedTitle} onChange={e => setEmbedTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <select value={embedCategory} onChange={e => setEmbedCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500">
+                  <input type="text" placeholder="Título del video incrustado" value={embedTitle} onChange={e => setEmbedTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <select value={embedCategory} onChange={e => setEmbedCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500 text-xs">
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-                  <textarea placeholder="Pega aquí el código completo <iframe ...> o el enlace embed de la otra web" value={rawEmbedCode} onChange={e => setRawEmbedCode(e.target.value)} rows={4} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none" />
-                  <p className="text-[11px] text-zinc-400">💡 <strong className="text-blue-400">Protección Antifuga Activa:</strong> El sistema extraerá automáticamente el enlace y mantendrá al usuario dentro de tu web maximizando tu CPM en Adsterra.</p>
+                  <textarea placeholder="Pega aquí el código completo <iframe ...> o el enlace embed" value={rawEmbedCode} onChange={e => setRawEmbedCode(e.target.value)} rows={4} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none text-xs" />
                 </>
               ) : (
                 <>
-                  <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500">
+                  <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500 text-xs">
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-                  <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none" />
+                  <textarea placeholder="Descripción del video" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none text-xs" />
                   
                   <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
                     <input 
@@ -801,15 +884,15 @@ export default function Home() {
                     </label>
                   </div>
 
-                  <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="Nombre del archivo (ej: video.mp4) o URL completa" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="Nombre del archivo (ej: video.mp4)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <p className="text-[10px] text-blue-400">💡 Si subes a Bunny, solo escribe el nombre del archivo (ej: <code>Q0Fcd8QC_720p.mp4</code>) y se completará solo.</p>
                 </>
               )}
 
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500">Guardar</button>
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700 text-xs">Cancelar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500 text-xs">Guardar</button>
               </div>
             </form>
           </div>
