@@ -301,7 +301,7 @@ function HorizontalVideoCard({
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [storeSearchQuery, setStoreSearchQuery] = useState(''); // Estado para búsqueda dentro de la tienda
+  const [storeSearchQuery, setStoreSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
@@ -309,7 +309,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminTab, setAdminTab] = useState<'video' | 'photo'>('video');
+  const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'afiliado'>('video');
   const [showStore, setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
@@ -352,6 +352,12 @@ export default function Home() {
   const [isShortVideo, setIsShortVideo] = useState(false);
   const [photoUrlInput, setPhotoUrlInput] = useState('');
   const [photoTitleInput, setPhotoTitleInput] = useState('');
+
+  // Estados para el formulario de Afiliados
+  const [prodTitle, setProdTitle] = useState('');
+  const [prodPrice, setProdPrice] = useState('');
+  const [prodImage, setProdImage] = useState('');
+  const [prodUrl, setProdUrl] = useState('');
 
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({
     default: [
@@ -397,7 +403,7 @@ export default function Home() {
         setDeferredPrompt(null);
       }
     } else {
-      alert('Para instalar la app, toca los tres puntos de tu navegador (Chrome ou Safari) y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
+      alert('Para instalar la app, toca los tres puntos de tu navegador y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
     }
   };
 
@@ -486,10 +492,37 @@ export default function Home() {
     setUserLikedMap({ ...userLikedMap, [videoId]: !isLiked });
   };
 
-  const handleSaveVideo = async (e: React.FormEvent) => {
+  const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (adminPassword !== 'flixes2026#Admin#Pass') {
       alert('Contraseña incorrecta');
+      return;
+    }
+
+    // Lógica para Producto Afiliado
+    if (adminTab === 'afiliado') {
+      if (!prodTitle.trim() || !prodPrice.trim() || !prodUrl.trim()) {
+        alert('Por favor completa al menos el título, precio y URL de compra del producto.');
+        return;
+      }
+      const { error } = await supabase.from('products').insert([{
+        title: prodTitle,
+        price: prodPrice,
+        image_url: prodImage.trim() ? prodImage.trim() : DEFAULT_COVER_IMAGE,
+        buy_url: prodUrl
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        setShowAdminModal(false);
+        setProdTitle('');
+        setProdPrice('');
+        setProdImage('');
+        setProdUrl('');
+        setAdminPassword('');
+        fetchProducts();
+      }
       return;
     }
 
@@ -647,7 +680,6 @@ export default function Home() {
   const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
-  // Productos de la tienda filtrados según el buscador de la tienda
   const filteredProducts = products.filter(p => 
     p.title.toLowerCase().includes(storeSearchQuery.toLowerCase())
   );
@@ -1389,19 +1421,27 @@ export default function Home() {
         {/* MODAL ADMIN */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-            <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <form onSubmit={handleAdminSubmit} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Panel Admin</h2>
-                <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold">
-                  <button type="button" onClick={() => setAdminTab('video')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
-                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto URL</button>
+                <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold overflow-x-auto">
+                  <button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
+                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
+                  <button type="button" onClick={() => setAdminTab('afiliado')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'afiliado' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Afiliado</button>
                 </div>
               </div>
 
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               <input type="text" placeholder="Tu Nombre de Usuario / Autor" value={currentUsername} onChange={e => { setCurrentUsername(e.target.value); localStorage.setItem('flixora_username', e.target.value); }} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               
-              {adminTab === 'photo' ? (
+              {adminTab === 'afiliado' ? (
+                <>
+                  <input type="text" placeholder="Título del producto" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="Precio (ej: $29.99)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL de compra (Enlace de afiliado)" value={prodUrl} onChange={e => setProdUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                </>
+              ) : adminTab === 'photo' ? (
                 <>
                   <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                   <input type="text" placeholder="URL de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
@@ -1429,7 +1469,7 @@ export default function Home() {
 
                   <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                   <input type="text" placeholder="URL del video (iframe o enlace embed)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                 </>
               )}
 
