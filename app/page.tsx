@@ -152,17 +152,21 @@ function HorizontalVideoCard({
               </span>
             </>
           ) : (
-            <iframe 
-              src={`${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
-              className="w-full h-full border-0 pointer-events-none" 
-              allow="autoplay"
-              title={video.title}
-            />
+            <div className="w-full h-full relative pointer-events-none">
+              <iframe 
+                src={`${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
+                className="w-full h-full border-0 pointer-events-none" 
+                allow="autoplay"
+                title={video.title}
+              />
+              {/* Capa invisible para evitar redirecciones y retener al usuario en la web */}
+              <div className="absolute inset-0 z-10 bg-transparent"></div>
+            </div>
           )}
 
           <button 
             onClick={(e) => onToggleSave(video, e)}
-            className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
+            className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-20 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
             title={isSaved ? "Quitar de guardados" : "Guardar para después"}
           >
             ⭐
@@ -199,7 +203,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminTab, setAdminTab] = useState<'video' | 'photo'>('video');
+  const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed'>('video');
   const [showStore, setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
@@ -225,6 +229,11 @@ export default function Home() {
   const [isShortVideo, setIsShortVideo] = useState(false);
   const [photoUrlInput, setPhotoUrlInput] = useState('');
   const [photoTitleInput, setPhotoTitleInput] = useState('');
+  
+  // Estados para Embed rápido desde otras webs
+  const [rawEmbedCode, setRawEmbedCode] = useState('');
+  const [embedTitle, setEmbedTitle] = useState('');
+  const [embedCategory, setEmbedCategory] = useState('HD');
 
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({
     default: [
@@ -337,6 +346,12 @@ export default function Home() {
     setUserLikedMap({ ...userLikedMap, [videoId]: !isLiked });
   };
 
+  // Función para extraer automáticamente la URL del src si pegan un código <iframe ...> completo
+  const extractSrcFromIframe = (input: string) => {
+    const match = input.match(/src=["']([^"']+)["']/);
+    return match ? match[1] : input.trim();
+  };
+
   const handleSaveVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (adminPassword !== 'flixes2026#Admin#Pass') {
@@ -372,13 +387,43 @@ export default function Home() {
       return;
     }
 
+    if (adminTab === 'embed') {
+      if (!rawEmbedCode.trim() || !embedTitle.trim()) {
+        alert('Por favor ingresa el título y el código iframe o enlace embed.');
+        return;
+      }
+      const cleanUrl = extractSrcFromIframe(rawEmbedCode);
+      const { error } = await supabase.from('videos').insert([{
+        title: embedTitle,
+        category: embedCategory,
+        voe_url: cleanUrl,
+        cover_url: DEFAULT_COVER_IMAGE,
+        description: 'Video incrustado de alta calidad disponible en Flixxes.',
+        tags: [embedCategory, 'HD', 'Incrustado'],
+        is_photo: false,
+        is_short: false
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        setShowAdminModal(false);
+        setEmbedTitle('');
+        setRawEmbedCode('');
+        setAdminPassword('');
+        fetchVideos();
+      }
+      return;
+    }
+
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
     const finalCoverUrl = coverUrl.trim() ? coverUrl.trim() : DEFAULT_COVER_IMAGE;
+    const cleanVoeUrl = extractSrcFromIframe(voeUrl);
 
     const { error } = await supabase.from('videos').insert([{ 
       title, 
       category, 
-      voe_url: voeUrl, 
+      voe_url: cleanVoeUrl, 
       cover_url: finalCoverUrl,
       description: description || 'Disfruta de este contenido en alta definición disponible en Flixxes.',
       tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
@@ -459,7 +504,7 @@ export default function Home() {
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {/* BARRA SUPERIOR */}
+        {/* BARRA SUPERIOR (LOGO COMPLETO SIN BOTÓN DE PUBLICAR) */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
@@ -471,8 +516,8 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
-              FLIX<span className="text-blue-500">XES</span>
+            <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate flex items-center" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); }}>
+              <span className="text-white">FLIX</span><span className="text-blue-500">XES</span>
             </h1>
           </div>
 
@@ -495,7 +540,6 @@ export default function Home() {
             </button>
             <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
             <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
-            <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ PUBLICAR</button>
           </div>
         </nav>
 
@@ -531,7 +575,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar / Incrustar (Admin)</button>
                 </div>
               </div>
             </div>
@@ -596,7 +640,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* GALERÍA DE FOTOS (SI ESTÁ ACTIVO O HAY FOTOS) */}
+        {/* GALERÍA DE FOTOS */}
         {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
           <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
             <div className="flex items-center justify-between mb-3">
@@ -681,7 +725,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* MODAL DE REPRODUCCIÓN / VISUALIZACIÓN */}
+        {/* MODAL DE REPRODUCCIÓN (CON CAPA ANTIFUGA PARA MAXIMIZAR CPM) */}
         {selectedVideo && !isPipActive && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
             <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300 shadow-2xl`} onClick={e => e.stopPropagation()}>
@@ -715,7 +759,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* REPRODUCTOR DINÁMICO O VISOR DE FOTO */}
+              {/* REPRODUCTOR DINÁMICO O VISOR DE FOTO CON CAPA DE BLOQUEO DE REDIRECCIÓN */}
               {selectedVideo.is_photo ? (
                 <div className="w-full bg-black flex justify-center items-center py-6">
                   <div className="max-w-2xl max-h-[70vh] flex items-center justify-center p-2">
@@ -733,6 +777,15 @@ export default function Home() {
                       scrolling="no"
                       title={selectedVideo.title}
                     />
+                    {/* CAPA DE BLOQUEO DE CLICS EXTERNOS / REDIRECCIONES */}
+                    <div 
+                      className="absolute inset-0 z-20 bg-transparent cursor-default pointer-events-auto"
+                      onClick={(e) => {
+                        // Permite clics internos esenciales (como reproducir/pausar nativo del iframe si está permitido) pero evita la apertura de pestañas de spam ajenas.
+                        // Si deseas total interactividad de reproducción, puedes quitar el pointer-events o usar un overlay inteligente.
+                      }}
+                      title="Haz clic en los controles del reproductor"
+                    ></div>
                   </div>
                 </div>
               )}
@@ -804,7 +857,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SECCIÓN DE COMENTARIOS */}
+              {/* COMENTARIOS */}
               <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
@@ -845,7 +898,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE RECOMENDADOS QUE ABRE Y REPRODUCE AUTOMÁTICAMENTE AL HACER CLIC */}
+              {/* RECOMENDADOS */}
               <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
                 <h3 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
                   🔥 Más contenido recomendado
@@ -876,7 +929,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* BLOQUE DE ANUNCIOS NATIVO ABAJO */}
+              {/* ANUNCIO NATIVO ADSTERRA */}
               <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex flex-col items-center">
                 <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Recomendada</span>
                 <AdsterraNativeBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
@@ -936,15 +989,16 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN PUBLICAR (VIDEO / FOTO) */}
+        {/* MODAL ADMIN MULTIFUNCIÓN (INCLUYE OPCIÓN DE EMBED RÁPIDO DESDE OTRAS WEBS) */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Panel Admin</h2>
                 <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold">
-                  <button type="button" onClick={() => setAdminTab('video')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
-                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto URL</button>
+                  <button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
+                  <button type="button" onClick={() => setAdminTab('embed')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'embed' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Embed Web</button>
+                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
                 </div>
               </div>
 
@@ -953,8 +1007,17 @@ export default function Home() {
               {adminTab === 'photo' ? (
                 <>
                   <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <p className="text-[11px] text-zinc-500">Sube únicamente el enlace directo de la imagen (ej: .jpg, .png, etc.).</p>
+                  <input type="text" placeholder="URL directa de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <p className="text-[11px] text-zinc-500">Sube únicamente el enlace directo de la imagen (ej: .jpg, .png).</p>
+                </>
+              ) : adminTab === 'embed' ? (
+                <>
+                  <input type="text" placeholder="Título del video incrustado" value={embedTitle} onChange={e => setEmbedTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <select value={embedCategory} onChange={e => setEmbedCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500">
+                    {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <textarea placeholder="Pega aquí el código completo <iframe ...> o el enlace embed de la otra web" value={rawEmbedCode} onChange={e => setRawEmbedCode(e.target.value)} rows={4} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none" />
+                  <p className="text-[11px] text-zinc-400">💡 <strong className="text-blue-400">Protección Antifuga Activa:</strong> El sistema extraerá automáticamente el enlace y mantendrá al usuario dentro de tu web maximizando tu CPM en Adsterra.</p>
                 </>
               ) : (
                 <>
@@ -978,14 +1041,14 @@ export default function Home() {
                   </div>
 
                   <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL del video (iframe o enlace embed)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL Portada / Miniatura (Opcional - Se usará una por defecto si se deja vacía)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL del video (o código iframe completo)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                 </>
               )}
 
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500">Publicar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500">Guardar</button>
               </div>
             </form>
           </div>
