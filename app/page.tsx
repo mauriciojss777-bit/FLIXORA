@@ -251,12 +251,13 @@ function HorizontalVideoCard({
               </span>
             </>
           ) : (
-            <iframe 
-              src={`${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
-              className="w-full h-full border-0 pointer-events-none" 
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              allow="autoplay"
-              title={video.title}
+            <div 
+              className="w-full h-full pointer-events-none"
+              dangerouslySetInnerHTML={{ 
+                __html: video.voe_url.includes('<iframe') 
+                  ? video.voe_url 
+                  : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
+              }} 
             />
           )}
 
@@ -1139,14 +1140,13 @@ export default function Home() {
                 ) : (
                   <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4 bg-black' : 'aspect-video'}`}>
                     <div className={`w-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'h-full'}`}>
-                      <iframe 
-                        src={`${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1`}
-                        className="w-full h-full border-0" 
-                        sandbox="allow-scripts allow-same-origin allow-presentation"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowFullScreen 
-                        scrolling="no"
-                        title={selectedVideo.title}
+                      <div 
+                        className="w-full h-full"
+                        dangerouslySetInnerHTML={{ 
+                          __html: selectedVideo.voe_url.includes('<iframe') 
+                            ? selectedVideo.voe_url 
+                            : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen scrolling="no" title="${selectedVideo.title}"></iframe>`
+                        }}
                       />
                     </div>
                   </div>
@@ -1504,4 +1504,3 @@ export default function Home() {
     </main>
   );
 }
-
