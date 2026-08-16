@@ -33,6 +33,7 @@ interface Product {
   price: string;
   image_url: string;
   buy_url: string;
+  category?: string;
 }
 
 interface Comment {
@@ -111,7 +112,6 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
-// NUEVO: Ventana flotante interactiva, desplazable y con botón de cierre (Draggable Ad Widget)
 function DraggableAdPopup({ zoneId }: { zoneId: string }) {
   const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -301,6 +301,7 @@ function HorizontalVideoCard({
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [storeSearchQuery, setStoreSearchQuery] = useState(''); // Estado para búsqueda dentro de la tienda
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
@@ -396,7 +397,7 @@ export default function Home() {
         setDeferredPrompt(null);
       }
     } else {
-      alert('Para instalar la app, toca los tres puntos de tu navegador (Chrome o Safari) y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
+      alert('Para instalar la app, toca los tres puntos de tu navegador (Chrome ou Safari) y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
     }
   };
 
@@ -645,6 +646,11 @@ export default function Home() {
   const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
   const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
+
+  // Productos de la tienda filtrados según el buscador de la tienda
+  const filteredProducts = products.filter(p => 
+    p.title.toLowerCase().includes(storeSearchQuery.toLowerCase())
+  );
 
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
@@ -1066,7 +1072,6 @@ export default function Home() {
         {/* MODAL DE REPRODUCCIÓN + CARRUSEL DE RECOMENDADOS + VENTANA FLOTANTE DESPLAZABLE */}
         {selectedVideo && !isPipActive && (
           <>
-            {/* Widget flotante de Adsterra desplazable mientras ves el video */}
             <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78" />
 
             <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
@@ -1168,7 +1173,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* NUEVO: CARRUSEL DE VIDEOS RECOMENDADOS DENTRO DEL MODAL */}
+                {/* CARRUSEL DE VIDEOS RECOMENDADOS DENTRO DEL MODAL */}
                 <div className="p-4 bg-zinc-950 border-b border-zinc-800">
                   <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-3">🔥 Videos Recomendados</h3>
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
@@ -1265,31 +1270,68 @@ export default function Home() {
           </>
         )}
 
-        {/* MODAL TIENDA */}
+        {/* MODAL TIENDA TIPO AMAZON */}
         {showStore && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowStore(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h2 className="text-xl font-black text-white">🛍️ Tienda Oficial Flixxes</h2>
-                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white">CERRAR</button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" onClick={() => setShowStore(false)}>
+            <div className="bg-[#121212] border border-zinc-800 p-0 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+              
+              {/* HEADER DE LA TIENDA */}
+              <div className="p-5 border-b border-zinc-800 bg-[#0f0f0f] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black text-white">🛍️ Tienda Flixxes</h2>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Compra tus accesorios y suscripciones</p>
+                </div>
+                
+                {/* BUSCADOR DE LA TIENDA */}
+                <div className="relative w-full sm:w-64">
+                  <input 
+                    type="text" 
+                    placeholder="Buscar productos..." 
+                    value={storeSearchQuery}
+                    onChange={(e) => setStoreSearchQuery(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-700 py-2 pl-4 pr-10 rounded-xl text-xs text-white outline-none focus:border-blue-500"
+                  />
+                  <span className="absolute right-3 top-2 text-zinc-500">🔍</span>
+                </div>
+                
+                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white px-3 py-2 bg-zinc-900 rounded-xl">Cerrar</button>
               </div>
 
-              {products.length === 0 ? (
-                <p className="text-center text-zinc-500 py-8 text-xs">No hay productos disponibles en la tienda por el momento.</p>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {products.map(p => (
-                    <div key={p.id} className="bg-zinc-900 p-3 rounded-2xl flex flex-col gap-2 border border-zinc-800">
-                      <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full aspect-video rounded-xl object-cover bg-black" />
-                      <h4 className="text-xs font-bold text-white line-clamp-1">{p.title}</h4>
-                      <div className="flex items-center justify-between mt-auto pt-2">
-                        <span className="text-blue-400 font-black text-xs">{p.price}</span>
-                        <a href={p.buy_url} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">Comprar</a>
+              {/* GRID DE PRODUCTOS */}
+              <div className="flex-1 overflow-y-auto p-5">
+                {filteredProducts.length === 0 ? (
+                  <p className="text-center text-zinc-500 py-20 text-sm">No hay productos disponibles con ese nombre.</p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {filteredProducts.map(p => (
+                      <div key={p.id} className="group bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all flex flex-col">
+                        <div className="aspect-square bg-black relative overflow-hidden">
+                          <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
+                        <div className="p-3 flex flex-col flex-1">
+                          <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight mb-2">{p.title}</h4>
+                          <div className="mt-auto flex items-center justify-between pt-3 border-t border-zinc-800/50">
+                            <span className="text-blue-400 font-black text-sm">{p.price}</span>
+                            <a 
+                              href={p.buy_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="bg-white text-black hover:bg-blue-500 hover:text-white text-[10px] font-black px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              COMPRAR
+                            </a>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* FOOTER TIENDA */}
+              <div className="p-4 bg-zinc-950/50 text-center border-t border-zinc-800">
+                <p className="text-[9px] text-zinc-600">Envíos garantizados a todo el mundo con seguridad SSL.</p>
+              </div>
             </div>
           </div>
         )}
