@@ -98,6 +98,96 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
+// Componente optimizado para tarjeta con hover autónomo estilo Facebook y prevención de lags
+function HorizontalVideoCard({ 
+  video, 
+  onSelect, 
+  isSaved, 
+  onToggleSave, 
+  likesCount 
+}: { 
+  video: Video; 
+  onSelect: (v: Video) => void; 
+  isSaved: boolean; 
+  onToggleSave: (v: Video, e: React.MouseEvent) => void; 
+  likesCount: number; 
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    // Retraso de 250ms para evitar que se dispare el iframe si el usuario solo pasa el mouse rápido por encima
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(true);
+    }, 250);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsHovered(false);
+  };
+
+  // Limpieza al desmontar
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <div 
+      className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group cursor-pointer" 
+      onClick={() => onSelect(video)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="flex flex-col h-full relative w-full">
+        <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
+          {!isHovered ? (
+            <>
+              <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
+              <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
+                {video.category}
+              </span>
+            </>
+          ) : (
+            <iframe 
+              src={`${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
+              className="w-full h-full border-0 pointer-events-none" 
+              allow="autoplay"
+              title={video.title}
+            />
+          )}
+
+          <button 
+            onClick={(e) => onToggleSave(video, e)}
+            className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
+            title={isSaved ? "Quitar de guardados" : "Guardar para después"}
+          >
+            ⭐
+          </button>
+        </div>
+        
+        <div className="p-3 flex gap-2.5 w-full items-start">
+          <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black flex items-center justify-center flex-shrink-0 text-xs">
+            F
+          </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
+            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
+              <span>Flixxes</span>
+              <span>•</span>
+              <span>HD</span>
+              <span>•</span>
+              <span>👍 {likesCount}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -513,40 +603,14 @@ export default function Home() {
                 const isSaved = watchLater.some(v => v.id === video.id);
 
                 return (
-                  <div key={video.id} className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group cursor-pointer" onClick={() => handleSelectVideo(video)}>
-                    <div className="flex flex-col h-full relative w-full">
-                      <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
-                        <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
-                          {video.category}
-                        </span>
-
-                        <button 
-                          onClick={(e) => toggleWatchLater(video, e)}
-                          className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
-                          title={isSaved ? "Quitar de guardados" : "Guardar para después"}
-                        >
-                          ⭐
-                        </button>
-                      </div>
-                      
-                      <div className="p-3 flex gap-2.5 w-full items-start">
-                        <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black flex items-center justify-center flex-shrink-0 text-xs">
-                          F
-                        </div>
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
-                          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
-                            <span>Flixxes</span>
-                            <span>•</span>
-                            <span>HD</span>
-                            <span>•</span>
-                            <span>👍 {likesMap[video.id] || 0}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <HorizontalVideoCard 
+                    key={video.id}
+                    video={video}
+                    onSelect={handleSelectVideo}
+                    isSaved={isSaved}
+                    onToggleSave={toggleWatchLater}
+                    likesCount={likesMap[video.id] || 0}
+                  />
                 );
               })}
             </div>
@@ -821,7 +885,7 @@ export default function Home() {
               <input type="text" placeholder="URL del video (iframe o enlace embed)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               <input type="text" placeholder="URL Portada / Miniatura" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar sin guardar</button>
                 <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500">Publicar</button>
               </div>
             </form>
