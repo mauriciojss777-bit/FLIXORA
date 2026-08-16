@@ -227,16 +227,27 @@ export default function Home() {
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
-  // NUEVOS ESTADOS DE RED SOCIAL
+  // ESTADOS DE RED SOCIAL Y CHAT
   const [currentUsername, setCurrentUsername] = useState('MiUsuario');
   const [viewingProfile, setViewingProfile] = useState<string | null>(null);
   const [showSocialFeed, setShowSocialFeed] = useState(false);
+  const [showChatDrawer, setShowChatDrawer] = useState(false);
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
   const [socialPosts, setSocialPosts] = useState<SocialPost[]>([
-    { id: '1', user: 'Carlos99', content: '¡Hola a todos! Acabo de subir un nuevo video corto a mi perfil. ¡Pasen a verlo!', likes: 12, created_at: 'Hace 1 hora' },
+    { id: '1', user: 'Carlos99', content: '¡Hola a todos! Acabo de subir un nuevo video corto a mi perfil.', likes: 12, created_at: 'Hace 1 hora' },
     { id: '2', user: 'FoxyUser', content: 'Excelente comunidad la que se está formando en Flixxes 🚀', likes: 25, created_at: 'Hace 3 horas' }
   ]);
   const [newPostText, setNewPostText] = useState('');
+
+  // ESTADO PARA BANDEJA DE CHAT FLOTANTE
+  const [chatMessages, setChatMessages] = useState<Comment[]>([
+    { id: '1', user: 'SoporteFlixxes', text: '¡Bienvenidos al chat general de la comunidad!', created_at: 'Hace 10 min' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+
+  // ESTADO PARA INSTALAR APP (PWA BANNER)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
@@ -285,10 +296,30 @@ export default function Home() {
       if (savedWatchLater) {
         try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); }
       }
+
+      // Capturar evento de instalación PWA
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+        setShowInstallBanner(true);
+      });
     }
     fetchVideos();
     fetchProducts();
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setShowInstallBanner(false);
+      }
+    } else {
+      alert('Para instalar la app, toca los tres puntos de tu navegador (Chrome o Safari) y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
+    }
+  };
 
   useEffect(() => {
     if (selectedVideo) {
@@ -314,7 +345,6 @@ export default function Home() {
       setLoading(true);
       const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
       if (data) {
-        // Aseguramos que tengan autor por defecto si no viene de la DB
         const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
         setVideos(enriched);
       }
@@ -463,7 +493,7 @@ export default function Home() {
     setNewCommentText('');
   };
 
-  // FUNCIONES DE RED SOCIAL
+  // FUNCIONES DE RED SOCIAL Y CHAT
   const handleToggleFollow = (username: string) => {
     const isFollowing = !!followingMap[username];
     setFollowingMap({ ...followingMap, [username]: !isFollowing });
@@ -492,6 +522,19 @@ export default function Home() {
     setViewingProfile(username);
   };
 
+  const handleSendChatMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const newMsg: Comment = {
+      id: Date.now().toString(),
+      user: currentUsername,
+      text: chatInput.trim(),
+      created_at: 'Justo ahora'
+    };
+    setChatMessages([...chatMessages, newMsg]);
+    setChatInput('');
+  };
+
   if (!ageAccepted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
@@ -517,7 +560,7 @@ export default function Home() {
     })
     .sort((a, b) => {
       if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
-      if (sortBy === 'popular') return (b.views || 0) - (a.views || 0);
+      if (sortBy === 'popular') return (b.views || 0) - (b.views || 0);
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
@@ -529,9 +572,30 @@ export default function Home() {
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {/* BARRA SUPERIOR */}
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
-          <div className="flex items-center gap-2 min-w-0">
+        {/* BANDEJA / BANNER DE DESCARGAR APLICACIÓN WEB (PWA) */}
+        {(showInstallBanner || true) && (
+          <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 border-b border-blue-700/50 px-4 py-2.5 flex items-center justify-between gap-3 text-xs shadow-md">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <span className="text-lg flex-shrink-0">📱</span>
+              <div className="truncate">
+                <p className="font-bold text-white leading-tight">Instala Flixxes App</p>
+                <p className="text-[10px] text-blue-200 truncate">Acceso rápido, sin anuncios molestos y pantalla completa.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button 
+                onClick={handleInstallClick}
+                className="bg-white text-blue-950 font-black px-3 py-1.5 rounded-lg text-[11px] hover:bg-blue-50 transition-all shadow"
+              >
+                Instalar App
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* BARRA SUPERIOR PROFESIONAL Y LIMPIA */}
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
+          <div className="flex items-center gap-3 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
               className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0"
@@ -541,7 +605,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-xl sm:text-2xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
+            <h1 className="text-xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
               FLIX<span className="text-blue-500">XES</span>
             </h1>
           </div>
@@ -550,7 +614,7 @@ export default function Home() {
             <div className="relative w-full">
               <input 
                 type="text" 
-                placeholder="Buscar en Flixxes (videos, tags, creadores)..." 
+                placeholder="Buscar videos, tags, creadores..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
                 className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:border-blue-500 outline-none" 
@@ -559,16 +623,32 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button onClick={() => setShowSocialFeed(true)} className="bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 text-[11px] px-2.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap">💬 Comunidad</button>
-            <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap">⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-blue-500 text-white px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}</button>
-            <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
-            <button onClick={() => handleOpenProfile(currentUsername)} className="bg-zinc-800 text-zinc-200 hover:bg-zinc-700 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all">👤 Mi Perfil</button>
-            <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ PUBLICAR</button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button 
+              onClick={() => setShowChatDrawer(true)}
+              className="relative bg-zinc-800 hover:bg-zinc-700 text-zinc-200 p-2 rounded-full border border-zinc-700 transition-all flex items-center justify-center"
+              title="Bandeja de Entrada de Chat"
+            >
+              💬
+              <span className="absolute -top-1 -right-1 bg-blue-500 w-2.5 h-2.5 rounded-full animate-pulse"></span>
+            </button>
+            <button 
+              onClick={() => handleOpenProfile(currentUsername)} 
+              className="bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 text-xs px-3 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5"
+            >
+              <span>👤</span>
+              <span className="hidden md:inline">Perfil</span>
+            </button>
+            <button 
+              onClick={() => setShowAdminModal(true)} 
+              className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1.5 rounded-full border border-zinc-700 font-bold transition-all"
+            >
+              + Publicar
+            </button>
           </div>
         </nav>
 
-        {/* MENÚ LATERAL */}
+        {/* MENÚ LATERAL PROFESIONAL */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -585,12 +665,12 @@ export default function Home() {
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
                 <button onClick={() => { setShowSocialFeed(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold">💬 Feed Social y Muro</button>
+                <button onClick={() => { setShowChatDrawer(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📥 Bandeja de Chat en Vivo</button>
                 <button onClick={() => { handleOpenProfile(currentUsername); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">👤 Mi Perfil de Usuario</button>
                 <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); setViewingProfile(null); setShowSocialFeed(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📷 Galería de Fotos</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">☕ Apóyame con una Donación</button>
-                <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} elementos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
-                <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
+                <button onClick={() => { handleInstallClick(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/10 text-blue-400 border border-blue-500/20 text-left">📱 Instalar Aplicación Web</button>
                 
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
@@ -605,6 +685,45 @@ export default function Home() {
                   <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar (Admin)</button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* BANDEJA DE ENTRADA DE CHAT FLOTANTE (DRAWER LATERAL) */}
+        {showChatDrawer && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowChatDrawer(false)}></div>
+            <div className="relative bg-[#141414] border-l border-zinc-800 w-full max-w-sm h-full flex flex-col z-10 shadow-2xl">
+              <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💬</span>
+                  <h3 className="font-bold text-white text-sm">Bandeja de Chat Comunidad</h3>
+                </div>
+                <button onClick={() => setShowChatDrawer(false)} className="text-zinc-400 hover:text-white p-1.5 text-xs font-bold">Cerrar</button>
+              </div>
+
+              <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className="bg-zinc-900/80 border border-zinc-800 p-3 rounded-2xl space-y-1">
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="font-bold text-blue-400">@{msg.user}</span>
+                      <span className="text-zinc-500">{msg.created_at}</span>
+                    </div>
+                    <p className="text-xs text-zinc-200">{msg.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={handleSendChatMessage} className="p-3 border-t border-zinc-800 bg-zinc-950 flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Escribe un mensaje al chat..." 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500"
+                />
+                <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Enviar</button>
+              </form>
             </div>
           </div>
         )}
@@ -723,40 +842,40 @@ export default function Home() {
           </div>
         )}
 
-        {/* CONTENIDO PRINCIPAL (SI NO ESTÁ EN PERFIL NI FEED SOCIAL) */}
+        {/* CONTENIDO PRINCIPAL */}
         {!viewingProfile && !showSocialFeed && (
           <>
-            <section className="px-3 pt-3 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-              <div className="sm:hidden mb-2.5 w-full">
+            <section className="px-4 pt-4 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <div className="sm:hidden mb-3 w-full">
                 <input 
                   type="text" 
                   placeholder="Buscar por título, categoría o etiqueta..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)} 
-                  className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:border-blue-500 outline-none text-zinc-200 box-border" 
+                  className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-xs focus:border-blue-500 outline-none text-zinc-200 box-border shadow-inner" 
                 />
               </div>
 
-              <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
-                <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
-                  <button onClick={() => setSortBy('recent')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Recientes</button>
-                  <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+              {/* BARRA DE FILTROS Y ORDENAMIENTO LIMPIA */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/60 w-full">
+                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
+                  {defaultTags.map(tag => (
+                    <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>
+                      {tag}
+                    </button>
+                  ))}
                 </div>
-              </div>
 
-              <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
-                {defaultTags.map(tag => (
-                  <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
-                    {tag}
-                  </button>
-                ))}
+                <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs flex-shrink-0 self-end sm:self-auto">
+                  <button onClick={() => setSortBy('recent')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Recientes</button>
+                  <button onClick={() => setSortBy('likes')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Populares</button>
+                </div>
               </div>
             </section>
 
             {/* SHORTS VERTICALES */}
             {verticalShorts.length > 0 && (
-              <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-blue-400 tracking-wider uppercase flex items-center gap-1.5">
                     ⚡ Shorts Verticales ({verticalShorts.length})
@@ -786,7 +905,7 @@ export default function Home() {
 
             {/* GALERÍA DE FOTOS */}
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
-              <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-pink-400 tracking-wider uppercase flex items-center gap-1.5">
                     📷 Galería de Fotos ({photoGallery.length})
@@ -799,7 +918,7 @@ export default function Home() {
                       <div 
                         key={`photo-${photo.id}`}
                         onClick={() => handleSelectVideo(photo)}
-                        className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative"
+                        className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow"
                       >
                         <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
                           <img src={photo.cover_url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
@@ -827,8 +946,8 @@ export default function Home() {
             )}
 
             {/* PUBLICIDAD SUPERIOR */}
-            <section className="px-3 py-2 w-full max-w-[100vw]">
-              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center">
+            <section className="px-4 py-2 w-full max-w-[100vw]">
+              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner">
                 <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada</span>
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
               </div>
@@ -836,7 +955,7 @@ export default function Home() {
 
             {/* VIDEOS HORIZONTALES */}
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
-              <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <section className="px-4 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
                   <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
                     📺 Videos Horizontales ({horizontalVideos.length})
@@ -878,7 +997,7 @@ export default function Home() {
           </>
         )}
 
-        {/* MODAL DE REPRODUCCIÓN / VISUALIZACIÓN */}
+        {/* MODAL DE REPRODUCCIÓN */}
         {selectedVideo && !isPipActive && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
             <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300 shadow-2xl`} onClick={e => e.stopPropagation()}>
@@ -899,12 +1018,6 @@ export default function Home() {
                 
                 <div className="flex items-center gap-3">
                   {!selectedVideo.is_photo && (
-                    <label className="hidden sm:flex items-center gap-1.5 cursor-pointer text-zinc-400 font-semibold select-none">
-                      <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accent-blue-500" />
-                      Autoplay
-                    </label>
-                  )}
-                  {!selectedVideo.is_photo && (
                     <button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg hover:bg-blue-500">
                       Siguiente ➔
                     </button>
@@ -912,7 +1025,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* REPRODUCTOR DINÁMICO O VISOR DE FOTO */}
               {selectedVideo.is_photo ? (
                 <div className="w-full bg-black flex justify-center items-center py-6">
                   <div className="max-w-2xl max-h-[70vh] flex items-center justify-center p-2">
@@ -1009,7 +1121,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SECCIÓN DE COMENTARIOS */}
+              {/* COMENTARIOS */}
               <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                 <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                   Comentarios ({(commentsMap[selectedVideo.id] || commentsMap['default']).length})
@@ -1024,7 +1136,7 @@ export default function Home() {
                       onChange={(e) => setNewCommentText(e.target.value)} 
                       className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" 
                     />
-                    <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-blue-500">Comentar como @{currentUsername}</button>
+                    <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-blue-500">Comentar</button>
                   </div>
                 </form>
 
@@ -1046,38 +1158,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE RECOMENDADOS */}
-              <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
-                <h3 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-                  🔥 Más contenido recomendado
-                </h3>
-                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
-                  {videos.filter(v => v.id !== selectedVideo.id).map(v => (
-                    <div 
-                      key={`carousel-${v.id}`}
-                      onClick={() => {
-                        handleSelectVideo(v);
-                        const modalContainer = document.getElementById('video-modal-container');
-                        if (modalContainer) modalContainer.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group flex-shrink-0 flex flex-col"
-                    >
-                      <div className="aspect-video w-full bg-black relative overflow-hidden flex items-center justify-center">
-                        <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute bottom-1 right-1 bg-black/80 text-blue-400 text-[9px] font-bold px-1 rounded">
-                          {v.is_photo ? 'Foto' : v.category}
-                        </span>
-                      </div>
-                      <div className="p-2 flex flex-col justify-between flex-grow">
-                        <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight">{v.title}</p>
-                        <span className="text-[10px] text-zinc-400 mt-1">@{v.author || 'Flixxes'} • 👍 {likesMap[v.id] || 0}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* BLOQUE DE ANUNCIOS NATIVO ABAJO */}
               <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex flex-col items-center">
                 <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Recomendada</span>
                 <AdsterraNativeBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
@@ -1087,12 +1167,12 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL DE DONACIÓN */}
+        {/* MODAL DONAR */}
         {showDonateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
               <h2 className="text-2xl font-black text-white">☕ Apóyame con una Donación</h2>
-              <p className="text-xs text-zinc-400">Si te gusta el contenido de Flixxes, tu apoyo ayuda a mantener los servidores y traer nuevos videos diariamente.</p>
+              <p className="text-xs text-zinc-400">Tu apoyo ayuda a mantener los servidores y traer contenido nuevo diariamente.</p>
               <a 
                 href="https://paypal.me/TU_USUARIO_PAYPAL" 
                 target="_blank" 
@@ -1106,7 +1186,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL DE GUARDADOS */}
+        {/* MODAL GUARDADOS */}
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1137,7 +1217,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN PUBLICAR */}
+        {/* MODAL ADMIN */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
