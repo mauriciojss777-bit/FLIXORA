@@ -114,6 +114,10 @@ function HorizontalVideoCard({
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
   likesCount: number; 
 }) {
+  const coverImage = (video.cover_url && video.cover_url.trim() !== '') 
+    ? video.cover_url 
+    : DEFAULT_COVER_IMAGE;
+
   return (
     <a 
       href={video.voe_url || '#'} 
@@ -123,7 +127,14 @@ function HorizontalVideoCard({
     >
       <div className="flex flex-col h-full relative w-full">
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
-          <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+          <img 
+            src={coverImage} 
+            alt={video.title} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = DEFAULT_COVER_IMAGE;
+            }}
+          />
           <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
             {video.is_photo ? '📷 Foto' : video.category}
           </span>
@@ -549,10 +560,10 @@ export default function Home() {
                 return (
                   <div 
                     key={`photo-${photo.id}`}
-                    className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative"
+                    className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden group flex flex-col relative"
                   >
                     <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
-                      <img src={photo.cover_url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                      <img src={photo.cover_url || DEFAULT_COVER_IMAGE} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                       <button 
                         onClick={(e) => toggleWatchLater(photo, e)}
                         className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
