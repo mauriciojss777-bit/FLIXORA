@@ -11,6 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
 const ADMIN_PASSWORD = 'flixes2026#Admin#Pass';
+const BUNNY_BASE_URL = 'https://flixxes.b-cdn.net/';
 
 interface Video {
   id: string;
@@ -411,7 +412,12 @@ export default function Home() {
     }
 
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    const cleanVoeUrl = extractSrcFromIframe(voeUrl);
+    let cleanVoeUrl = extractSrcFromIframe(voeUrl);
+
+    // AUTOMATIZACIÓN DE BUNNY.NET: Si escribes solo el nombre del archivo, le antepone la URL base automáticamente.
+    if (cleanVoeUrl && !cleanVoeUrl.startsWith('http://') && !cleanVoeUrl.startsWith('https://')) {
+      cleanVoeUrl = `${BUNNY_BASE_URL}${cleanVoeUrl}`;
+    }
 
     const { error } = await supabase.from('videos').insert([{ 
       title, 
@@ -458,7 +464,7 @@ export default function Home() {
     .sort((a, b) => {
       if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
       if (sortBy === 'popular') return (b.views || 0) - (a.views || 0);
-      return Math.random() - 0.5; // Orden aleatorio genérico predeterminado
+      return Math.random() - 0.5;
     });
 
   const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
@@ -796,7 +802,8 @@ export default function Home() {
                   </div>
 
                   <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL del video (o código iframe completo)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="Nombre del archivo (ej: video.mp4) o URL completa" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <p className="text-[10px] text-blue-400">💡 Si subes a Bunny, solo escribe el nombre del archivo (ej: <code>Q0Fcd8QC_720p.mp4</code>) y se completará solo.</p>
                 </>
               )}
 
