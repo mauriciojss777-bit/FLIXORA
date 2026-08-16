@@ -10,6 +10,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
+const ADMIN_PASSWORD = 'flixes2026#Admin#Pass';
 
 interface Video {
   id: string;
@@ -32,13 +33,6 @@ interface Product {
   price: string;
   image_url: string;
   buy_url: string;
-}
-
-interface Comment {
-  id: string;
-  user: string;
-  text: string;
-  created_at: string;
 }
 
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
@@ -103,7 +97,6 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
 
 function HorizontalVideoCard({ 
   video, 
-  onSelect, 
   isSaved, 
   onToggleSave, 
   likesCount 
@@ -114,7 +107,6 @@ function HorizontalVideoCard({
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
   likesCount: number; 
 }) {
-  // Genera una portada automática con el título si está vacía, evitando que todas se vean iguales
   const coverImage = (video.cover_url && video.cover_url.trim() !== '' && video.cover_url !== DEFAULT_COVER_IMAGE) 
     ? video.cover_url 
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(video.title)}&background=09090b&color=3b82f6&size=500&bold=true`;
@@ -175,25 +167,22 @@ function HorizontalVideoCard({
 
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminTab, setAdminTab] = useState<'video' | 'photo' | 'embed'>('video');
-  const [showStore, setShowStore] = useState(false);
+  const [setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
-  const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
-
-  const [likesMap, setLikesMap] = useState<Record<string, number>>({});
+  const [likesMap] = useState<Record<string, number>>({});
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -248,12 +237,7 @@ export default function Home() {
   const toggleWatchLater = (video: Video, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const exists = watchLater.some(v => v.id === video.id);
-    let updated: Video[];
-    if (exists) {
-      updated = watchLater.filter(v => v.id !== video.id);
-    } else {
-      updated = [video, ...watchLater];
-    }
+    const updated = exists ? watchLater.filter(v => v.id !== video.id) : [video, ...watchLater];
     setWatchLater(updated);
     localStorage.setItem('flixora_watch_later', JSON.stringify(updated));
   };
@@ -265,10 +249,12 @@ export default function Home() {
 
   const handleSaveVideo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminPassword !== 'flixes2026#Admin#Pass') {
+    if (adminPassword !== ADMIN_PASSWORD) {
       alert('Contraseña incorrecta');
       return;
     }
+
+    const finalCoverUrl = coverUrl.trim();
 
     if (adminTab === 'photo') {
       if (!photoUrlInput.trim() || !photoTitleInput.trim()) {
@@ -279,7 +265,7 @@ export default function Home() {
         title: photoTitleInput,
         category: 'Fotos',
         voe_url: '',
-        cover_url: photoUrlInput,
+        cover_url: finalCoverUrl || photoUrlInput,
         description: 'Fotografía exclusiva en alta resolución disponible en Flixxes.',
         tags: ['Fotos', 'HD'],
         is_photo: true,
@@ -292,6 +278,7 @@ export default function Home() {
         setShowAdminModal(false);
         setPhotoTitleInput('');
         setPhotoUrlInput('');
+        setCoverUrl('');
         setAdminPassword('');
         fetchVideos();
       }
@@ -308,7 +295,7 @@ export default function Home() {
         title: embedTitle,
         category: embedCategory,
         voe_url: cleanUrl,
-        cover_url: '', // Se dejará vacío para que aplique miniatura dinámica o defecto
+        cover_url: finalCoverUrl, // Aquí respetará si dejaste la miniatura vacía para usar el fallback automático
         description: 'Video incrustado de alta calidad disponible en Flixxes.',
         tags: [embedCategory, 'HD', 'Incrustado'],
         is_photo: false,
@@ -321,6 +308,7 @@ export default function Home() {
         setShowAdminModal(false);
         setEmbedTitle('');
         setRawEmbedCode('');
+        setCoverUrl('');
         setAdminPassword('');
         fetchVideos();
       }
@@ -328,7 +316,6 @@ export default function Home() {
     }
 
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    const finalCoverUrl = coverUrl.trim();
     const cleanVoeUrl = extractSrcFromIframe(voeUrl);
 
     const { error } = await supabase.from('videos').insert([{ 
@@ -384,7 +371,7 @@ export default function Home() {
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
   return (
-    <main className={`min-h-screen bg-[#0f0f0f] text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
+    <main className="min-h-screen bg-[#0f0f0f] text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300">
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
         {/* BARRA SUPERIOR */}
@@ -599,7 +586,7 @@ export default function Home() {
                     <HorizontalVideoCard 
                       key={video.id}
                       video={video}
-                      onSelect={(v) => {}}
+                      onSelect={() => {}}
                       isSaved={isSaved}
                       onToggleSave={toggleWatchLater}
                       likesCount={likesMap[video.id] || 0}
@@ -661,7 +648,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN MULTIFUNCIÓN */}
+        {/* MODAL ADMIN MULTIFUNCIÓN (Con URL de Miniatura Global) */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -676,6 +663,9 @@ export default function Home() {
 
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               
+              {/* CAMPO DE URL DE MINIATURA DISPONIBLE EN TODAS LAS PESTAÑAS */}
+              <input type="text" placeholder="URL Portada / Miniatura (Opcional - Si se deja vacío se genera una)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+
               {adminTab === 'photo' ? (
                 <>
                   <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
@@ -714,7 +704,6 @@ export default function Home() {
 
                   <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                   <input type="text" placeholder="URL del video (o código iframe completo)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-                  <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
                 </>
               )}
 
@@ -751,4 +740,3 @@ export default function Home() {
     </main>
   );
 }
-
