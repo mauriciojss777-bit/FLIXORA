@@ -244,7 +244,6 @@ export default function Home() {
   const [chatInput, setChatInput] = useState('');
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
@@ -295,7 +294,6 @@ export default function Home() {
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         setDeferredPrompt(e);
-        setShowInstallBanner(true);
       });
     }
     fetchVideos();
@@ -308,7 +306,6 @@ export default function Home() {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
-        setShowInstallBanner(false);
       }
     } else {
       alert('Para instalar la app, toca los tres puntos de tu navegador (Chrome o Safari) y selecciona "Instalar aplicación" o "Agregar a la pantalla principal".');
@@ -565,87 +562,73 @@ export default function Home() {
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {/* BANDEJA / BANNER DE DESCARGAR APLICACIÓN WEB (PWA) */}
-        {(showInstallBanner || true) && (
-          <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 border-b border-blue-700/50 px-4 py-2.5 flex items-center justify-between gap-3 text-xs shadow-md">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <span className="text-lg flex-shrink-0">📱</span>
-              <div className="truncate">
-                <p className="font-bold text-white leading-tight">Instala Flixxes App</p>
-                <p className="text-[10px] text-blue-200 truncate">Acceso rápido, sin anuncios molestos y pantalla completa.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button 
-                onClick={handleInstallClick}
-                className="bg-white text-blue-950 font-black px-3 py-1.5 rounded-lg text-[11px] hover:bg-blue-50 transition-all shadow"
-              >
-                Instalar App
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* BARRA SUPERIOR CON BOTONES DE TIENDA, DONAR E INSTALAR APP */}
+        {/* BARRA SUPERIOR ACTUALIZADA */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
-          <div className="flex items-center gap-3 min-w-0">
+          
+          {/* IZQUIERDA SUPERIOR: Botón del Menú */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button 
               onClick={() => setShowMenu(true)} 
-              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0"
+              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex items-center gap-1.5"
               aria-label="Abrir Menú"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
+              <span className="text-xs font-bold hidden sm:inline">Menú</span>
             </button>
-            <h1 className="text-xl font-black text-white cursor-pointer tracking-tight truncate" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
+          </div>
+
+          {/* CENTRO SUPERIOR: Logo Centralizado */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+            <h1 className="text-xl font-black text-white cursor-pointer tracking-tight" onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setViewingProfile(null); setShowSocialFeed(false); }}>
               FLIX<span className="text-blue-500">XES</span>
             </h1>
           </div>
 
-          <div className="hidden sm:flex items-center flex-1 max-w-xl mx-4">
-            <div className="relative w-full">
-              <input 
-                type="text" 
-                placeholder="Buscar videos, tags, creadores..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-[#141414] border border-zinc-700 pl-4 pr-10 py-2 rounded-full text-sm text-zinc-200 focus:border-blue-500 outline-none" 
-              />
-              <span className="absolute right-3 top-2.5 text-zinc-400">🔍</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* DERECHA SUPERIOR: Registro y Chat */}
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <button 
-              onClick={() => setShowStore(true)}
+              onClick={() => setShowChatDrawer(true)}
               className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-1.5 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1"
             >
-              <span>🛍️</span>
-              <span className="hidden md:inline">Tienda</span>
-            </button>
-            <button 
-              onClick={() => setShowDonateModal(true)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-1.5 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1"
-            >
-              <span>☕</span>
-              <span className="hidden md:inline">Donar</span>
-            </button>
-            <button 
-              onClick={handleInstallClick}
-              className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-full font-bold transition-all shadow"
-            >
-              Instalar App
+              <span>💬</span>
+              <span className="hidden md:inline">Chat</span>
             </button>
             <button 
               onClick={() => handleOpenProfile(currentUsername)} 
-              className="bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 text-xs px-3 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5"
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-1.5 rounded-full font-bold transition-all shadow flex items-center gap-1.5"
             >
               <span>👤</span>
-              <span className="hidden md:inline">Perfil</span>
+              <span className="hidden md:inline">Registro</span>
             </button>
           </div>
         </nav>
+
+        {/* SECCIÓN ABAJO DEL LOGO: Botones Donar, Tienda y Descargar (Instalar App) */}
+        <div className="bg-[#141414] border-b border-zinc-800 px-4 py-3 flex flex-wrap items-center justify-center gap-3 w-full">
+          <button 
+            onClick={() => setShowDonateModal(true)}
+            className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"
+          >
+            <span>☕</span>
+            <span>Donar</span>
+          </button>
+          <button 
+            onClick={() => setShowStore(true)}
+            className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"
+          >
+            <span>🛍️</span>
+            <span>Tienda</span>
+          </button>
+          <button 
+            onClick={handleInstallClick}
+            className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-black transition-all shadow flex items-center gap-1.5"
+          >
+            <span>📱</span>
+            <span>Instalar App</span>
+          </button>
+        </div>
 
         {/* MENÚ LATERAL PROFESIONAL */}
         {showMenu && (
@@ -846,7 +829,7 @@ export default function Home() {
         {!viewingProfile && !showSocialFeed && (
           <>
             <section className="px-4 pt-4 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-              <div className="sm:hidden mb-3 w-full">
+              <div className="mb-3 w-full">
                 <input 
                   type="text" 
                   placeholder="Buscar por título, categoría o etiqueta..." 
