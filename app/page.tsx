@@ -99,26 +99,80 @@ function HorizontalVideoCard({
   video, 
   isSaved, 
   onToggleSave, 
+  onDonateClick,
   likesCount 
 }: { 
   video: Video; 
-  onSelect: (v: Video) => void; 
   isSaved: boolean; 
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
+  onDonateClick: () => void;
   likesCount: number; 
 }) {
   const coverImage = (video.cover_url && video.cover_url.trim() !== '' && video.cover_url !== DEFAULT_COVER_IMAGE) 
     ? video.cover_url 
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(video.title)}&background=09090b&color=3b82f6&size=500&bold=true`;
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: video.title,
+        text: '¡Mira este video en Flixxes!',
+        url: video.voe_url || window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(video.voe_url || window.location.href);
+      alert('¡Enlace copiado al portapapeles!');
+    }
+  };
+
   return (
-    <a 
-      href={video.voe_url || '#'} 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group cursor-pointer"
-    >
-      <div className="flex flex-col h-full relative w-full">
+    <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group relative">
+      
+      {/* Botones externos situados en la esquina superior derecha de la tarjeta */}
+      <div className="absolute top-2 right-2 z-30 flex items-center gap-1.5">
+        <button 
+          onClick={handleShare}
+          className="bg-black/70 hover:bg-black text-white p-2 rounded-full backdrop-blur-md transition-all shadow-lg border border-zinc-700/50"
+          title="Compartir video"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDonateClick();
+          }}
+          className="bg-blue-600/90 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-md transition-all shadow-lg"
+          title="Donar cafecito"
+        >
+          ☕
+        </button>
+
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSave(video, e);
+          }}
+          className={`p-2 rounded-full backdrop-blur-md transition-all shadow-lg ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/70 text-white hover:bg-black border border-zinc-700/50'}`}
+          title={isSaved ? "Quitar de guardados" : "Guardar para después"}
+        >
+          ⭐
+        </button>
+      </div>
+
+      <a 
+        href={video.voe_url || '#'} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex flex-col h-full w-full cursor-pointer"
+      >
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
           <img 
             src={coverImage} 
@@ -128,21 +182,9 @@ function HorizontalVideoCard({
               (e.target as HTMLImageElement).src = DEFAULT_COVER_IMAGE;
             }}
           />
-          <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
+          <span className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
             {video.is_photo ? '📷 Foto' : video.category}
           </span>
-
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleSave(video, e);
-            }}
-            className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-20 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
-            title={isSaved ? "Quitar de guardados" : "Guardar para después"}
-          >
-            ⭐
-          </button>
         </div>
         
         <div className="p-3 flex gap-2.5 w-full items-start">
@@ -160,8 +202,52 @@ function HorizontalVideoCard({
             </div>
           </div>
         </div>
+      </a>
+    </div>
+  );
+}
+
+function VerticalShortModal({ 
+  short, 
+  onClose, 
+  onNext 
+}: { 
+  short: Video; 
+  onClose: () => void; 
+  onNext: () => void; 
+}) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onNext();
+    }, 25000); 
+
+    return () => clearTimeout(timer);
+  }, [short, onNext]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-0 sm:p-4" onClick={onClose}>
+      <div className="relative w-full max-w-sm h-full sm:h-[85vh] bg-black rounded-none sm:rounded-3xl overflow-hidden border border-zinc-800 flex flex-col justify-center items-center shadow-2xl" onClick={e => e.stopPropagation()}>
+        
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black text-white p-2.5 rounded-full backdrop-blur-md transition-all"
+        >
+          ✕
+        </button>
+
+        <iframe 
+          src={short.voe_url} 
+          className="w-full h-full border-0 pointer-events-auto"
+          allow="autoplay; fullscreen"
+          allowFullScreen
+        />
+
+        <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-none bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 rounded-b-3xl">
+          <h4 className="text-white font-black text-sm line-clamp-2">{short.title}</h4>
+          <span className="text-[10px] text-blue-400 font-bold mt-1 inline-block">Cambio automático a 5s del final ⚡</span>
+        </div>
       </div>
-    </a>
+    </div>
   );
 }
 
@@ -180,6 +266,8 @@ export default function Home() {
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
+
+  const [activeShortIndex, setActiveShortIndex] = useState<number | null>(null);
 
   const [watchLater, setWatchLater] = useState<Video[]>([]);
   const [likesMap] = useState<Record<string, number>>({});
@@ -374,7 +462,6 @@ export default function Home() {
     <main className="min-h-screen bg-[#0f0f0f] text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300">
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {/* BARRA SUPERIOR */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
@@ -413,7 +500,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MENÚ LATERAL */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -478,7 +564,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SHORTS VERTICALES */}
         {verticalShorts.length > 0 && (
           <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
             <div className="flex items-center justify-between mb-3">
@@ -488,12 +573,10 @@ export default function Home() {
             </div>
 
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
-              {verticalShorts.map((v) => (
-                <a 
+              {verticalShorts.map((v, index) => (
+                <div 
                   key={`short-${v.id}`} 
-                  href={v.voe_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => setActiveShortIndex(index)}
                   className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                 >
                   <img src={v.cover_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(v.title)}&background=09090b&color=3b82f6&size=500&bold=true`} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
@@ -503,13 +586,23 @@ export default function Home() {
                     </span>
                     <h4 className="text-[11px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </section>
         )}
 
-        {/* GALERÍA DE FOTOS */}
+        {activeShortIndex !== null && verticalShorts[activeShortIndex] && (
+          <VerticalShortModal 
+            short={verticalShorts[activeShortIndex]}
+            onClose={() => setActiveShortIndex(null)}
+            onNext={() => {
+              const nextIdx = (activeShortIndex + 1) % verticalShorts.length;
+              setActiveShortIndex(nextIdx);
+            }}
+          />
+        )}
+
         {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
           <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
             <div className="flex items-center justify-between mb-3">
@@ -544,7 +637,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* PUBLICIDAD SUPERIOR */}
         <section className="px-3 py-2 w-full max-w-[100vw]">
           <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center">
             <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada</span>
@@ -552,12 +644,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* INTEGRACIÓN NATIVE BLOCK */}
         <section className="px-3 py-2 w-full max-w-[100vw]">
           <AdsterraNativeBlock zoneId="30814143" />
         </section>
 
-        {/* VIDEOS HORIZONTALES */}
         {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
           <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
             <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
@@ -586,9 +676,9 @@ export default function Home() {
                     <HorizontalVideoCard 
                       key={video.id}
                       video={video}
-                      onSelect={() => {}}
                       isSaved={isSaved}
                       onToggleSave={toggleWatchLater}
+                      onDonateClick={() => setShowDonateModal(true)}
                       likesCount={likesMap[video.id] || 0}
                     />
                   );
@@ -598,7 +688,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* MODAL DE DONACIÓN */}
         {showDonateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -617,7 +706,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL DE GUARDADOS */}
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -648,7 +736,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN MULTIFUNCIÓN (Con URL de Miniatura Global) */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -663,7 +750,6 @@ export default function Home() {
 
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               
-              {/* CAMPO DE URL DE MINIATURA GLOBAL (Visible en Video, Embed y Foto) */}
               <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
 
               {adminTab === 'photo' ? (
@@ -740,3 +826,4 @@ export default function Home() {
     </main>
   );
 }
+
