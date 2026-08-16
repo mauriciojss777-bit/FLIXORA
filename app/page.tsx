@@ -271,7 +271,7 @@ function HorizontalVideoCard({
         
         <div className="p-3 flex gap-2.5 w-full items-start">
           <div 
-            onClick={(e) => onOpenProfile(video.author || 'FlixoraUser', e)}
+            onClick={(e) => onOpenProfile(video.author || 'FlixxesUser', e)}
             className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black flex items-center justify-center flex-shrink-0 text-xs hover:bg-blue-600 hover:text-white transition-colors"
             title="Ver perfil"
           >
@@ -281,10 +281,10 @@ function HorizontalVideoCard({
             <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
             <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
               <span 
-                onClick={(e) => onOpenProfile(video.author || 'FlixoraUser', e)}
+                onClick={(e) => onOpenProfile(video.author || 'FlixxesUser', e)}
                 className="hover:text-blue-400 underline cursor-pointer"
               >
-                {video.author || 'FlixoraUser'}
+                {video.author || 'FlixxesUser'}
               </span>
               <span>•</span>
               <span>{video.is_photo ? 'Foto HD' : 'HD'}</span>
@@ -353,7 +353,6 @@ export default function Home() {
   const [photoUrlInput, setPhotoUrlInput] = useState('');
   const [photoTitleInput, setPhotoTitleInput] = useState('');
 
-  // Estados para el formulario de Afiliados
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
   const [prodImage, setProdImage] = useState('');
@@ -374,14 +373,14 @@ export default function Home() {
       if (localStorage.getItem('age_verified') === 'true') {
         setAgeAccepted(true);
       }
-      const savedUser = localStorage.getItem('flixora_username');
+      const savedUser = localStorage.getItem('flixxes_username');
       if (savedUser) setCurrentUsername(savedUser);
 
-      const savedHistory = localStorage.getItem('flixora_history');
+      const savedHistory = localStorage.getItem('flixxes_history');
       if (savedHistory) {
         try { setHistory(JSON.parse(savedHistory)); } catch (e) { console.error(e); }
       }
-      const savedWatchLater = localStorage.getItem('flixora_watch_later');
+      const savedWatchLater = localStorage.getItem('flixxes_watch_later');
       if (savedWatchLater) {
         try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); }
       }
@@ -455,7 +454,7 @@ export default function Home() {
     
     const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 15);
     setHistory(updatedHistory);
-    localStorage.setItem('flixora_history', JSON.stringify(updatedHistory));
+    localStorage.setItem('flixxes_history', JSON.stringify(updatedHistory));
   };
 
   const handleCloseVideo = () => {
@@ -475,7 +474,7 @@ export default function Home() {
       updated = [video, ...watchLater];
     }
     setWatchLater(updated);
-    localStorage.setItem('flixora_watch_later', JSON.stringify(updated));
+    localStorage.setItem('flixxes_watch_later', JSON.stringify(updated));
   };
 
   const handleNextVideo = () => {
@@ -499,7 +498,6 @@ export default function Home() {
       return;
     }
 
-    // Lógica para Producto Afiliado
     if (adminTab === 'afiliado') {
       if (!prodTitle.trim() || !prodPrice.trim() || !prodUrl.trim()) {
         alert('Por favor completa al menos el título, precio y URL de compra del producto.');
@@ -1036,10 +1034,10 @@ export default function Home() {
                         <div className="p-2.5">
                           <h4 className="text-xs font-bold text-zinc-100 line-clamp-1 group-hover:text-blue-400 transition-colors">{photo.title}</h4>
                           <span 
-                            onClick={(e) => handleOpenProfile(photo.author || 'FlixoraUser', e)} 
+                            onClick={(e) => handleOpenProfile(photo.author || 'FlixxesUser', e)} 
                             className="text-[10px] text-zinc-400 hover:text-blue-400 underline mt-1 block"
                           >
-                            @{photo.author || 'FlixoraUser'}
+                            @{photo.author || 'FlixxesUser'}
                           </span>
                         </div>
                       </div>
@@ -1158,10 +1156,10 @@ export default function Home() {
                   <div>
                     <h2 className="font-bold text-white text-base sm:text-lg">{selectedVideo.title}</h2>
                     <span 
-                      onClick={() => { handleOpenProfile(selectedVideo.author || 'FlixoraUser'); handleCloseVideo(); }}
+                      onClick={() => { handleOpenProfile(selectedVideo.author || 'FlixxesUser'); handleCloseVideo(); }}
                       className="text-xs text-blue-400 hover:underline cursor-pointer mt-0.5 block font-semibold"
                     >
-                      @{selectedVideo.author || 'FlixoraUser'}
+                      @{selectedVideo.author || 'FlixxesUser'}
                     </span>
                   </div>
                   
@@ -1223,7 +1221,7 @@ export default function Home() {
                         </div>
                         <div className="p-2">
                           <h4 className="text-[11px] font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors">{rec.title}</h4>
-                          <span className="text-[9px] text-zinc-400">@{rec.author || 'FlixoraUser'}</span>
+                          <span className="text-[9px] text-zinc-400">@{rec.author || 'FlixxesUser'}</span>
                         </div>
                       </div>
                     ))}
@@ -1432,7 +1430,7 @@ export default function Home() {
               </div>
 
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-              <input type="text" placeholder="Tu Nombre de Usuario / Autor" value={currentUsername} onChange={e => { setCurrentUsername(e.target.value); localStorage.setItem('flixora_username', e.target.value); }} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              <input type="text" placeholder="Tu Nombre de Usuario / Autor" value={currentUsername} onChange={e => { setCurrentUsername(e.target.value); localStorage.setItem('flixxes_username', e.target.value); }} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
               
               {adminTab === 'afiliado' ? (
                 <>
@@ -1506,3 +1504,4 @@ export default function Home() {
     </main>
   );
 }
+
