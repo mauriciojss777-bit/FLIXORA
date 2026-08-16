@@ -9,6 +9,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
+
 interface Video {
   id: string;
   title: string;
@@ -21,6 +23,7 @@ interface Video {
   likes?: number;
   created_at?: string;
   is_short?: boolean;
+  is_photo?: boolean;
 }
 
 interface Product {
@@ -98,7 +101,6 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
-// Componente optimizado con autoplay real forzado y hover autónomo estilo Facebook sin lags
 function HorizontalVideoCard({ 
   video, 
   onSelect, 
@@ -116,7 +118,7 @@ function HorizontalVideoCard({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    // Retraso inteligente de 250ms para evitar parpadeos y sobrecarga al pasar el mouse rápido
+    if (video.is_photo) return;
     timeoutRef.current = setTimeout(() => {
       setIsHovered(true);
     }, 250);
@@ -142,11 +144,11 @@ function HorizontalVideoCard({
     >
       <div className="flex flex-col h-full relative w-full">
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
-          {!isHovered ? (
+          {!isHovered || video.is_photo ? (
             <>
-              <img src={video.cover_url} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
+              <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
               <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
-                {video.category}
+                {video.is_photo ? '📷 Foto' : video.category}
               </span>
             </>
           ) : (
@@ -176,7 +178,7 @@ function HorizontalVideoCard({
             <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
               <span>Flixxes</span>
               <span>•</span>
-              <span>HD</span>
+              <span>{video.is_photo ? 'Foto HD' : 'HD'}</span>
               <span>•</span>
               <span>👍 {likesCount}</span>
             </div>
@@ -197,6 +199,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
   
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminTab, setAdminTab] = useState<'video' | 'photo'>('video');
   const [showStore, setShowStore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
@@ -220,17 +223,19 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [videoTagsInput, setVideoTagsInput] = useState('HD, Latino, Casero');
   const [isShortVideo, setIsShortVideo] = useState(false);
+  const [photoUrlInput, setPhotoUrlInput] = useState('');
+  const [photoTitleInput, setPhotoTitleInput] = useState('');
 
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({
     default: [
-      { id: '1', user: 'Carlos99', text: 'Excelente calidad de video, gracias por compartir!', created_at: 'Hace 2 horas' },
+      { id: '1', user: 'Carlos99', text: 'Excelente contenido, gracias por compartir!', created_at: 'Hace 2 horas' },
       { id: '2', user: 'FoxyUser', text: 'Muy buen aporte bro.', created_at: 'Hace 5 horas' }
     ]
   });
   const [newCommentUser, setNewCommentUser] = useState('');
   const [newCommentText, setNewCommentText] = useState('');
 
-  const defaultTags = ['Todos', 'Destacados', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Jovencitas', 'Caseros'];
+  const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -338,12 +343,37 @@ export default function Home() {
       alert('Contraseña incorrecta');
       return;
     }
+
+    if (adminTab === 'photo') {
+      if (!photoUrlInput.trim() || !photoTitleInput.trim()) {
+        alert('Por favor completa el título y la URL de la foto.');
+        return;
+      }
+      const { error } = await supabase.from('videos').insert([{
+        title: photoTitleInput,
+        category: 'Fotos',
+        voe_url: '',
+        cover_url: photoUrlInput,
+        description: 'Fotografía exclusiva en alta resolución disponible en Flixxes.',
+        tags: ['Fotos', 'HD'],
+        is_photo: true,
+        is_short: false
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        setShowAdminModal(false);
+        setPhotoTitleInput('');
+        setPhotoUrlInput('');
+        setAdminPassword('');
+        fetchVideos();
+      }
+      return;
+    }
+
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    
-    // Si no se introduce foto de portada, se asigna una imagen por defecto automática
-    const finalCoverUrl = coverUrl.trim() !== '' 
-      ? coverUrl.trim() 
-      : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
+    const finalCoverUrl = coverUrl.trim() ? coverUrl.trim() : DEFAULT_COVER_IMAGE;
 
     const { error } = await supabase.from('videos').insert([{ 
       title, 
@@ -352,7 +382,8 @@ export default function Home() {
       cover_url: finalCoverUrl,
       description: description || 'Disfruta de este contenido en alta definición disponible en Flixxes.',
       tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
-      is_short: isShortVideo
+      is_short: isShortVideo,
+      is_photo: false
     }]);
 
     if (error) { 
@@ -394,7 +425,7 @@ export default function Home() {
 
   if (!ageAccepted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full max-w-[100vw] overflow-x-hidden">
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 w-full overflow-x-hidden">
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
           <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
@@ -407,7 +438,7 @@ export default function Home() {
   const filteredVideos = videos
     .filter(v => {
       const vTags = Array.isArray(v.tags) ? v.tags : (v.tags ? [String(v.tags)] : []);
-      const matchesTag = activeTag === 'Todos' || v.category === activeTag || vTags.some(t => t.toLowerCase() === activeTag.toLowerCase());
+      const matchesTag = activeTag === 'Todos' || (activeTag === 'Fotos' ? v.is_photo : (v.category === activeTag || vTags.some(t => t.toLowerCase() === activeTag.toLowerCase())));
       const query = searchQuery.toLowerCase();
       const matchesSearch = v.title.toLowerCase().includes(query) || 
                             (v.category && v.category.toLowerCase().includes(query)) ||
@@ -420,7 +451,8 @@ export default function Home() {
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
-  const horizontalVideos = filteredVideos.filter(v => !v.is_short);
+  const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
+  const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
   return (
@@ -428,7 +460,7 @@ export default function Home() {
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
         {/* BARRA SUPERIOR */}
-        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw] overflow-x-hidden">
+        <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
@@ -463,7 +495,7 @@ export default function Home() {
             </button>
             <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
             <button onClick={() => { setShowStore(true); fetchProducts(); }} className="hidden md:inline-block bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all">🛍️ Tienda</button>
-            <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ SUBIR</button>
+            <button onClick={() => setShowAdminModal(true)} className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1.5 rounded-full border border-zinc-700 font-bold transition-all whitespace-nowrap">+ PUBLICAR</button>
           </div>
         </nav>
 
@@ -483,9 +515,10 @@ export default function Home() {
 
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); handleCloseVideo(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
+                <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📷 Galería de Fotos</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold">☕ Apóyame con una Donación</button>
-                <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} videos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
+                <button onClick={() => { alert(history.length > 0 ? `Tienes ${history.length} elementos en tu historial reciente.` : 'No hay historial reciente.'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⏱️ Historial Reciente ({history.length})</button>
                 <a href="mailto:umbrellaholdings.global@gmail.com" className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📢 Contacto y Publicidad</a>
                 
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
@@ -498,7 +531,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Subir Video (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar (Admin)</button>
                 </div>
               </div>
             </div>
@@ -534,28 +567,15 @@ export default function Home() {
         </section>
 
         {/* SHORTS VERTICALES */}
-        <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-black text-blue-400 tracking-wider uppercase flex items-center gap-1.5">
-              ⚡ Shorts Verticales ({verticalShorts.length})
-            </h3>
-            <span className="text-[10px] text-zinc-500">Desliza para ver más</span>
-          </div>
+        {verticalShorts.length > 0 && (
+          <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-black text-blue-400 tracking-wider uppercase flex items-center gap-1.5">
+                ⚡ Shorts Verticales ({verticalShorts.length})
+              </h3>
+              <span className="text-[10px] text-zinc-500">Desliza para ver más</span>
+            </div>
 
-          {loading ? (
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
-              {[1, 2, 3, 4, 5].map(n => (
-                <div key={`load-short-${n}`} className="min-w-[140px] max-w-[140px] h-[250px] rounded-2xl bg-zinc-800 animate-pulse flex-shrink-0"></div>
-              ))}
-            </div>
-          ) : verticalShorts.length === 0 ? (
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
-              <div className="min-w-[140px] h-[250px] bg-zinc-900 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md flex flex-col items-center justify-center p-3 text-center">
-                <span className="text-xs text-zinc-400 mb-2 font-bold">Sube tu primer Short Vertical</span>
-                <button onClick={() => setShowAdminModal(true)} className="bg-blue-600 text-white text-[10px] font-black px-3 py-2 rounded-xl">+ Subir</button>
-              </div>
-            </div>
-          ) : (
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
               {verticalShorts.map((v) => (
                 <div 
@@ -563,7 +583,7 @@ export default function Home() {
                   onClick={() => handleSelectVideo(v)}
                   className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                 >
-                  <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                  <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                     <span className="absolute top-2 left-2 bg-blue-600/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                       Short
@@ -573,8 +593,44 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
+
+        {/* GALERÍA DE FOTOS (SI ESTÁ ACTIVO O HAY FOTOS) */}
+        {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
+          <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-black text-pink-400 tracking-wider uppercase flex items-center gap-1.5">
+                📷 Galería de Fotos ({photoGallery.length})
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 w-full">
+              {photoGallery.map((photo) => {
+                const isSaved = watchLater.some(v => v.id === photo.id);
+                return (
+                  <div 
+                    key={`photo-${photo.id}`}
+                    onClick={() => handleSelectVideo(photo)}
+                    className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative"
+                  >
+                    <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
+                      <img src={photo.cover_url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                      <button 
+                        onClick={(e) => toggleWatchLater(photo, e)}
+                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
+                      >
+                        ⭐
+                      </button>
+                    </div>
+                    <div className="p-2.5">
+                      <h4 className="text-xs font-bold text-zinc-100 line-clamp-1 group-hover:text-blue-400 transition-colors">{photo.title}</h4>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* PUBLICIDAD SUPERIOR */}
         <section className="px-3 py-2 w-full max-w-[100vw]">
@@ -585,83 +641,101 @@ export default function Home() {
         </section>
 
         {/* VIDEOS HORIZONTALES */}
-        <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-          <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
-            <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
-              📺 Videos Horizontales ({horizontalVideos.length})
-            </h3>
-            <span className="text-[10px] text-zinc-500">Streaming Estándar</span>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                <div key={n} className="animate-pulse flex flex-col space-y-3 w-full">
-                  <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
-                  <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
-                  <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
-                </div>
-              ))}
+        {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
+          <section className="px-3 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+            <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
+              <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase flex items-center gap-1.5">
+                📺 Videos Horizontales ({horizontalVideos.length})
+              </h3>
+              <span className="text-[10px] text-zinc-500">Streaming Estándar</span>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
-              {horizontalVideos.map((video) => {
-                const isSaved = watchLater.some(v => v.id === video.id);
 
-                return (
-                  <HorizontalVideoCard 
-                    key={video.id}
-                    video={video}
-                    onSelect={handleSelectVideo}
-                    isSaved={isSaved}
-                    onToggleSave={toggleWatchLater}
-                    likesCount={likesMap[video.id] || 0}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                  <div key={n} className="animate-pulse flex flex-col space-y-3 w-full">
+                    <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
+                    <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
+                    <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
+                {horizontalVideos.map((video) => {
+                  const isSaved = watchLater.some(v => v.id === video.id);
 
-        {/* MODAL DE REPRODUCCIÓN */}
+                  return (
+                    <HorizontalVideoCard 
+                      key={video.id}
+                      video={video}
+                      onSelect={handleSelectVideo}
+                      isSaved={isSaved}
+                      onToggleSave={toggleWatchLater}
+                      likesCount={likesMap[video.id] || 0}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* MODAL DE REPRODUCCIÓN / VISUALIZACIÓN */}
         {selectedVideo && !isPipActive && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
             <div id="video-modal-container" className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 transition-all duration-300 shadow-2xl`} onClick={e => e.stopPropagation()}>
               
               <div className="bg-zinc-950 px-4 py-2.5 border-b border-zinc-800 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
-                    🎬 Modo Cine
-                  </button>
-                  <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800">
-                    📌 PiP
-                  </button>
+                  {!selectedVideo.is_photo && (
+                    <>
+                      <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}>
+                        🎬 Modo Cine
+                      </button>
+                      <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800">
+                        📌 PiP
+                      </button>
+                    </>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <label className="hidden sm:flex items-center gap-1.5 cursor-pointer text-zinc-400 font-semibold select-none">
-                    <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accent-blue-500" />
-                    Autoplay
-                  </label>
-                  <button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg hover:bg-blue-500">
-                    Siguiente ➔
-                  </button>
+                  {!selectedVideo.is_photo && (
+                    <label className="hidden sm:flex items-center gap-1.5 cursor-pointer text-zinc-400 font-semibold select-none">
+                      <input type="checkbox" checked={autoPlayNext} onChange={(e) => setAutoPlayNext(e.target.checked)} className="accent-blue-500" />
+                      Autoplay
+                    </label>
+                  )}
+                  {!selectedVideo.is_photo && (
+                    <button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg hover:bg-blue-500">
+                      Siguiente ➔
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* REPRODUCTOR CON AUTOPLAY FORZADO */}
-              <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4 bg-black' : 'aspect-video'}`}>
-                <div className={`w-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'h-full'}`}>
-                  <iframe 
-                    src={`${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1`}
-                    className="w-full h-full border-0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowFullScreen 
-                    scrolling="no"
-                    title={selectedVideo.title}
-                  />
+              {/* REPRODUCTOR DINÁMICO O VISOR DE FOTO */}
+              {selectedVideo.is_photo ? (
+                <div className="w-full bg-black flex justify-center items-center py-6">
+                  <div className="max-w-2xl max-h-[70vh] flex items-center justify-center p-2">
+                    <img src={selectedVideo.cover_url} alt={selectedVideo.title} className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4 bg-black' : 'aspect-video'}`}>
+                  <div className={`w-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'h-full'}`}>
+                    <iframe 
+                      src={`${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1`}
+                      className="w-full h-full border-0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      allowFullScreen 
+                      scrolling="no"
+                      title={selectedVideo.title}
+                    />
+                  </div>
+                </div>
+              )}
               
               <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
                 <h2 className="font-bold text-white text-base sm:text-lg truncate w-full sm:w-1/2">{selectedVideo.title}</h2>
@@ -771,10 +845,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CARRUSEL DE RECOMENDADOS CON SCROLL AUTOMÁTICO HACIA ARRIBA */}
+              {/* CARRUSEL DE RECOMENDADOS QUE ABRE Y REPRODUCE AUTOMÁTICAMENTE AL HACER CLIC */}
               <div className="p-4 bg-[#0d0d0d] border-t border-zinc-800 space-y-3">
                 <h3 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-                  🔥 Más videos recomendados
+                  🔥 Más contenido recomendado
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar w-full">
                   {videos.filter(v => v.id !== selectedVideo.id).map(v => (
@@ -788,9 +862,9 @@ export default function Home() {
                       className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group flex-shrink-0 flex flex-col"
                     >
                       <div className="aspect-video w-full bg-black relative overflow-hidden flex items-center justify-center">
-                        <img src={v.cover_url} alt={v.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
+                        <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
                         <span className="absolute bottom-1 right-1 bg-black/80 text-blue-400 text-[9px] font-bold px-1 rounded">
-                          {v.category}
+                          {v.is_photo ? 'Foto' : v.category}
                         </span>
                       </div>
                       <div className="p-2 flex flex-col justify-between flex-grow">
@@ -836,17 +910,17 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h2 className="text-xl font-black text-white">⭐ Videos Guardados</h2>
+                <h2 className="text-xl font-black text-white">⭐ Elementos Guardados</h2>
                 <button onClick={() => setShowWatchLaterModal(false)} className="text-xs text-zinc-400 hover:text-white">CERRAR</button>
               </div>
 
               {watchLater.length === 0 ? (
-                <p className="text-center text-zinc-500 py-8 text-xs">No tienes ningún video guardado en tu lista.</p>
+                <p className="text-center text-zinc-500 py-8 text-xs">No tienes ningún elemento guardado en tu lista.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {watchLater.map(v => (
                     <div key={v.id} className="bg-zinc-900 p-2 rounded-xl flex gap-3 items-center border border-zinc-800">
-                      <img src={v.cover_url} alt={v.title} className="w-20 aspect-video rounded-lg object-cover bg-black pointer-events-none" />
+                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-20 aspect-video rounded-lg object-cover bg-black pointer-events-none" />
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
@@ -862,36 +936,55 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN SUBIR VIDEO (CON FOTO DE PORTADA POR DEFECTO AUTOMÁTICA SI SE DEJA VACÍO) */}
+        {/* MODAL ADMIN PUBLICAR (VIDEO / FOTO) */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleSaveVideo} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-              <h2 className="text-xl font-bold text-white">Panel Admin - Subir Video</h2>
-              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-              <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500">
-                {defaultTags.filter(t => t !== 'Todos').map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none" />
-              
-              <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
-                <input 
-                  type="checkbox" 
-                  id="shortCheckbox" 
-                  checked={isShortVideo} 
-                  onChange={(e) => setIsShortVideo(e.target.checked)} 
-                  className="w-4 h-4 accent-blue-500 cursor-pointer" 
-                />
-                <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
-                  ¿Es un Video Vertical / Short?
-                </label>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">Panel Admin</h2>
+                <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold">
+                  <button type="button" onClick={() => setAdminTab('video')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
+                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-3 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto URL</button>
+                </div>
               </div>
 
-              <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
-              <input type="text" placeholder="URL del video (iframe o enlace embed)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none filter outline-none focus:border-blue-500" />
-              <input type="text" placeholder="URL Portada / Miniatura (Opcional, se asigna una por defecto)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+              
+              {adminTab === 'photo' ? (
+                <>
+                  <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <p className="text-[11px] text-zinc-500">Sube únicamente el enlace directo de la imagen (ej: .jpg, .png, etc.).</p>
+                </>
+              ) : (
+                <>
+                  <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-blue-500">
+                    {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <textarea placeholder="Descripción del video personalizada" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none" />
+                  
+                  <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                    <input 
+                      type="checkbox" 
+                      id="shortCheckbox" 
+                      checked={isShortVideo} 
+                      onChange={(e) => setIsShortVideo(e.target.checked)} 
+                      className="w-4 h-4 accent-blue-500 cursor-pointer" 
+                    />
+                    <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
+                      ¿Es un Video Vertical / Short?
+                    </label>
+                  </div>
+
+                  <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL del video (iframe o enlace embed)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                  <input type="text" placeholder="URL Portada / Miniatura (Opcional - Se usará una por defecto si se deja vacía)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500" />
+                </>
+              )}
+
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar sin guardar</button>
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700">Cancelar</button>
                 <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500">Publicar</button>
               </div>
             </form>
@@ -904,7 +997,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
-            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, entre otros. Prohibido el acceso a menores de 18 años.
+            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 años.
           </p>
         </div>
 
@@ -913,7 +1006,7 @@ export default function Home() {
           <span>•</span>
           <a href="#" className="hover:text-blue-500">DMCA</a>
           <span>•</span>
-          <a href="#" className="hover:text-db500">2257</a>
+          <a href="#" className="hover:text-blue-500">2257</a>
           <span>•</span>
           <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:text-blue-500">Contacto</a>
         </div>
