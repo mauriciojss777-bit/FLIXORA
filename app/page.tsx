@@ -12,7 +12,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
 const ADMIN_PASSWORD = 'flixes2026#Admin#Pass';
 const BUNNY_BASE_URL = 'https://flixxes.b-cdn.net/';
-const PAYPAL_CLIENT_ID = 'TU_PAYPAL_CLIENT_ID_AQUI'; // Reemplaza con tu Client ID real de PayPal Developer
 
 interface Video {
   id: string;
@@ -40,84 +39,33 @@ interface Product {
   category?: string;
 }
 
-declare global {
-  interface Window {
-    paypal?: any;
-  }
-}
-
-/**
- * Componente interactivo para el Modal de Donación (PayPal + Tarjetas nativas)
- */
 function DonateModal({ onClose }: { onClose: () => void }) {
   const [selectedAmount, setSelectedAmount] = useState('5.00');
   const [customAmount, setCustomAmount] = useState('');
-  const [sdkLoaded, setSdkLoaded] = useState(false);
 
   const finalAmount = customAmount ? customAmount : selectedAmount;
 
-  useEffect(() => {
-    if (window.paypal) {
-      setSdkLoaded(true);
+  const handlePayPalDirectPay = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amountNum = parseFloat(finalAmount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert('Por favor ingresa un monto válido.');
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
-    script.async = true;
-    script.onload = () => setSdkLoaded(true);
-    script.onerror = () => console.error('Error al cargar el SDK de PayPal');
-    document.body.appendChild(script);
-  }, []);
-
-  useEffect(() => {
-    if (sdkLoaded && window.paypal) {
-      const container = document.getElementById('paypal-button-container');
-      if (container) container.innerHTML = '';
-
-      window.paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'paypal',
-        },
-        createOrder: (_data: any, actions: any) => {
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: finalAmount,
-              },
-              description: 'Propina / Apoyo para Flixxes'
-            }]
-          });
-        },
-        onApprove: (_data: any, actions: any) => {
-          return actions.order.capture().then((details: any) => {
-            alert(`¡Muchas gracias por tu apoyo, ${details.payer.name.given_name}! ☕`);
-            onClose();
-          });
-        },
-        onError: (err: any) => {
-          console.error('Error en el proceso de pago:', err);
-          alert('Hubo un error al procesar el pago. Inténtalo de nuevo.');
-        }
-      }).render('#paypal-button-container');
-    }
-  }, [sdkLoaded, finalAmount, onClose]);
+    const paypalMeUrl = `https://paypal.me/tu-usuario-paypal/${amountNum}USD`;
+    window.open(paypalMeUrl, '_blank', 'noopener,noreferrer');
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl text-center" onClick={e => e.stopPropagation()}>
-        
         <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
           <h2 className="text-xl font-black text-white">☕ Apóyame con una Propina</h2>
           <button onClick={onClose} className="text-xs text-zinc-400 hover:text-white cursor-pointer">✕</button>
         </div>
-
-        <p className="text-xs text-zinc-400">Selecciona o escribe el monto. Puedes pagar con tu cuenta de PayPal o directamente con tarjeta de crédito/débito.</p>
-
-        {/* Montos rápidos */}
+        <p className="text-xs text-zinc-400">Selecciona o escribe el monto. Paga de forma 100% segura mediante PayPal o tarjeta.</p>
         <div className="grid grid-cols-3 gap-2">
           {['3.00', '5.00', '10.00'].map((amt) => (
             <button
@@ -129,8 +77,6 @@ function DonateModal({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
-
-        {/* Monto personalizado */}
         <input 
           type="number" 
           placeholder="Otro monto (USD)" 
@@ -138,22 +84,23 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setCustomAmount(e.target.value)}
           className="w-full bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-xs text-white text-center focus:border-blue-500 outline-none"
         />
-
-        {/* Contenedor PayPal + Tarjetas */}
         <div className="pt-2">
-          {!sdkLoaded && <p className="text-xs text-zinc-500 py-4">Cargando métodos de pago seguros...</p>}
-          <div id="paypal-button-container" className="w-full"></div>
+          <button 
+            onClick={handlePayPalDirectPay}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>Pagar ${finalAmount} USD con PayPal</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
         </div>
-
         <button onClick={onClose} className="w-full text-xs text-zinc-500 hover:text-white py-1 cursor-pointer">Cancelar</button>
       </div>
     </div>
   );
 }
 
-/**
- * Componente de Anuncio Interstitial
- */
 function InterstitialAdModal({ 
   onAdFinished, 
   onClose 
@@ -196,7 +143,6 @@ function InterstitialAdModal({
             </button>
           </div>
         </div>
-
         <div className="flex-1 flex items-center justify-center my-3 relative overflow-hidden rounded-xl border border-zinc-800 bg-black">
           <img 
             src={DEFAULT_COVER_IMAGE} 
@@ -207,7 +153,6 @@ function InterstitialAdModal({
             <p className="text-xs text-white font-bold drop-shadow">¡Descubre ofertas exclusivas y apoya a Flixxes!</p>
           </div>
         </div>
-
         <div className="flex justify-end items-center w-full">
           {canSkip ? (
             <button 
@@ -342,7 +287,6 @@ function HorizontalVideoCard({
             {video.is_photo ? '📷 Foto' : video.category}
           </span>
         </div>
-        
         <div className="p-3 flex gap-2.5 w-full items-start">
           <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black flex items-center justify-center flex-shrink-0 text-xs">
             F
@@ -357,7 +301,6 @@ function HorizontalVideoCard({
                 <span>•</span>
                 <span>👍 {likesCount}</span>
               </div>
-
               <div className="flex items-center gap-1.5 z-30" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                 <button 
                   onClick={handleShare}
@@ -368,7 +311,6 @@ function HorizontalVideoCard({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
                 </button>
-
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
@@ -380,7 +322,6 @@ function HorizontalVideoCard({
                 >
                   ☕
                 </button>
-
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
@@ -436,14 +377,13 @@ function VerticalShortModal({
         >
           ✕
         </button>
-
         <iframe 
           src={getAutoplayUrl(short.voe_url)} 
           className="w-full h-full border-0 pointer-events-auto"
           allow="autoplay; fullscreen"
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-presentation"
         />
-
         <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-none bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 rounded-b-3xl">
           <h4 className="text-white font-black text-sm line-clamp-2">{short.title}</h4>
         </div>
@@ -522,7 +462,7 @@ export default function Home() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const { data } = await supabase.from('videos').select('*');
+      const { data } = await supabase.from('videos').select('*').limit(50);
       if (data) setVideos(data);
     } catch (e) { 
       console.error(e); 
@@ -534,7 +474,7 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       setStoreLoading(true);
-      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false }).limit(50);
       if (error) throw error;
       if (data) setProducts(data);
     } catch (e) { 
@@ -732,7 +672,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300">
       <div className="w-full max-w-[100vw] overflow-x-hidden">
-        
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-3 py-3 flex items-center justify-between gap-2 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 min-w-0">
             <button 
@@ -748,7 +687,6 @@ export default function Home() {
               <span className="text-white">FLIX</span><span className="text-blue-500">XES</span>
             </h1>
           </div>
-
           <div className="hidden sm:flex items-center flex-1 max-w-xl mx-4">
             <div className="relative w-full">
               <input 
@@ -761,7 +699,6 @@ export default function Home() {
               <span className="absolute right-3 top-2.5 text-zinc-400">🔍</span>
             </div>
           </div>
-
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap cursor-pointer">
               ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-blue-500 text-white px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
@@ -783,14 +720,12 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-
               <div className="flex flex-col space-y-2 text-sm font-semibold">
                 <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">🏠 Inicio</button>
                 <button onClick={() => { setShowStore(true); fetchProducts(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-blue-400 cursor-pointer">🛍️ Tienda de Afiliados</button>
                 <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">📷 Galería de Fotos</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">⭐ Lista de Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold cursor-pointer">☕ Apóyame con una Donación</button>
-                
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
@@ -799,7 +734,6 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-
                 <div className="pt-2">
                   <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500 cursor-pointer">+ Publicar / Afiliados (Admin)</button>
                 </div>
@@ -818,7 +752,6 @@ export default function Home() {
               className="w-full bg-[#121212] border border-zinc-800 p-2.5 rounded-xl text-xs focus:border-blue-500 outline-none text-zinc-200 box-border" 
             />
           </div>
-
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
@@ -826,7 +759,6 @@ export default function Home() {
               <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
-
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
               <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 cursor-pointer ${activeTag === tag ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
@@ -843,7 +775,6 @@ export default function Home() {
                 ⚡ Shorts Verticales ({verticalShorts.length})
               </h3>
             </div>
-
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
               {verticalShorts.map((v, index) => (
                 <div 
@@ -928,7 +859,6 @@ export default function Home() {
               </h3>
               <span className="text-[10px] text-zinc-500">Streaming Estándar</span>
             </div>
-
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
@@ -943,7 +873,6 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
                 {horizontalVideos.map((video) => {
                   const isSaved = watchLater.some(v => v.id === video.id);
-
                   return (
                     <HorizontalVideoCard 
                       key={video.id}
@@ -972,84 +901,140 @@ export default function Home() {
           />
         )}
 
+        {/* ================= TIENDA / E-COMMERCE MODAL REDISEÑADO ================= */}
         {showStore && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" onClick={() => setShowStore(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-4xl w-full space-y-6 max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn" onClick={() => setShowStore(false)}>
+            <div className="bg-[#121214] border border-zinc-800 rounded-3xl max-w-5xl w-full flex flex-col h-[92vh] max-h-[92vh] shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
               
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-black text-white">🛍️ Tienda de Productos y Afiliados</h2>
+              {/* Header de la Tienda */}
+              <div className="flex justify-between items-center px-6 py-4 bg-zinc-950 border-b border-zinc-800/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-xl">
+                    🛍️
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-black text-white tracking-wide">Tienda Oficial y Afiliados</h2>
+                    <p className="text-[11px] text-zinc-400">Explora ofertas exclusivas seleccionadas para ti</p>
+                  </div>
                 </div>
-                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white font-bold bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 cursor-pointer">CERRAR</button>
-              </div>
-
-              <div className="flex flex-col md:flex-row gap-3">
-                <input
-                  type="text"
-                  placeholder="Buscar productos en la tienda..."
-                  value={storeSearchQuery}
-                  onChange={(e) => setStoreSearchQuery(e.target.value)}
-                  className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white flex-1 focus:outline-none focus:border-blue-500 text-xs"
-                />
-                <select
-                  value={selectedStoreCategory}
-                  onChange={(e) => setSelectedStoreCategory(e.target.value)}
-                  className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 focus:outline-none focus:border-blue-500 text-xs"
+                <button 
+                  onClick={() => setShowStore(false)} 
+                  className="text-xs text-zinc-400 hover:text-white font-bold bg-zinc-900 hover:bg-zinc-800 px-3.5 py-2 rounded-xl border border-zinc-800 transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  {storeCategories.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                  ))}
-                </select>
+                  <span>CERRAR</span>
+                  <span className="text-zinc-500">✕</span>
+                </button>
               </div>
 
-              {storeLoading ? (
-                <p className="text-center py-10 text-xs text-zinc-500">Cargando productos...</p>
-              ) : filteredProducts.length === 0 ? (
-                <p className="text-center py-10 text-zinc-500 text-xs">No se encontraron productos o ofertas disponibles.</p>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {filteredProducts.map((product) => (
-                    <div 
-                      key={product.id} 
-                      className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between hover:border-zinc-700 transition group"
-                    >
-                      <div>
-                        <div className="w-full h-52 bg-zinc-950 flex items-center justify-center overflow-hidden p-2 relative">
-                          <img 
-                            src={product.image_url || DEFAULT_COVER_IMAGE} 
-                            alt={product.title} 
-                            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow">
-                            {product.price || '$0.00'}
-                          </span>
-                        </div>
-
-                        <div className="p-4">
-                          <h3 className="font-bold text-xs mb-1.5 line-clamp-2 text-white">{product.title}</h3>
-                          <p className="text-zinc-400 text-[11px] line-clamp-3 mb-2">{product.description || 'Sin descripción detallada.'}</p>
-                        </div>
-                      </div>
-
-                      <div className="p-4 pt-0">
-                        <a 
-                          href={product.affiliate_link || product.buy_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs transition-all shadow-sm"
-                        >
-                          Ver oferta / Comprar 🚀
-                        </a>
-                      </div>
-                    </div>
-                  ))}
+              {/* Panel de Búsqueda y Filtros de Categorías */}
+              <div className="p-4 bg-zinc-950/60 border-b border-zinc-800/60 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div className="relative w-full sm:max-w-md">
+                  <span className="absolute left-3.5 top-3 text-zinc-400 text-xs">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Buscar productos por nombre o descripción..."
+                    value={storeSearchQuery}
+                    onChange={(e) => setStoreSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-xs transition-all shadow-inner"
+                  />
+                  {storeSearchQuery && (
+                    <button onClick={() => setStoreSearchQuery('')} className="absolute right-3 top-2.5 text-xs text-zinc-500 hover:text-white">✕</button>
+                  )}
                 </div>
-              )}
+
+                <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                  <span className="text-[11px] font-bold text-zinc-400 whitespace-nowrap">Categoría:</span>
+                  <select
+                    value={selectedStoreCategory}
+                    onChange={(e) => setSelectedStoreCategory(e.target.value)}
+                    className="px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 focus:outline-none focus:border-blue-500 text-xs cursor-pointer font-semibold"
+                  >
+                    {storeCategories.map((cat, index) => (
+                      <option key={index} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Contenido / Catálogo de Productos */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0f0f11]">
+                {storeLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 space-y-3">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-xs text-zinc-500">Cargando catálogo de productos...</p>
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-24 space-y-3 text-center">
+                    <span className="text-4xl">🛒</span>
+                    <p className="text-sm font-bold text-zinc-300">No se encontraron productos</p>
+                    <p className="text-xs text-zinc-500 max-w-xs">Intenta buscar con otros términos o cambia la categoría seleccionada.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {filteredProducts.map((product) => (
+                      <div 
+                        key={product.id} 
+                        className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between hover:border-blue-500/50 transition-all group"
+                      >
+                        <div className="flex flex-col">
+                          {/* Contenedor Imagen Estilo E-commerce */}
+                          <div className="w-full aspect-square bg-black/80 flex items-center justify-center overflow-hidden relative p-3 border-b border-zinc-800/50">
+                            <img 
+                              src={product.image_url || DEFAULT_COVER_IMAGE} 
+                              alt={product.title} 
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = DEFAULT_COVER_IMAGE;
+                              }}
+                            />
+                            <div className="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-md tracking-wide">
+                              {product.price || '$0.00'}
+                            </div>
+                            {product.category && (
+                              <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-sm text-zinc-300 text-[9px] font-bold px-2 py-0.5 rounded-md border border-zinc-700/50">
+                                {product.category}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Información del Producto */}
+                          <div className="p-3">
+                            <h3 className="font-bold text-xs mb-1 line-clamp-2 text-zinc-100 group-hover:text-blue-400 transition-colors leading-snug">
+                              {product.title}
+                            </h3>
+                            <p className="text-zinc-400 text-[10px] line-clamp-2 leading-relaxed">
+                              {product.description || 'Producto exclusivo recomendado en Flixxes.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Botón de Acción */}
+                        <div className="p-3 pt-0">
+                          <a 
+                            href={product.affiliate_link || product.buy_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs transition-all shadow-md transform active:scale-95"
+                          >
+                            Ver oferta / Comprar 🚀
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer del Modal Tienda */}
+              <div className="px-6 py-3 bg-zinc-950 border-t border-zinc-800/80 flex justify-between items-center text-[11px] text-zinc-500">
+                <span>Mostrando {filteredProducts.length} productos</span>
+                <span>Envíos seguros a través de aliados oficiales</span>
+              </div>
+
             </div>
           </div>
         )}
 
-        {/* Modal de Donación Integrado con PayPal y Tarjetas */}
         {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
 
         {showWatchLaterModal && (
@@ -1059,7 +1044,6 @@ export default function Home() {
                 <h2 className="text-xl font-black text-white">⭐ Elementos Guardados</h2>
                 <button onClick={() => setShowWatchLaterModal(false)} className="text-xs text-zinc-400 hover:text-white cursor-pointer">CERRAR</button>
               </div>
-
               {watchLater.length === 0 ? (
                 <p className="text-center text-zinc-500 py-8 text-xs">No tienes ningún elemento guardado en tu lista.</p>
               ) : (
@@ -1094,13 +1078,10 @@ export default function Home() {
                   <button type="button" onClick={() => setAdminTab('product')} className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${adminTab === 'product' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🛍️ Afiliado</button>
                 </div>
               </div>
-
               <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
-              
               {adminTab !== 'product' && (
                 <input type="text" placeholder="URL Portada / Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
               )}
-
               {adminTab === 'product' ? (
                 <>
                   <input type="text" placeholder="Título del producto / oferta" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
@@ -1132,7 +1113,6 @@ export default function Home() {
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <textarea placeholder="Descripción del video" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none text-xs" />
-                  
                   <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
                     <input 
                       type="checkbox" 
@@ -1145,13 +1125,11 @@ export default function Home() {
                       ¿Es un Video Vertical / Short?
                     </label>
                   </div>
-
                   <input type="text" placeholder="Etiquetas (separadas por coma)" value={videoTagsInput} onChange={e => setVideoTagsInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <input type="text" placeholder="Nombre del archivo (ej: video.mp4)" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <p className="text-[10px] text-blue-400">💡 Si subes a Bunny, solo escribe el nombre del archivo (ej: <code>Q0Fcd8QC_720p.mp4</code>) y se completará solo.</p>
                 </>
               )}
-
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700 text-xs cursor-pointer">Cancelar</button>
                 <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500 text-xs cursor-pointer">Guardar</button>
@@ -1159,7 +1137,6 @@ export default function Home() {
             </form>
           </div>
         )}
-
       </div>
 
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
@@ -1169,7 +1146,6 @@ export default function Home() {
             Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 años.
           </p>
         </div>
-
         <div className="flex justify-center gap-6 font-semibold text-zinc-400 flex-wrap">
           <a href="#" className="hover:text-blue-500">Política Y privacidad</a>
           <span>•</span>
@@ -1179,7 +1155,6 @@ export default function Home() {
           <span>•</span>
           <a href="mailto:umbrellaholdings.global@gmail.com" className="hover:text-blue-500">Contacto</a>
         </div>
-
         <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
