@@ -12,6 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
 const ADMIN_PASSWORD = 'flixes2026#Admin#Pass';
 const BUNNY_BASE_URL = 'https://flixxes.b-cdn.net/';
+const PAYPAL_CLIENT_ID = 'TU_PAYPAL_CLIENT_ID_AQUI'; // Reemplaza con tu Client ID real de PayPal Developer
 
 interface Video {
   id: string;
@@ -34,13 +35,126 @@ interface Product {
   price: string;
   image_url: string;
   buy_url: string;
+  affiliate_link?: string;
+  description?: string;
+  category?: string;
+}
+
+declare global {
+  interface Window {
+    paypal?: any;
+  }
 }
 
 /**
- * Componente de Anuncio Interstitial con cuenta regresiva de 10s y botón para saltar
+ * Componente interactivo para el Modal de Donación (PayPal + Tarjetas nativas)
+ */
+function DonateModal({ onClose }: { onClose: () => void }) {
+  const [selectedAmount, setSelectedAmount] = useState('5.00');
+  const [customAmount, setCustomAmount] = useState('');
+  const [sdkLoaded, setSdkLoaded] = useState(false);
+
+  const finalAmount = customAmount ? customAmount : selectedAmount;
+
+  useEffect(() => {
+    if (window.paypal) {
+      setSdkLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+    script.async = true;
+    script.onload = () => setSdkLoaded(true);
+    script.onerror = () => console.error('Error al cargar el SDK de PayPal');
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (sdkLoaded && window.paypal) {
+      const container = document.getElementById('paypal-button-container');
+      if (container) container.innerHTML = '';
+
+      window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'blue',
+          shape: 'rect',
+          label: 'paypal',
+        },
+        createOrder: (_data: any, actions: any) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: finalAmount,
+              },
+              description: 'Propina / Apoyo para Flixxes'
+            }]
+          });
+        },
+        onApprove: (_data: any, actions: any) => {
+          return actions.order.capture().then((details: any) => {
+            alert(`¡Muchas gracias por tu apoyo, ${details.payer.name.given_name}! ☕`);
+            onClose();
+          });
+        },
+        onError: (err: any) => {
+          console.error('Error en el proceso de pago:', err);
+          alert('Hubo un error al procesar el pago. Inténtalo de nuevo.');
+        }
+      }).render('#paypal-button-container');
+    }
+  }, [sdkLoaded, finalAmount, onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl text-center" onClick={e => e.stopPropagation()}>
+        
+        <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+          <h2 className="text-xl font-black text-white">☕ Apóyame con una Propina</h2>
+          <button onClick={onClose} className="text-xs text-zinc-400 hover:text-white cursor-pointer">✕</button>
+        </div>
+
+        <p className="text-xs text-zinc-400">Selecciona o escribe el monto. Puedes pagar con tu cuenta de PayPal o directamente con tarjeta de crédito/débito.</p>
+
+        {/* Montos rápidos */}
+        <div className="grid grid-cols-3 gap-2">
+          {['3.00', '5.00', '10.00'].map((amt) => (
+            <button
+              key={amt}
+              onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
+              className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${selectedAmount === amt && !customAmount ? 'bg-blue-600 border-blue-500 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'}`}
+            >
+              ${amt} USD
+            </button>
+          ))}
+        </div>
+
+        {/* Monto personalizado */}
+        <input 
+          type="number" 
+          placeholder="Otro monto (USD)" 
+          value={customAmount}
+          onChange={(e) => setCustomAmount(e.target.value)}
+          className="w-full bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-xs text-white text-center focus:border-blue-500 outline-none"
+        />
+
+        {/* Contenedor PayPal + Tarjetas */}
+        <div className="pt-2">
+          {!sdkLoaded && <p className="text-xs text-zinc-500 py-4">Cargando métodos de pago seguros...</p>}
+          <div id="paypal-button-container" className="w-full"></div>
+        </div>
+
+        <button onClick={onClose} className="w-full text-xs text-zinc-500 hover:text-white py-1 cursor-pointer">Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Componente de Anuncio Interstitial
  */
 function InterstitialAdModal({ 
-  videoUrl, 
   onAdFinished, 
   onClose 
 }: { 
@@ -69,7 +183,6 @@ function InterstitialAdModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
       <div className="relative w-full max-w-xl aspect-video bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 flex flex-col justify-between p-4 sm:p-6 shadow-2xl">
-        {/* Cabecera del anuncio */}
         <div className="flex justify-between items-center w-full">
           <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
             Anuncio Patrocinado
@@ -78,13 +191,12 @@ function InterstitialAdModal({
             <span className="text-zinc-400 text-xs font-semibold">
               {canSkip ? 'Puedes saltar el anuncio' : `El video se desbloquea en ${timeLeft}s`}
             </span>
-            <button onClick={onClose} className="text-zinc-400 hover:text-white text-xs bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
+            <button onClick={onClose} className="text-zinc-400 hover:text-white text-xs bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800 cursor-pointer">
               ✕
             </button>
           </div>
         </div>
 
-        {/* Contenido del anuncio (Banner o puedes integrar tu etiqueta VAST aquí) */}
         <div className="flex-1 flex items-center justify-center my-3 relative overflow-hidden rounded-xl border border-zinc-800 bg-black">
           <img 
             src={DEFAULT_COVER_IMAGE} 
@@ -96,7 +208,6 @@ function InterstitialAdModal({
           </div>
         </div>
 
-        {/* Botón de saltar */}
         <div className="flex justify-end items-center w-full">
           {canSkip ? (
             <button 
@@ -120,8 +231,9 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
+    const container = containerRef.current;
+    if (!container) return;
+    container.innerHTML = '';
 
     const confScript = document.createElement('script');
     confScript.type = 'text/javascript';
@@ -139,8 +251,8 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
     invokeScript.type = 'text/javascript';
     invokeScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
 
-    containerRef.current.appendChild(confScript);
-    containerRef.current.appendChild(invokeScript);
+    container.appendChild(confScript);
+    container.appendChild(invokeScript);
   }, [zoneId]);
 
   return (
@@ -154,8 +266,9 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
+    const container = containerRef.current;
+    if (!container) return;
+    container.innerHTML = '';
 
     const script = document.createElement('script');
     script.async = true;
@@ -165,8 +278,8 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
     const innerDiv = document.createElement('div');
     innerDiv.id = `container-${zoneId}`;
 
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
+    container.appendChild(script);
+    container.appendChild(innerDiv);
   }, [zoneId]);
 
   return (
@@ -211,7 +324,7 @@ function HorizontalVideoCard({
   };
 
   return (
-    <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group relative">
+    <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/85 hover:border-blue-500/50 transition-all shadow-md group relative">
       <div 
         onClick={() => onPlayClick(video.voe_url || '#')}
         className="flex flex-col h-full w-full cursor-pointer"
@@ -225,7 +338,7 @@ function HorizontalVideoCard({
               (e.target as HTMLImageElement).src = DEFAULT_COVER_IMAGE;
             }}
           />
-          <span className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
+          <span className="absolute bottom-2 left-2 bg-black/85 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
             {video.is_photo ? '📷 Foto' : video.category}
           </span>
         </div>
@@ -245,10 +358,10 @@ function HorizontalVideoCard({
                 <span>👍 {likesCount}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 z-30" onClick={(e) => e.preventDefault()}>
+              <div className="flex items-center gap-1.5 z-30" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                 <button 
                   onClick={handleShare}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 p-1.5 rounded-lg transition-all border border-zinc-700/50 shadow-sm"
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 p-1.5 rounded-lg transition-all border border-zinc-700/50 shadow-sm cursor-pointer"
                   title="Compartir video"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +375,7 @@ function HorizontalVideoCard({
                     e.stopPropagation();
                     onDonateClick();
                   }}
-                  className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg transition-all shadow-sm text-xs"
+                  className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg transition-all shadow-sm text-xs cursor-pointer"
                   title="Donar cafecito"
                 >
                   ☕
@@ -274,7 +387,7 @@ function HorizontalVideoCard({
                     e.stopPropagation();
                     onToggleSave(video, e);
                   }}
-                  className={`p-1.5 rounded-lg transition-all shadow-sm ${isSaved ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700/50'}`}
+                  className={`p-1.5 rounded-lg transition-all shadow-sm cursor-pointer ${isSaved ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700/50'}`}
                   title={isSaved ? "Quitar de guardados" : "Guardar para después"}
                 >
                   ⭐
@@ -319,7 +432,7 @@ function VerticalShortModal({
       <div className="relative w-full max-w-sm h-full sm:h-[85vh] bg-black rounded-none sm:rounded-3xl overflow-hidden border border-zinc-800 flex flex-col justify-center items-center shadow-2xl" onClick={e => e.stopPropagation()}>
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black text-white p-2.5 rounded-full backdrop-blur-md transition-all"
+          className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black text-white p-2.5 rounded-full backdrop-blur-md transition-all cursor-pointer"
         >
           ✕
         </button>
@@ -355,7 +468,10 @@ export default function Home() {
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
-  // Estados para controlar el anuncio Interstitial antes de ver un video
+  const [storeSearchQuery, setStoreSearchQuery] = useState('');
+  const [selectedStoreCategory, setSelectedStoreCategory] = useState('Todas');
+  const [storeLoading, setStoreLoading] = useState(false);
+
   const [pendingVideoUrl, setPendingVideoUrl] = useState<string | null>(null);
   const [showInterstitialAd, setShowInterstitialAd] = useState(false);
 
@@ -383,6 +499,9 @@ export default function Home() {
   const [prodPrice, setProdPrice] = useState('');
   const [prodImage, setProdImage] = useState('');
   const [prodUrl, setProdUrl] = useState('');
+  const [prodAffiliateLink, setProdAffiliateLink] = useState('');
+  const [prodDescription, setProdDescription] = useState('');
+  const [prodCategory, setProdCategory] = useState('General');
 
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
@@ -414,9 +533,15 @@ export default function Home() {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      setStoreLoading(true);
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
       if (data) setProducts(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+    } finally {
+      setStoreLoading(false);
+    }
   };
 
   const toggleWatchLater = (video: Video, e?: React.MouseEvent) => {
@@ -442,26 +567,26 @@ export default function Home() {
     const finalCoverUrl = coverUrl.trim();
 
     if (adminTab === 'product') {
-      if (!prodTitle.trim() || !prodUrl.trim()) {
-        alert('Por favor completa al menos el título y el enlace de compra del producto.');
+      if (!prodTitle.trim() || (!prodUrl.trim() && !prodAffiliateLink.trim())) {
+        alert('Por favor completa al menos el título y el enlace de compra / afiliado del producto.');
         return;
       }
+      const finalBuyUrl = prodUrl.trim() || prodAffiliateLink.trim();
       const { error } = await supabase.from('products').insert([{
         title: prodTitle,
         price: prodPrice || '$0.00',
         image_url: prodImage || DEFAULT_COVER_IMAGE,
-        buy_url: prodUrl
+        buy_url: finalBuyUrl,
+        affiliate_link: prodAffiliateLink.trim() || finalBuyUrl,
+        description: prodDescription || 'Producto exclusivo recomendado en Flixxes.',
+        category: prodCategory || 'General'
       }]);
 
       if (error) {
         alert('Error al guardar el producto: ' + error.message);
       } else {
         setShowAdminModal(false);
-        setProdTitle('');
-        setProdPrice('');
-        setProdImage('');
-        setProdUrl('');
-        setAdminPassword('');
+        setProdTitle(''); setProdPrice(''); setProdImage(''); setProdUrl(''); setProdAffiliateLink(''); setProdDescription(''); setProdCategory('General'); setAdminPassword('');
         fetchProducts();
       }
       return;
@@ -487,10 +612,7 @@ export default function Home() {
         alert('Error: ' + error.message);
       } else {
         setShowAdminModal(false);
-        setPhotoTitleInput('');
-        setPhotoUrlInput('');
-        setCoverUrl('');
-        setAdminPassword('');
+        setPhotoTitleInput(''); setPhotoUrlInput(''); setCoverUrl(''); setAdminPassword('');
         fetchVideos();
       }
       return;
@@ -517,10 +639,7 @@ export default function Home() {
         alert('Error: ' + error.message);
       } else {
         setShowAdminModal(false);
-        setEmbedTitle('');
-        setRawEmbedCode('');
-        setCoverUrl('');
-        setAdminPassword('');
+        setEmbedTitle(''); setRawEmbedCode(''); setCoverUrl(''); setAdminPassword('');
         fetchVideos();
       }
       return;
@@ -553,7 +672,6 @@ export default function Home() {
     }
   };
 
-  // Manejador al hacer clic en un video: dispara el anuncio antes de redirigir
   const handleTriggerVideo = (url: string) => {
     if (!url || url === '#') return;
     setPendingVideoUrl(url);
@@ -574,7 +692,7 @@ export default function Home() {
         <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
           <h1 className="text-4xl font-black text-white tracking-tight">FLIX<span className="text-blue-500">XES</span></h1>
           <p className="text-xs text-zinc-400">Este sitio contiene material para adultos. Debes ser mayor de edad para ingresar.</p>
-          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-colors">INGRESAR</button>
+          <button onClick={() => { localStorage.setItem('age_verified', 'true'); setAgeAccepted(true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-colors cursor-pointer">INGRESAR</button>
         </div>
       </div>
     );
@@ -600,6 +718,17 @@ export default function Home() {
   const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
 
+  const filteredProducts = products.filter(product => {
+    const prodTitleText = product.title || '';
+    const prodDescText = product.description || '';
+    const matchesSearch = prodTitleText.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
+                          prodDescText.toLowerCase().includes(storeSearchQuery.toLowerCase());
+    const matchesCategory = selectedStoreCategory === 'Todas' || product.category === selectedStoreCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const storeCategories = ['Todas', ...new Set(products.map(p => p.category).filter(Boolean))];
+
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300">
       <div className="w-full max-w-[100vw] overflow-x-hidden">
@@ -608,7 +737,7 @@ export default function Home() {
           <div className="flex items-center gap-2 min-w-0">
             <button 
               onClick={() => setShowMenu(true)} 
-              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0"
+              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex-shrink-0 cursor-pointer"
               aria-label="Abrir Menú"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -634,11 +763,11 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap">
+            <button onClick={() => setShowWatchLaterModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 transition-all whitespace-nowrap cursor-pointer">
               ⭐ Guardados {watchLater.length > 0 && <span className="ml-0.5 bg-blue-500 text-white px-1.5 py-0.2 rounded-full text-[9px] font-black">{watchLater.length}</span>}
             </button>
-            <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap">☕ Donar</button>
-            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all whitespace-nowrap">🛍️ Tienda</button>
+            <button onClick={() => setShowDonateModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2.5 py-1.5 rounded-full font-black transition-all whitespace-nowrap cursor-pointer">☕ Donar</button>
+            <button onClick={() => { setShowStore(true); fetchProducts(); }} className="bg-zinc-800 text-blue-400 text-[11px] px-2.5 py-1.5 rounded-full font-bold border border-zinc-700 hover:bg-zinc-700 transition-all whitespace-nowrap cursor-pointer">🛍️ Tienda</button>
           </div>
         </nav>
 
@@ -648,7 +777,7 @@ export default function Home() {
             <div className="relative bg-[#181818] border-r border-zinc-800 w-80 max-w-[85vw] h-full p-6 flex flex-col z-10 overflow-y-auto space-y-4 shadow-2xl">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <h2 className="text-lg font-black text-white tracking-wider">MENÚ PRINCIPAL</h2>
-                <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2">
+                <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white p-2 cursor-pointer">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -656,23 +785,23 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col space-y-2 text-sm font-semibold">
-                <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">🏠 Inicio</button>
-                <button onClick={() => { setShowStore(true); fetchProducts(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-blue-400">🛍️ Tienda de Afiliados</button>
-                <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">📷 Galería de Fotos</button>
-                <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200">⭐ Lista de Guardados ({watchLater.length})</button>
-                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold">☕ Apóyame con una Donación</button>
+                <button onClick={() => { setActiveTag('Todos'); setSearchQuery(''); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">🏠 Inicio</button>
+                <button onClick={() => { setShowStore(true); fetchProducts(); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-blue-400 cursor-pointer">🛍️ Tienda de Afiliados</button>
+                <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">📷 Galería de Fotos</button>
+                <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-left text-zinc-200 cursor-pointer">⭐ Lista de Guardados ({watchLater.length})</button>
+                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3 p-3 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold cursor-pointer">☕ Apóyame con una Donación</button>
                 
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
-                    <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white">
+                    <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white cursor-pointer">
                       #{t}
                     </button>
                   ))}
                 </div>
 
                 <div className="pt-2">
-                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500">+ Publicar / Afiliados (Admin)</button>
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full py-3 rounded-2xl bg-blue-600 text-white font-black text-center hover:bg-blue-500 cursor-pointer">+ Publicar / Afiliados (Admin)</button>
                 </div>
               </div>
             </div>
@@ -693,14 +822,14 @@ export default function Home() {
           <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-zinc-800/60 w-full">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Ordenar:</span>
             <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
-              <button onClick={() => setSortBy('random')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'random' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Aleatorio</button>
-              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
+              <button onClick={() => setSortBy('random')} className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${sortBy === 'random' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Aleatorio</button>
+              <button onClick={() => setSortBy('likes')} className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Más Gustados</button>
             </div>
           </div>
 
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
             {defaultTags.map(tag => (
-              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+              <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex-shrink-0 cursor-pointer ${activeTag === tag ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
                 {tag}
               </button>
             ))}
@@ -765,7 +894,7 @@ export default function Home() {
                       <img src={photo.cover_url || DEFAULT_COVER_IMAGE} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                       <button 
                         onClick={(e) => toggleWatchLater(photo, e)}
-                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
+                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 cursor-pointer ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
                       >
                         ⭐
                       </button>
@@ -832,7 +961,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* Modal del Anuncio Interstitial Saltable (10s) */}
         {showInterstitialAd && pendingVideoUrl && (
           <InterstitialAdModal 
             videoUrl={pendingVideoUrl}
@@ -847,34 +975,70 @@ export default function Home() {
         {showStore && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" onClick={() => setShowStore(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-4xl w-full space-y-6 max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              
               <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-black text-white">🛍️ Tienda de Productos Afiliados</h2>
+                  <h2 className="text-xl font-black text-white">🛍️ Tienda de Productos y Afiliados</h2>
                 </div>
-                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white font-bold bg-zinc-900 px-3 py-1.5 rounded-xl">CERRAR</button>
+                <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white font-bold bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 cursor-pointer">CERRAR</button>
               </div>
 
-              {products.length === 0 ? (
-                <p className="text-center text-zinc-500 py-12 text-xs">No hay productos de afiliados disponibles en este momento. Agrega algunos desde el panel de administración.</p>
+              <div className="flex flex-col md:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Buscar productos en la tienda..."
+                  value={storeSearchQuery}
+                  onChange={(e) => setStoreSearchQuery(e.target.value)}
+                  className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white flex-1 focus:outline-none focus:border-blue-500 text-xs"
+                />
+                <select
+                  value={selectedStoreCategory}
+                  onChange={(e) => setSelectedStoreCategory(e.target.value)}
+                  className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 focus:outline-none focus:border-blue-500 text-xs"
+                >
+                  {storeCategories.map((cat, index) => (
+                    <option key={index} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {storeLoading ? (
+                <p className="text-center py-10 text-xs text-zinc-500">Cargando productos...</p>
+              ) : filteredProducts.length === 0 ? (
+                <p className="text-center py-10 text-zinc-500 text-xs">No se encontraron productos o ofertas disponibles.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {products.map(p => (
-                    <div key={p.id} className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between group">
-                      <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
-                        <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg">
-                          {p.price}
-                        </span>
+                  {filteredProducts.map((product) => (
+                    <div 
+                      key={product.id} 
+                      className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between hover:border-zinc-700 transition group"
+                    >
+                      <div>
+                        <div className="w-full h-52 bg-zinc-950 flex items-center justify-center overflow-hidden p-2 relative">
+                          <img 
+                            src={product.image_url || DEFAULT_COVER_IMAGE} 
+                            alt={product.title} 
+                            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow">
+                            {product.price || '$0.00'}
+                          </span>
+                        </div>
+
+                        <div className="p-4">
+                          <h3 className="font-bold text-xs mb-1.5 line-clamp-2 text-white">{product.title}</h3>
+                          <p className="text-zinc-400 text-[11px] line-clamp-3 mb-2">{product.description || 'Sin descripción detallada.'}</p>
+                        </div>
                       </div>
-                      <div className="p-4 flex flex-col gap-3">
-                        <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">{p.title}</h4>
+
+                      <div className="p-4 pt-0">
                         <a 
-                          href={p.buy_url} 
+                          href={product.affiliate_link || product.buy_url} 
                           target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs text-center transition-all shadow-sm"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs transition-all shadow-sm"
                         >
-                          Ver Oferta / Comprar 🚀
+                          Ver oferta / Comprar 🚀
                         </a>
                       </div>
                     </div>
@@ -885,30 +1049,15 @@ export default function Home() {
           </div>
         )}
 
-        {showDonateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
-              <h2 className="text-2xl font-black text-white">☕ Apóyame con una Donación</h2>
-              <p className="text-xs text-zinc-400">Si te gusta el contenido de Flixxes, tu apoyo ayuda a mantener los servidores y traer nuevos videos diariamente.</p>
-              <a 
-                href="https://paypal.me/TU_USUARIO_PAYPAL" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3.5 rounded-xl text-sm transition-all"
-              >
-                Donar con PayPal
-              </a>
-              <button onClick={() => setShowDonateModal(false)} className="w-full text-xs text-zinc-500 hover:text-white py-2">Cancelar</button>
-            </div>
-          </div>
-        )}
+        {/* Modal de Donación Integrado con PayPal y Tarjetas */}
+        {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
 
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <h2 className="text-xl font-black text-white">⭐ Elementos Guardados</h2>
-                <button onClick={() => setShowWatchLaterModal(false)} className="text-xs text-zinc-400 hover:text-white">CERRAR</button>
+                <button onClick={() => setShowWatchLaterModal(false)} className="text-xs text-zinc-400 hover:text-white cursor-pointer">CERRAR</button>
               </div>
 
               {watchLater.length === 0 ? (
@@ -922,7 +1071,7 @@ export default function Home() {
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
                           <button onClick={() => handleTriggerVideo(v.voe_url)} className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold cursor-pointer">Ver</button>
-                          <button onClick={() => toggleWatchLater(v)} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Eliminar</button>
+                          <button onClick={() => toggleWatchLater(v)} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded cursor-pointer">Eliminar</button>
                         </div>
                       </div>
                     </div>
@@ -939,10 +1088,10 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Panel Admin</h2>
                 <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold overflow-x-auto">
-                  <button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
-                  <button type="button" onClick={() => setAdminTab('embed')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'embed' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Embed</button>
-                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
-                  <button type="button" onClick={() => setAdminTab('product')} className={`px-2.5 py-1 rounded-lg transition-colors ${adminTab === 'product' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🛍️ Afiliado</button>
+                  <button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
+                  <button type="button" onClick={() => setAdminTab('embed')} className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${adminTab === 'embed' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Embed</button>
+                  <button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
+                  <button type="button" onClick={() => setAdminTab('product')} className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${adminTab === 'product' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🛍️ Afiliado</button>
                 </div>
               </div>
 
@@ -957,8 +1106,10 @@ export default function Home() {
                   <input type="text" placeholder="Título del producto / oferta" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <input type="text" placeholder="Precio (ej: $29.99 o Gratis)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
                   <input type="text" placeholder="URL de la imagen del producto" value={prodImage} onChange={e => setProdImage(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
-                  <input type="text" placeholder="Tu enlace de afiliado (Enlace de compra)" value={prodUrl} onChange={e => setProdUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
-                  <p className="text-[10px] text-blue-400">💡 Este producto aparecerá automáticamente en la sección <b>🛍️ Tienda</b> para generar comisiones por afiliación.</p>
+                  <input type="text" placeholder="Enlace de afiliado / Compra" value={prodAffiliateLink} onChange={e => setProdAffiliateLink(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <input type="text" placeholder="Categoría del producto (ej: Tecnología, Ropa)" value={prodCategory} onChange={e => setProdCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 text-xs" />
+                  <textarea placeholder="Descripción corta del producto" value={prodDescription} onChange={e => setProdDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none focus:border-blue-500 resize-none text-xs" />
+                  <p className="text-[10px] text-blue-400">💡 Este producto aparecerá automáticamente en la sección <b>🛍️ Tienda</b> con buscador y categorías.</p>
                 </>
               ) : adminTab === 'photo' ? (
                 <>
@@ -1002,8 +1153,8 @@ export default function Home() {
               )}
 
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700 text-xs">Cancelar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500 text-xs">Guardar</button>
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold hover:bg-zinc-700 text-xs cursor-pointer">Cancelar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-500 text-xs cursor-pointer">Guardar</button>
               </div>
             </form>
           </div>
