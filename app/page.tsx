@@ -114,9 +114,10 @@ function HorizontalVideoCard({
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
   likesCount: number; 
 }) {
-  const coverImage = (video.cover_url && video.cover_url.trim() !== '') 
+  // Genera una portada automática con el título si está vacía, evitando que todas se vean iguales
+  const coverImage = (video.cover_url && video.cover_url.trim() !== '' && video.cover_url !== DEFAULT_COVER_IMAGE) 
     ? video.cover_url 
-    : DEFAULT_COVER_IMAGE;
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(video.title)}&background=09090b&color=3b82f6&size=500&bold=true`;
 
   return (
     <a 
@@ -191,12 +192,8 @@ export default function Home() {
 
   const [history, setHistory] = useState<Video[]>([]);
   const [watchLater, setWatchLater] = useState<Video[]>([]);
-  const [isCinemaMode, setIsCinemaMode] = useState(false);
-  const [isPipActive, setIsPipActive] = useState(false);
-  const [autoPlayNext, setAutoPlayNext] = useState(true);
 
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
-  const [userLikedMap, setUserLikedMap] = useState<Record<string, boolean>>({});
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -213,25 +210,12 @@ export default function Home() {
   const [embedTitle, setEmbedTitle] = useState('');
   const [embedCategory, setEmbedCategory] = useState('HD');
 
-  const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({
-    default: [
-      { id: '1', user: 'Carlos99', text: 'Excelente contenido, gracias por compartir!', created_at: 'Hace 2 horas' },
-      { id: '2', user: 'FoxyUser', text: 'Muy buen aporte bro.', created_at: 'Hace 5 horas' }
-    ]
-  });
-  const [newCommentUser, setNewCommentUser] = useState('');
-  const [newCommentText, setNewCommentText] = useState('');
-
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (localStorage.getItem('age_verified') === 'true') {
         setAgeAccepted(true);
-      }
-      const savedHistory = localStorage.getItem('flixora_history');
-      if (savedHistory) {
-        try { setHistory(JSON.parse(savedHistory)); } catch (e) { console.error(e); }
       }
       const savedWatchLater = localStorage.getItem('flixora_watch_later');
       if (savedWatchLater) {
@@ -241,14 +225,6 @@ export default function Home() {
     fetchVideos();
     fetchProducts();
   }, []);
-
-  useEffect(() => {
-    if (selectedVideo) {
-      document.title = `${selectedVideo.title} | Flixxes`;
-    } else {
-      document.title = 'Flixxes - Streaming Pro';
-    }
-  }, [selectedVideo]);
 
   const fetchVideos = async () => {
     try {
@@ -332,7 +308,7 @@ export default function Home() {
         title: embedTitle,
         category: embedCategory,
         voe_url: cleanUrl,
-        cover_url: DEFAULT_COVER_IMAGE,
+        cover_url: '', // Se dejará vacío para que aplique miniatura dinámica o defecto
         description: 'Video incrustado de alta calidad disponible en Flixxes.',
         tags: [embedCategory, 'HD', 'Incrustado'],
         is_photo: false,
@@ -352,7 +328,7 @@ export default function Home() {
     }
 
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    const finalCoverUrl = coverUrl.trim() ? coverUrl.trim() : DEFAULT_COVER_IMAGE;
+    const finalCoverUrl = coverUrl.trim();
     const cleanVoeUrl = extractSrcFromIframe(voeUrl);
 
     const { error } = await supabase.from('videos').insert([{ 
@@ -533,7 +509,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                 >
-                  <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                  <img src={v.cover_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(v.title)}&background=09090b&color=3b82f6&size=500&bold=true`} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                     <span className="absolute top-2 left-2 bg-blue-600/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                       Short
@@ -589,7 +565,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* INTEGRACIÓN DE OPCIÓN 2 (Native Block) */}
+        {/* INTEGRACIÓN NATIVE BLOCK */}
         <section className="px-3 py-2 w-full max-w-[100vw]">
           <AdsterraNativeBlock zoneId="30814143" />
         </section>
