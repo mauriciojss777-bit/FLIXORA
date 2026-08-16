@@ -36,6 +36,86 @@ interface Product {
   buy_url: string;
 }
 
+/**
+ * Componente de Anuncio Interstitial con cuenta regresiva de 10s y botón para saltar
+ */
+function InterstitialAdModal({ 
+  videoUrl, 
+  onAdFinished, 
+  onClose 
+}: { 
+  videoUrl: string; 
+  onAdFinished: () => void; 
+  onClose: () => void; 
+}) {
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [canSkip, setCanSkip] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanSkip(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
+      <div className="relative w-full max-w-xl aspect-video bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 flex flex-col justify-between p-4 sm:p-6 shadow-2xl">
+        {/* Cabecera del anuncio */}
+        <div className="flex justify-between items-center w-full">
+          <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
+            Anuncio Patrocinado
+          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-zinc-400 text-xs font-semibold">
+              {canSkip ? 'Puedes saltar el anuncio' : `El video se desbloquea en ${timeLeft}s`}
+            </span>
+            <button onClick={onClose} className="text-zinc-400 hover:text-white text-xs bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Contenido del anuncio (Banner o puedes integrar tu etiqueta VAST aquí) */}
+        <div className="flex-1 flex items-center justify-center my-3 relative overflow-hidden rounded-xl border border-zinc-800 bg-black">
+          <img 
+            src={DEFAULT_COVER_IMAGE} 
+            alt="Anuncio publicitario" 
+            className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+            <p className="text-xs text-white font-bold drop-shadow">¡Descubre ofertas exclusivas y apoya a Flixxes!</p>
+          </div>
+        </div>
+
+        {/* Botón de saltar */}
+        <div className="flex justify-end items-center w-full">
+          {canSkip ? (
+            <button 
+              onClick={onAdFinished}
+              className="bg-white hover:bg-zinc-200 text-black font-black text-xs px-6 py-2.5 rounded-xl transition-all shadow-lg transform active:scale-95 cursor-pointer"
+            >
+              Saltar Anuncio ⏭
+            </button>
+          ) : (
+            <div className="bg-zinc-900 text-zinc-500 text-xs font-bold px-5 py-2.5 rounded-xl border border-zinc-800 cursor-not-allowed select-none">
+              Saltar en {timeLeft}s
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,12 +181,14 @@ function HorizontalVideoCard({
   isSaved, 
   onToggleSave, 
   onDonateClick,
+  onPlayClick,
   likesCount 
 }: { 
   video: Video; 
   isSaved: boolean; 
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
   onDonateClick: () => void;
+  onPlayClick: (videoUrl: string) => void;
   likesCount: number; 
 }) {
   const coverImage = (video.cover_url && video.cover_url.trim() !== '' && video.cover_url !== DEFAULT_COVER_IMAGE) 
@@ -130,10 +212,8 @@ function HorizontalVideoCard({
 
   return (
     <div className="flex flex-col w-full max-w-full overflow-hidden bg-zinc-900/40 rounded-2xl border border-zinc-800/80 hover:border-blue-500/50 transition-all shadow-md group relative">
-      <a 
-        href={video.voe_url || '#'} 
-        target="_blank" 
-        rel="noopener noreferrer"
+      <div 
+        onClick={() => onPlayClick(video.voe_url || '#')}
         className="flex flex-col h-full w-full cursor-pointer"
       >
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
@@ -203,7 +283,7 @@ function HorizontalVideoCard({
             </div>
           </div>
         </div>
-      </a>
+      </div>
     </div>
   );
 }
@@ -275,6 +355,10 @@ export default function Home() {
   const [showWatchLaterModal, setShowWatchLaterModal] = useState(false);
   const [ageAccepted, setAgeAccepted] = useState(false);
 
+  // Estados para controlar el anuncio Interstitial antes de ver un video
+  const [pendingVideoUrl, setPendingVideoUrl] = useState<string | null>(null);
+  const [showInterstitialAd, setShowInterstitialAd] = useState(false);
+
   const [activeShortIndex, setActiveShortIndex] = useState<number | null>(null);
 
   const [watchLater, setWatchLater] = useState<Video[]>([]);
@@ -295,7 +379,6 @@ export default function Home() {
   const [embedTitle, setEmbedTitle] = useState('');
   const [embedCategory, setEmbedCategory] = useState('HD');
 
-  // Campos para producto de afiliado
   const [prodTitle, setProdTitle] = useState('');
   const [prodPrice, setProdPrice] = useState('');
   const [prodImage, setProdImage] = useState('');
@@ -467,6 +550,21 @@ export default function Home() {
       setShowAdminModal(false);
       setTitle(''); setVoeUrl(''); setCoverUrl(''); setDescription(''); setVideoTagsInput('HD, Latino, Casero'); setIsShortVideo(false); setAdminPassword('');
       fetchVideos();
+    }
+  };
+
+  // Manejador al hacer clic en un video: dispara el anuncio antes de redirigir
+  const handleTriggerVideo = (url: string) => {
+    if (!url || url === '#') return;
+    setPendingVideoUrl(url);
+    setShowInterstitialAd(true);
+  };
+
+  const handleAdFinished = () => {
+    setShowInterstitialAd(false);
+    if (pendingVideoUrl) {
+      window.open(pendingVideoUrl, '_blank', 'noopener,noreferrer');
+      setPendingVideoUrl(null);
     }
   };
 
@@ -724,6 +822,7 @@ export default function Home() {
                       isSaved={isSaved}
                       onToggleSave={toggleWatchLater}
                       onDonateClick={() => setShowDonateModal(true)}
+                      onPlayClick={handleTriggerVideo}
                       likesCount={likesMap[video.id] || 0}
                     />
                   );
@@ -731,6 +830,18 @@ export default function Home() {
               </div>
             )}
           </section>
+        )}
+
+        {/* Modal del Anuncio Interstitial Saltable (10s) */}
+        {showInterstitialAd && pendingVideoUrl && (
+          <InterstitialAdModal 
+            videoUrl={pendingVideoUrl}
+            onAdFinished={handleAdFinished}
+            onClose={() => {
+              setShowInterstitialAd(false);
+              setPendingVideoUrl(null);
+            }}
+          />
         )}
 
         {showStore && (
@@ -810,7 +921,7 @@ export default function Home() {
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
-                          <a href={v.voe_url} target="_blank" rel="noopener noreferrer" className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold">Ver</a>
+                          <button onClick={() => handleTriggerVideo(v.voe_url)} className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold cursor-pointer">Ver</button>
                           <button onClick={() => toggleWatchLater(v)} className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Eliminar</button>
                         </div>
                       </div>
