@@ -223,7 +223,14 @@ function HorizontalVideoCard({
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
           {!isHovered || video.is_photo ? (
             <>
-              <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
+              {/* Optimización: Se añade loading="lazy" y decoding="async" */}
+              <img 
+                src={video.cover_url || DEFAULT_COVER_IMAGE} 
+                alt={video.title} 
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" 
+              />
               <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
                 {video.is_photo ? '📷 Foto' : (video.is_short ? '⚡ Vertical' : video.category)}
               </span>
@@ -416,24 +423,38 @@ export default function Home() {
     fetchProducts();
   }, [fetchVideos, fetchProducts]);
 
+  // CORRECCIÓN DE VISTAS: Se realiza una consulta robusta y asíncrona para actualizar la base de datos de Supabase de manera correcta.
   const incrementRealView = useCallback(async (videoId: string) => {
     try {
-      setViewsMap(prev => {
-        const currentViews = prev[videoId] !== undefined ? prev[videoId] : 0;
-        const newViews = currentViews + 1;
-        
-        supabase
-          .from('videos')
-          .update({ views: newViews })
-          .eq('id', videoId)
-          .then(({ error }) => {
-            if (error) console.error(error);
-          });
+      // Obtenemos el valor actual directamente desde la base de datos para evitar desincronización
+      const { data: currentVideo, error: fetchError } = await supabase
+        .from('videos')
+        .select('views')
+        .eq('id', videoId)
+        .single();
 
-        return { ...prev, [videoId]: newViews };
-      });
+      if (fetchError) {
+        console.error('Error al obtener vistas actuales:', fetchError);
+        return;
+      }
+
+      const currentViews = currentVideo?.views || 0;
+      const newViews = currentViews + 1;
+
+      // Actualizamos en Supabase
+      const { error: updateError } = await supabase
+        .from('videos')
+        .update({ views: newViews })
+        .eq('id', videoId);
+
+      if (updateError) {
+        console.error('Error al actualizar vistas en Supabase:', updateError);
+      } else {
+        // Actualizamos el estado local de las vistas
+        setViewsMap(prev => ({ ...prev, [videoId]: newViews }));
+      }
     } catch (e) {
-      console.error(e);
+      console.error('Excepción al incrementar vista:', e);
     }
   }, []);
 
@@ -975,7 +996,13 @@ export default function Home() {
                       onClick={() => handleSelectVideo(v)}
                       className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                     >
-                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                      <img 
+                        src={v.cover_url || DEFAULT_COVER_IMAGE} 
+                        alt={v.title} 
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                         <h4 className="text-[11px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
                       </div>
@@ -1002,7 +1029,13 @@ export default function Home() {
                         className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow"
                       >
                         <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
-                          <img src={photo.cover_url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                          <img 
+                            src={photo.cover_url} 
+                            alt={photo.title} 
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                          />
                           <button 
                             onClick={(e) => toggleWatchLater(photo, e)}
                             className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
@@ -1103,7 +1136,13 @@ export default function Home() {
 
                 {selectedVideo.is_photo ? (
                   <div className="w-full bg-black flex justify-center items-center py-6">
-                    <img src={selectedVideo.cover_url} alt={selectedVideo.title} className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
+                    <img 
+                      src={selectedVideo.cover_url} 
+                      alt={selectedVideo.title} 
+                      loading="lazy"
+                      decoding="async"
+                      className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" 
+                    />
                   </div>
                 ) : (
                   <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video w-full'}`}>
@@ -1188,7 +1227,13 @@ export default function Home() {
                             className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow"
                           >
                             <div className="aspect-video bg-black relative overflow-hidden">
-                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              <img 
+                                src={v.cover_url || DEFAULT_COVER_IMAGE} 
+                                alt={v.title} 
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                              />
                             </div>
                             <div className="p-2">
                               <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
@@ -1257,7 +1302,13 @@ export default function Home() {
                   {filteredProducts.map(p => (
                     <div key={p.id} className="group bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
                       <div className="aspect-square bg-black relative overflow-hidden">
-                        <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full h-full object-cover" />
+                        <img 
+                          src={p.image_url || DEFAULT_COVER_IMAGE} 
+                          alt={p.title} 
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover" 
+                        />
                       </div>
                       <div className="p-3 flex flex-col flex-1">
                         <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 mb-2">{p.title}</h4>
@@ -1295,7 +1346,13 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {watchLater.map(v => (
                   <div key={v.id} className="bg-zinc-900 p-2 rounded-xl flex gap-3 items-center border border-zinc-800">
-                    <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-20 aspect-video rounded-lg object-cover bg-black" />
+                    <img 
+                      src={v.cover_url || DEFAULT_COVER_IMAGE} 
+                      alt={v.title} 
+                      loading="lazy"
+                      decoding="async"
+                      className="w-20 aspect-video rounded-lg object-cover bg-black" 
+                    />
                     <div className="flex-1 overflow-hidden">
                       <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                       <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold mt-2">Ver</button>
@@ -1388,4 +1445,3 @@ export default function Home() {
     </main>
   );
 }
-
