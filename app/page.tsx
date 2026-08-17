@@ -170,7 +170,6 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
   );
 }
 
-// Componente principal ajustado con protección anti-redirección en iframes
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -357,8 +356,73 @@ export default function Home() {
       alert('Contraseña incorrecta');
       return;
     }
-    // ... resto de tu lógica de admin
-    setShowAdminModal(false);
+
+    try {
+      if (adminTab === 'video') {
+        if (!title || !voeUrl) {
+          alert('Por favor completa el título y la URL del video');
+          return;
+        }
+        const tagsArray = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
+        const { error } = await supabase.from('videos').insert([{
+          title,
+          category,
+          voe_url: voeUrl,
+          cover_url: coverUrl || DEFAULT_COVER_IMAGE,
+          description,
+          tags: tagsArray,
+          is_short: isShortVideo,
+          is_photo: false,
+          author: currentUsername
+        }]);
+        if (error) throw error;
+        alert('¡Video agregado con éxito!');
+        setTitle('');
+        setVoeUrl('');
+        setCoverUrl('');
+        setDescription('');
+      } else if (adminTab === 'photo') {
+        if (!photoTitleInput || !photoUrlInput) {
+          alert('Completa el título y la URL de la foto');
+          return;
+        }
+        const { error } = await supabase.from('videos').insert([{
+          title: photoTitleInput,
+          category: 'Fotos',
+          voe_url: photoUrlInput,
+          cover_url: photoUrlInput,
+          is_photo: true,
+          is_short: false,
+          author: currentUsername
+        }]);
+        if (error) throw error;
+        alert('¡Foto agregada con éxito!');
+        setPhotoTitleInput('');
+        setPhotoUrlInput('');
+      } else if (adminTab === 'afiliado') {
+        if (!prodTitle || !prodPrice || !prodUrl) {
+          alert('Completa los campos del producto');
+          return;
+        }
+        const { error } = await supabase.from('products').insert([{
+          title: prodTitle,
+          price: prodPrice,
+          image_url: prodImage || DEFAULT_COVER_IMAGE,
+          buy_url: prodUrl
+        }]);
+        if (error) throw error;
+        alert('¡Producto de afiliado agregado con éxito!');
+        setProdTitle('');
+        setProdPrice('');
+        setProdImage('');
+        setProdUrl('');
+      }
+      fetchVideos();
+      fetchProducts();
+      setShowAdminModal(false);
+    } catch (err: any) {
+      alert('Error al guardar: ' + err.message);
+    }
   };
 
   if (!ageAccepted) {
@@ -406,7 +470,50 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* MODAL DE REPRODUCCIÓN CORREGIDO (ANTI-REDIRECCIÓN) */}
+        {/* CONTENIDO PRINCIPAL */}
+        <div className="p-4 space-y-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {defaultTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTag === tag ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20 text-zinc-500">Cargando contenido...</div>
+          ) : (
+            <div className="space-y-8">
+              {horizontalVideos.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Videos Destacados</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {horizontalVideos.map(video => (
+                      <div key={video.id} onClick={() => handleSelectVideo(video)} className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl overflow-hidden group cursor-pointer hover:border-zinc-700 transition-all">
+                        <div className="aspect-video relative overflow-hidden bg-zinc-950">
+                          <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-white">HD</div>
+                        </div>
+                        <div className="p-3 flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-white text-sm line-clamp-1">{video.title}</h4>
+                            <p className="text-xs text-zinc-400 mt-1">{viewsMap[video.id] || 0} vistas</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* MODAL DE REPRODUCCIÓN (CON SANDBOX PROTECTOR) */}
         {selectedVideo && !isPipActive && (
           <>
             <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78" />
@@ -430,7 +537,7 @@ export default function Home() {
                     <img src={selectedVideo.cover_url} alt={selectedVideo.title} className="max-w-full max-h-[70vh] object-contain rounded-xl" />
                   </div>
                 ) : (
-                  // CONTENEDOR DEL REPRODUCTOR CON SANDBOX SEGURO PARA EVITAR SALIR DE LA WEB
+                  // IFRAME SEGURO CON SANDBOX PARA EVITAR SALIDAS A OTRAS WEBS
                   <div className="w-full bg-black aspect-video relative flex items-center justify-center overflow-hidden">
                     <iframe 
                       src={`${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1`}
@@ -454,7 +561,101 @@ export default function Home() {
           </>
         )}
 
+        {/* MENÚ LATERAL */}
+        {showMenu && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-start" onClick={() => setShowMenu(false)}>
+            <div className="bg-[#0f0f0f] border-r border-zinc-800 w-80 h-full p-6 flex flex-col justify-between shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-black text-white">FLIX<span className="text-blue-500">XES</span></h2>
+                  <button onClick={() => setShowMenu(false)} className="text-zinc-400 hover:text-white font-bold">✕</button>
+                </div>
+                <div className="space-y-2">
+                  <button onClick={() => { setShowMenu(false); setShowAdminModal(true); }} className="w-full text-left px-4 py-3 rounded-xl bg-zinc-900 font-bold hover:bg-zinc-800 transition-colors">⚙️ Panel de Administración</button>
+                  <button onClick={() => { setShowMenu(false); setShowStore(true); }} className="w-full text-left px-4 py-3 rounded-xl bg-zinc-900 font-bold hover:bg-zinc-800 transition-colors">🛍️ Tienda / Afiliados</button>
+                </div>
+              </div>
+              <div className="text-xs text-zinc-500 text-center">Flixxes App v2.6</div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL ADMIN */}
+        {showAdminModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#0f0f0f] border border-zinc-800 w-full max-w-lg rounded-3xl p-6 space-y-6 shadow-2xl">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold text-white">Panel de Administración</h3>
+                <button onClick={() => setShowAdminModal(false)} className="text-zinc-400 hover:text-white">✕</button>
+              </div>
+
+              <form onSubmit={handleAdminSubmit} className="space-y-4">
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-1">Contraseña de Admin</label>
+                  <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="••••••••" required />
+                </div>
+
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setAdminTab('video')} className={`flex-1 py-2 text-xs font-bold rounded-xl ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>Video</button>
+                  <button type="button" onClick={() => setAdminTab('photo')} className={`flex-1 py-2 text-xs font-bold rounded-xl ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>Foto</button>
+                  <button type="button" onClick={() => setAdminTab('afiliado')} className={`flex-1 py-2 text-xs font-bold rounded-xl ${adminTab === 'afiliado' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>Afiliado</button>
+                </div>
+
+                {adminTab === 'video' && (
+                  <>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Título</label>
+                      <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="Título del video" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">URL del Video (Voe / Embed)</label>
+                      <input type="text" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="https://..." />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Portada (URL de imagen)</label>
+                      <input type="text" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="https://..." />
+                    </div>
+                  </>
+                )}
+
+                {adminTab === 'photo' && (
+                  <>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Título de la Foto</label>
+                      <input type="text" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="Título" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">URL de la Imagen</label>
+                      <input type="text" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="https://..." />
+                    </div>
+                  </>
+                )}
+
+                {adminTab === 'afiliado' && (
+                  <>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Título del Producto</label>
+                      <input type="text" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="Nombre" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Precio</label>
+                      <input type="text" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="$0.00" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Enlace de Compra (Afiliado)</label>
+                      <input type="text" value={prodUrl} onChange={e => setProdUrl(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-white" placeholder="https://..." />
+                    </div>
+                  </>
+                )}
+
+                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors">Guardar Contenido</button>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   );
 }
+
