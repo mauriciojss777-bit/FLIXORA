@@ -1495,7 +1495,8 @@ export default function Home() {
                       checked={isShortVideo} 
                       onChange={(e) => setIsShortVideo(e.target.checked)} 
                       className="w-4 h-4 accent-blue-500 cursor-pointer" 
-                    />                    <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
+                    />
+                    <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
                       ¿Es un Video Vertical / Short?
                     </label>
                   </div>
@@ -1513,6 +1514,8 @@ export default function Home() {
             </form>
           </div>
         )}
+
+      </div>
 
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
         <div className="max-w-3xl mx-auto space-y-3">
@@ -1537,4 +1540,3 @@ export default function Home() {
     </main>
   );
 }
-
