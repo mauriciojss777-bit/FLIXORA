@@ -1195,6 +1195,61 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* NUEVA OPCIÓN: NAVEGAR / CARRUSEL DE VIDEOS Y ANUNCIOS DEBAJO DEL VIDEO (ESTILO YOUTUBE) */}
+                <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
+                  <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
+                    {defaultTags.map(tag => (
+                      <button 
+                        key={`nav-sub-${tag}`} 
+                        onClick={() => setActiveTag(tag)} 
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Bloque de Anuncio Adsterra mezclado arriba o en el carrusel */}
+                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                    <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                  </div>
+
+                  {/* Carrusel Horizontal Mezclado con Videos Sugeridos */}
+                  <div className="space-y-2 pt-2">
+                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">
+                      Videos y Anuncios Recomendados
+                    </h4>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
+                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 6).map((v, index) => (
+                        <div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
+                          <div 
+                            onClick={() => handleSelectVideo(v)}
+                            className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow"
+                          >
+                            <div className="aspect-video bg-black relative overflow-hidden">
+                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                            <div className="p-2">
+                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
+                            </div>
+                          </div>
+
+                          {/* Inserción de un bloque de Adsterra nativo/banner cada 3 videos en el carrusel para aumentar impresiones */}
+                          {index === 2 && (
+                            <div className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col justify-center items-center p-2 text-center">
+                              <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Anuncio</span>
+                              <div className="scale-75 origin-center">
+                                <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* COMENTARIOS */}
                 <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                   <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
@@ -1213,44 +1268,6 @@ export default function Home() {
                       <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Comentar</button>
                     </div>
                   </form>
-
-                  {/* ESPACIO PARA ANUNCIOS Y CARRUSEL DE VIDEOS SUGERIDOS DEBAJO DE LA CAJA DE COMENTARIOS */}
-                  <div className="mt-6 pt-6 border-t border-zinc-800 space-y-6">
-                    {/* Anuncio debajo del comentario */}
-                    <div className="bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center">
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Destacada</span>
-                      <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
-                    </div>
-
-                    {/* Carrusel horizontal de videos sugeridos */}
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">
-                        Videos Sugeridos
-                      </h4>
-                      <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x">
-                        {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 8).map(v => (
-                          <div 
-                            key={`suggested-${v.id}`}
-                            onClick={() => handleSelectVideo(v)}
-                            className="min-w-[200px] max-w-[200px] bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 snap-start flex flex-col group shadow"
-                          >
-                            <div className="aspect-video bg-black relative overflow-hidden">
-                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            </div>
-                            <div className="p-2">
-                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Indicador Desliza hacia abajo */}
-                    <div className="flex flex-col items-center justify-center py-2 text-zinc-500 text-[11px] animate-bounce gap-1">
-                      <span>Desliza hacia abajo para ver más</span>
-                      <span>⬇️</span>
-                    </div>
-                  </div>
 
                   <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
                     {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
@@ -1369,13 +1386,13 @@ export default function Home() {
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
-                  <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+                  <input type="text" placeholder="URL del video embed" value= {voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                   <input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                 </>
               )}
 
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold">Cancelar</button>
+                <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold">Cancelar y Cerrar</button>
                 <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black">Publicar</button>
               </div>
             </form>
@@ -1396,3 +1413,4 @@ export default function Home() {
     </main>
   );
 }
+
