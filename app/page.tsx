@@ -225,7 +225,7 @@ function HorizontalVideoCard({
             <>
               <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
               <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
-                {video.is_photo ? '📷 Foto' : video.category}
+                {video.is_photo ? '📷 Foto' : (video.is_short ? '⚡ Vertical' : video.category)}
               </span>
             </>
           ) : (
@@ -1336,6 +1336,27 @@ export default function Home() {
               ) : (
                 <>
                   <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+                  
+                  <div className="flex items-center justify-between bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                    <span className="text-xs text-zinc-300 font-bold">Tipo de video:</span>
+                    <div className="flex gap-1 bg-zinc-950 p-1 rounded-lg">
+                      <button 
+                        type="button" 
+                        onClick={() => setIsShortVideo(false)} 
+                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
+                      >
+                        Horizontal
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsShortVideo(true)} 
+                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
+                      >
+                        Vertical (Short)
+                      </button>
+                    </div>
+                  </div>
+
                   <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none">
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -1367,3 +1388,4 @@ export default function Home() {
     </main>
   );
 }
+
