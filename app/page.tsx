@@ -80,8 +80,9 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden" />
+    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-6 py-4 border-y border-zinc-800/40">
+      <span className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Espacio Publicitario / Impresiones</span>
+      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden min-h-[250px]" />
     </div>
   );
 }
@@ -106,8 +107,8 @@ function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full flex justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="w-full flex justify-center items-center" />
+    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-6 py-4">
+      <div ref={containerRef} className="w-full flex justify-center items-center min-h-[120px]" />
     </div>
   );
 }
@@ -247,7 +248,7 @@ function HorizontalVideoCard({
         <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black w-full flex items-center justify-center">
           {!isHovered || video.is_photo ? (
             <>
-              <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
+              <img src={video.cover_url || DEFAULT_COVER_IMAGE} alt={video.title} loading="lazy" className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300" />
               <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border border-zinc-700/50">
                 {video.is_photo ? '📷 Foto' : video.category}
               </span>
@@ -1022,37 +1023,12 @@ export default function Home() {
                       onClick={() => handleSelectVideo(v)}
                       className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
                     >
-                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                         <span className="absolute top-2 left-2 bg-blue-600/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                           Short
                         </span>
                         <h4 className="text-[11px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* CARRUSEL DE VIDEOS VERTICALES EN HORIZONTAL */}
-            {verticalShorts.length > 0 && (
-              <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-black text-purple-400 tracking-wider uppercase flex items-center gap-1.5">
-                    📱 Carrusel de Videos Verticales (Movimiento Horizontal)
-                  </h3>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
-                  {verticalShorts.map((v) => (
-                    <div 
-                      key={`v-horizontal-${v.id}`} 
-                      onClick={() => handleSelectVideo(v)}
-                      className="min-w-[130px] max-w-[130px] h-[230px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
-                    >
-                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2">
-                        <h4 className="text-[10px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
                       </div>
                     </div>
                   ))}
@@ -1078,7 +1054,7 @@ export default function Home() {
                         className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow"
                       >
                         <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
-                          <img src={photo.cover_url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                          <img src={photo.cover_url} alt={photo.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                           <button 
                             onClick={(e) => toggleWatchLater(photo, e)}
                             className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
@@ -1102,17 +1078,17 @@ export default function Home() {
               </section>
             )}
 
-            {/* PUBLICIDAD Y CARRUSEL HORIZONTAL EN MEDIO */}
-            <section className="px-4 py-2 w-full max-w-[100vw]">
-              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada 1</span>
+            {/* ESPACIO ESTRATÉGICO DE ANUNCIOS Y SCROLL */}
+            <section className="px-4 py-6 w-full max-w-[100vw] space-y-6">
+              <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/80 shadow-inner flex flex-col items-center">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold mb-2">⬇️ Continúa deslizando para ver más contenido y anuncios</span>
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
               </div>
 
-              {/* CARRUSEL HORIZONTAL ENMEDIO DE LOS 4 ANUNCIOS */}
+              {/* CARRUSEL INTERMEDIO */}
               {horizontalVideos.length > 0 && (
-                <div className="my-4 py-3 bg-zinc-950/40 border border-zinc-800/60 rounded-2xl p-3">
-                  <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2">🔥 Carrusel Destacado Intermedio</h3>
+                <div className="py-3 bg-zinc-950/40 border border-zinc-800/60 rounded-2xl p-4">
+                  <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-3">🔥 Carrusel Destacado Intermedio</h3>
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
                     {horizontalVideos.slice(0, 8).map(v => (
                       <div 
@@ -1121,7 +1097,7 @@ export default function Home() {
                         className="min-w-[150px] max-w-[150px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group hover:border-blue-500 shadow"
                       >
                         <div className="aspect-video bg-black relative flex items-center justify-center overflow-hidden">
-                          <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>
                         <div className="p-2">
                           <h4 className="text-[11px] font-bold text-white line-clamp-1">{v.title}</h4>
@@ -1133,8 +1109,7 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada 2</span>
+              <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/80 shadow-inner flex flex-col items-center">
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
               </div>
             </section>
@@ -1184,7 +1159,7 @@ export default function Home() {
           </>
         )}
 
-        {/* MODAL DE REPRODUCCIÓN + CARRUSEL DE RECOMENDADOS + VENTANA FLOTANTE DESPLAZABLE */}
+        {/* MODAL DE REPRODUCCIÓN */}
         {selectedVideo && !isPipActive && (
           <>
             <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78" />
@@ -1293,7 +1268,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* CARRUSEL DE VIDEOS RECOMENDADOS DENTRO DEL MODAL */}
+                {/* CARRUSEL RECOMENDADOS DENTRO DEL MODAL */}
                 <div className="p-4 bg-zinc-950 border-b border-zinc-800">
                   <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-3">🔥 Videos Recomendados</h3>
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
@@ -1304,7 +1279,7 @@ export default function Home() {
                         className="min-w-[160px] max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group hover:border-blue-500 transition-all shadow"
                       >
                         <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center">
-                          <img src={rec.cover_url || DEFAULT_COVER_IMAGE} alt={rec.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                          <img src={rec.cover_url || DEFAULT_COVER_IMAGE} alt={rec.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                           <span className="absolute bottom-1 right-1 bg-black/70 text-[9px] text-blue-400 px-1.5 py-0.5 rounded font-bold">
                             {rec.category}
                           </span>
@@ -1395,14 +1370,12 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" onClick={() => setShowStore(false)}>
             <div className="bg-[#121212] border border-zinc-800 p-0 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
               
-              {/* HEADER DE LA TIENDA */}
               <div className="p-5 border-b border-zinc-800 bg-[#0f0f0f] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-black text-white">🛍️ Tienda Flixxes</h2>
                   <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Compra tus accesorios y suscripciones</p>
                 </div>
                 
-                {/* BUSCADOR DE LA TIENDA */}
                 <div className="relative w-full sm:w-64">
                   <input 
                     type="text" 
@@ -1417,7 +1390,6 @@ export default function Home() {
                 <button onClick={() => setShowStore(false)} className="text-xs text-zinc-400 hover:text-white px-3 py-2 bg-zinc-900 rounded-xl">Cerrar</button>
               </div>
 
-              {/* GRID DE PRODUCTOS */}
               <div className="flex-1 overflow-y-auto p-5">
                 {filteredProducts.length === 0 ? (
                   <p className="text-center text-zinc-500 py-20 text-sm">No hay productos disponibles con ese nombre.</p>
@@ -1426,7 +1398,7 @@ export default function Home() {
                     {filteredProducts.map(p => (
                       <div key={p.id} className="group bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all flex flex-col">
                         <div className="aspect-square bg-black relative overflow-hidden">
-                          <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         </div>
                         <div className="p-3 flex flex-col flex-1">
                           <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight mb-2">{p.title}</h4>
@@ -1448,7 +1420,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* FOOTER TIENDA */}
               <div className="p-4 bg-zinc-950/50 text-center border-t border-zinc-800">
                 <p className="text-[9px] text-zinc-600">Envíos garantizados a todo el mundo con seguridad SSL.</p>
               </div>
@@ -1490,7 +1461,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {watchLater.map(v => (
                     <div key={v.id} className="bg-zinc-900 p-2 rounded-xl flex gap-3 items-center border border-zinc-800">
-                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-20 aspect-video rounded-lg object-cover bg-black pointer-events-none" />
+                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" className="w-20 aspect-video rounded-lg object-cover bg-black pointer-events-none" />
                       <div className="flex-1 overflow-hidden">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                         <div className="flex gap-2 mt-2">
@@ -1575,7 +1546,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
           <p className="leading-relaxed text-[11px] text-zinc-400">
-            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 años.
+            Todo el material alojado en esta web es recolectado de sitios web públicos. Flixxes es un sitio donde usted encontrará videos caseros, HD, latinos, fotos, entre otros. Prohibido el acceso a menores de 18 anos.
           </p>
         </div>
 
@@ -1594,3 +1565,4 @@ export default function Home() {
     </main>
   );
 }
+
