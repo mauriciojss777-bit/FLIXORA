@@ -86,32 +86,6 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
-function AdsterraNativeBlock({ zoneId }: { zoneId: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
-
-    const script = document.createElement('script');
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    script.src = `https://pl30814143.effectivecpmnetwork.com/${zoneId}/invoke.js`;
-
-    const innerDiv = document.createElement('div');
-    innerDiv.id = `container-${zoneId}`;
-
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
-  }, [zoneId]);
-
-  return (
-    <div className="w-full flex justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="w-full flex justify-center items-center" />
-    </div>
-  );
-}
-
 function DraggableAdPopup({ zoneId }: { zoneId: string }) {
   const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -256,13 +230,17 @@ function HorizontalVideoCard({
             </>
           ) : (
             <div 
-              className="w-full h-full pointer-events-none"
-              dangerouslySetInnerHTML={{ 
-                __html: video.voe_url.includes('<iframe') 
-                  ? video.voe_url 
-                  : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
-              }} 
-            />
+              className="w-full h-full absolute inset-0 overflow-hidden flex items-center justify-center bg-black pointer-events-none"
+            >
+              <div 
+                className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
+                dangerouslySetInnerHTML={{ 
+                  __html: video.voe_url.includes('<iframe') 
+                    ? video.voe_url 
+                    : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
+                }} 
+              />
+            </div>
           )}
 
           <button 
@@ -295,7 +273,6 @@ function HorizontalVideoCard({
               <span>👍 {likesCount}</span>
             </div>
             
-            {/* Botones de Donar y Compartir en la tarjeta */}
             <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-800/60">
               <button 
                 onClick={(e) => { e.stopPropagation(); onDonate(e); }}
@@ -724,7 +701,6 @@ export default function Home() {
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {/* BARRA SUPERIOR */}
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 flex-shrink-0">
             <button 
@@ -762,7 +738,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* SECCIÓN BOTONES ADICIONALES */}
         <div className="bg-[#141414] border-b border-zinc-800 px-4 py-3 flex flex-wrap items-center justify-center gap-3 w-full">
           <button 
             onClick={() => setShowDonateModal(true)}
@@ -787,7 +762,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* MENÚ LATERAL */}
         {showMenu && (
           <div className="fixed inset-0 z-50 flex max-w-[100vw] overflow-x-hidden">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMenu(false)}></div>
@@ -824,7 +798,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* BANDEJA DE CHAT */}
         {showChatDrawer && (
           <div className="fixed inset-0 z-50 flex justify-end">
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowChatDrawer(false)}></div>
@@ -863,7 +836,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* PERFIL DE USUARIO */}
         {viewingProfile && (
           <div className="px-4 py-8 max-w-4xl mx-auto w-full space-y-6">
             <div className="bg-zinc-900/60 border border-zinc-800 p-6 rounded-3xl flex flex-col sm:flex-row items-center gap-6 shadow-xl">
@@ -917,7 +889,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* FEED SOCIAL */}
         {showSocialFeed && !viewingProfile && (
           <div className="px-4 py-8 max-w-2xl mx-auto w-full space-y-6">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -962,7 +933,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* LISTADO PRINCIPAL */}
         {!viewingProfile && !showSocialFeed && (
           <>
             <section className="px-4 pt-4 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
@@ -992,7 +962,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* SHORTS VERTICALES */}
             {verticalShorts.length > 0 && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3">
@@ -1018,7 +987,6 @@ export default function Home() {
               </section>
             )}
 
-            {/* GALERÍA DE FOTOS */}
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3">
@@ -1054,7 +1022,6 @@ export default function Home() {
               </section>
             )}
 
-            {/* PUBLICIDAD Y BLOQUES */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
               <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
                 <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
@@ -1062,7 +1029,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* VIDEOS HORIZONTALES */}
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
               <section className="px-4 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
@@ -1107,7 +1073,6 @@ export default function Home() {
           </>
         )}
 
-        {/* MODAL DE REPRODUCCIÓN */}
         {selectedVideo && !isPipActive && (
           <>
             <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78" />
@@ -1143,10 +1108,10 @@ export default function Home() {
                     <img src={selectedVideo.cover_url} alt={selectedVideo.title} className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
                   </div>
                 ) : (
-                  <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video'}`}>
-                    <div className={`w-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'h-full'}`}>
+                  <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video w-full'}`}>
+                    <div className={`w-full h-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'absolute inset-0'}`}>
                       <div 
-                        className="w-full h-full"
+                        className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
                         dangerouslySetInnerHTML={{ 
                           __html: selectedVideo.voe_url.includes('<iframe') 
                             ? selectedVideo.voe_url 
@@ -1195,7 +1160,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* NUEVA OPCIÓN: NAVEGAR / CARRUSEL DE VIDEOS Y ANUNCIOS DEBAJO DEL VIDEO (ESTILO YOUTUBE) */}
                 <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
                   <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
                     {defaultTags.map(tag => (
@@ -1209,13 +1173,11 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {/* Bloque de Anuncio Adsterra mezclado arriba o en el carrusel */}
                   <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
                     <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
                     <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                   </div>
 
-                  {/* Carrusel Horizontal Mezclado con Videos Sugeridos */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">
                       Videos y Anuncios Recomendados
@@ -1235,7 +1197,6 @@ export default function Home() {
                             </div>
                           </div>
 
-                          {/* Inserción de un bloque de Adsterra nativo/banner cada 3 videos en el carrusel para aumentar impresiones */}
                           {index === 2 && (
                             <div className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col justify-center items-center p-2 text-center">
                               <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Anuncio</span>
@@ -1250,7 +1211,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* COMENTARIOS */}
                 <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
                   <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                     Comentarios
@@ -1287,7 +1247,6 @@ export default function Home() {
           </>
         )}
 
-        {/* MODAL TIENDA */}
         {showStore && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" onClick={() => setShowStore(false)}>
             <div className="bg-[#121212] border border-zinc-800 p-0 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
@@ -1317,7 +1276,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL DONAR */}
         {showDonateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1329,7 +1287,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL GUARDADOS */}
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-2xl w-full space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1352,7 +1309,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* MODAL ADMIN */}
         {showAdminModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
             <form onSubmit={handleAdminSubmit} className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -1413,4 +1369,3 @@ export default function Home() {
     </main>
   );
 }
-
