@@ -234,7 +234,7 @@ function HorizontalVideoCard({
                 className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
                 dangerouslySetInnerHTML={{ 
                   __html: video.voe_url.includes('<iframe') 
-                    ? video.voe_url 
+                    ? video.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') 
                     : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
                 }} 
               />
@@ -1112,7 +1112,7 @@ export default function Home() {
                         className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
                         dangerouslySetInnerHTML={{ 
                           __html: selectedVideo.voe_url.includes('<iframe') 
-                            ? selectedVideo.voe_url 
+                            ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') 
                             : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>`
                         }}
                       />
@@ -1388,3 +1388,4 @@ export default function Home() {
     </main>
   );
 }
+
