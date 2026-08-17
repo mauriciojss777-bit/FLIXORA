@@ -203,7 +203,9 @@ function HorizontalVideoCard({
   onToggleSave, 
   likesCount,
   viewsCount,
-  onOpenProfile 
+  onOpenProfile,
+  onDonate,
+  onShare 
 }: { 
   video: Video; 
   onSelect: (v: Video) => void; 
@@ -212,6 +214,8 @@ function HorizontalVideoCard({
   likesCount: number;
   viewsCount: number;
   onOpenProfile: (username: string, e: React.MouseEvent) => void;
+  onDonate: (e: React.MouseEvent) => void;
+  onShare: (video: Video, e: React.MouseEvent) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -278,7 +282,7 @@ function HorizontalVideoCard({
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
-            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium">
+            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium flex-wrap">
               <span 
                 onClick={(e) => onOpenProfile(video.author || 'FlixxesUser', e)}
                 className="hover:text-blue-400 underline cursor-pointer"
@@ -289,6 +293,22 @@ function HorizontalVideoCard({
               <span>👁️ {viewsCount}</span>
               <span>•</span>
               <span>👍 {likesCount}</span>
+            </div>
+            
+            {/* Botones de Donar y Compartir en la tarjeta */}
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-800/60">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onDonate(e); }}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
+              >
+                <span>☕</span> Donar
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onShare(video, e); }}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
+              >
+                <span>🔗</span> Compartir
+              </button>
             </div>
           </div>
         </div>
@@ -593,10 +613,12 @@ export default function Home() {
     }
   };
 
-  const handleShare = (video: Video) => {
-    const shareUrl = window.location.href;
+  const handleShare = (video?: Video, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const shareUrl = video ? `${window.location.origin}${window.location.pathname}?v=${video.id}` : window.location.href;
+    const shareTitle = video ? video.title : 'Flixxes';
     if (navigator.share) {
-      navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
+      navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
     } else {
       navigator.clipboard.writeText(shareUrl);
       alert('¡Enlace copiado al portapapeles!');
@@ -880,6 +902,8 @@ export default function Home() {
                     likesCount={likesMap[v.id] || 0}
                     viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}
                     onOpenProfile={handleOpenProfile}
+                    onDonate={() => setShowDonateModal(true)}
+                    onShare={handleShare}
                   />
                 ))}
               </div>
@@ -1071,6 +1095,8 @@ export default function Home() {
                           likesCount={likesMap[video.id] || 0}
                           viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)}
                           onOpenProfile={handleOpenProfile}
+                          onDonate={() => setShowDonateModal(true)}
+                          onShare={handleShare}
                         />
                       );
                     })}
@@ -1149,6 +1175,18 @@ export default function Home() {
                       👍 {likesMap[selectedVideo.id] || 0}
                     </button>
                     <button 
+                      onClick={(e) => handleShare(selectedVideo, e)}
+                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"
+                    >
+                      <span>🔗</span> Compartir
+                    </button>
+                    <button 
+                      onClick={() => setShowDonateModal(true)}
+                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"
+                    >
+                      <span>☕</span> Donar
+                    </button>
+                    <button 
                       onClick={handleCloseVideo} 
                       className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-full font-bold"
                     >
@@ -1175,6 +1213,44 @@ export default function Home() {
                       <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Comentar</button>
                     </div>
                   </form>
+
+                  {/* ESPACIO PARA ANUNCIOS Y CARRUSEL DE VIDEOS SUGERIDOS DEBAJO DE LA CAJA DE COMENTARIOS */}
+                  <div className="mt-6 pt-6 border-t border-zinc-800 space-y-6">
+                    {/* Anuncio debajo del comentario */}
+                    <div className="bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center">
+                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Destacada</span>
+                      <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                    </div>
+
+                    {/* Carrusel horizontal de videos sugeridos */}
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">
+                        Videos Sugeridos
+                      </h4>
+                      <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x">
+                        {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 8).map(v => (
+                          <div 
+                            key={`suggested-${v.id}`}
+                            onClick={() => handleSelectVideo(v)}
+                            className="min-w-[200px] max-w-[200px] bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 snap-start flex flex-col group shadow"
+                          >
+                            <div className="aspect-video bg-black relative overflow-hidden">
+                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                            <div className="p-2">
+                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Indicador Desliza hacia abajo */}
+                    <div className="flex flex-col items-center justify-center py-2 text-zinc-500 text-[11px] animate-bounce gap-1">
+                      <span>Desliza hacia abajo para ver más</span>
+                      <span>⬇️</span>
+                    </div>
+                  </div>
 
                   <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
                     {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
