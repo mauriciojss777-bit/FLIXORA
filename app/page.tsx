@@ -229,9 +229,7 @@ function HorizontalVideoCard({
               </span>
             </>
           ) : (
-            <div 
-              className="w-full h-full absolute inset-0 overflow-hidden flex items-center justify-center bg-black pointer-events-none"
-            >
+            <div className="w-full h-full absolute inset-0 overflow-hidden flex items-center justify-center bg-black pointer-events-none">
               <div 
                 className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
                 dangerouslySetInnerHTML={{ 
@@ -1342,7 +1340,7 @@ export default function Home() {
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
-                  <input type="text" placeholder="URL del video embed" value= {voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+                  <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                   <input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                 </>
               )}
@@ -1369,3 +1367,4 @@ export default function Home() {
     </main>
   );
 }
+
