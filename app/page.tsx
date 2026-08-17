@@ -204,6 +204,7 @@ function HorizontalVideoCard({
   isSaved, 
   onToggleSave, 
   likesCount,
+  viewsCount,
   onOpenProfile 
 }: { 
   video: Video; 
@@ -211,6 +212,7 @@ function HorizontalVideoCard({
   isSaved: boolean; 
   onToggleSave: (v: Video, e: React.MouseEvent) => void; 
   likesCount: number;
+  viewsCount: number;
   onOpenProfile: (username: string, e: React.MouseEvent) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -288,7 +290,7 @@ function HorizontalVideoCard({
                 {video.author || 'FlixxesUser'}
               </span>
               <span>•</span>
-              <span>{video.is_photo ? 'Foto HD' : 'HD'}</span>
+              <span>👁️ {viewsCount}</span>
               <span>•</span>
               <span>👍 {likesCount}</span>
             </div>
@@ -342,6 +344,7 @@ export default function Home() {
 
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [userLikedMap, setUserLikedMap] = useState<Record<string, boolean>>({});
+  const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
 
   const [adminPassword, setAdminPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -422,6 +425,7 @@ export default function Home() {
       const video = videos.find(v => v.id === vId);
       if (video) {
         setSelectedVideo(video);
+        incrementRealView(video.id);
       }
     }
   }, [videos]);
@@ -433,11 +437,32 @@ export default function Home() {
       if (data) {
         const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
         setVideos(enriched);
+        const vMap: Record<string, number> = {};
+        data.forEach(v => {
+          vMap[v.id] = v.views || 0;
+        });
+        setViewsMap(vMap);
       }
     } catch (e) { 
       console.error(e); 
     } finally {
       setLoading(false);
+    }
+  };
+
+  const incrementRealView = async (videoId: string) => {
+    try {
+      const currentViews = viewsMap[videoId] !== undefined ? viewsMap[videoId] : 0;
+      const newViews = currentViews + 1;
+      
+      setViewsMap(prev => ({ ...prev, [videoId]: newViews }));
+      
+      await supabase
+        .from('videos')
+        .update({ views: newViews })
+        .eq('id', videoId);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -452,6 +477,7 @@ export default function Home() {
     setSelectedVideo(video);
     setIsPipActive(false);
     window.history.pushState(null, '', `?v=${video.id}`);
+    incrementRealView(video.id);
     
     const updatedHistory = [video, ...history.filter(h => h.id !== video.id)].slice(0, 15);
     setHistory(updatedHistory);
@@ -539,7 +565,8 @@ export default function Home() {
         tags: ['Fotos', 'HD'],
         is_photo: true,
         is_short: false,
-        author: currentUsername
+        author: currentUsername,
+        views: 0
       }]);
 
       if (error) {
@@ -566,7 +593,8 @@ export default function Home() {
       tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
       is_short: isShortVideo,
       is_photo: false,
-      author: currentUsername
+      author: currentUsername,
+      views: 0
     }]);
 
     if (error) { 
@@ -671,7 +699,7 @@ export default function Home() {
     })
     .sort((a, b) => {
       if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
-      if (sortBy === 'popular') return (b.views || 0) - (b.views || 0);
+      if (sortBy === 'popular') return (viewsMap[b.id] || 0) - (viewsMap[a.id] || 0);
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
 
@@ -874,6 +902,7 @@ export default function Home() {
                       isSaved={watchLater.some(item => item.id === v.id)}
                       onToggleSave={toggleWatchLater}
                       likesCount={likesMap[v.id] || 0}
+                      viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}
                       onOpenProfile={handleOpenProfile}
                     />
                   ))
@@ -971,7 +1000,7 @@ export default function Home() {
 
                 <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs flex-shrink-0 self-end sm:self-auto">
                   <button onClick={() => setSortBy('recent')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Recientes</button>
-                  <button onClick={() => setSortBy('likes')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'likes' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Populares</button>
+                  <button onClick={() => setSortBy('popular')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'popular' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Populares</button>
                 </div>
               </div>
             </section>
@@ -1089,6 +1118,7 @@ export default function Home() {
                           isSaved={isSaved}
                           onToggleSave={toggleWatchLater}
                           likesCount={likesMap[video.id] || 0}
+                          viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)}
                           onOpenProfile={handleOpenProfile}
                         />
                       );
@@ -1155,12 +1185,18 @@ export default function Home() {
                 <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
                   <div>
                     <h2 className="font-bold text-white text-base sm:text-lg">{selectedVideo.title}</h2>
-                    <span 
-                      onClick={() => { handleOpenProfile(selectedVideo.author || 'FlixxesUser'); handleCloseVideo(); }}
-                      className="text-xs text-blue-400 hover:underline cursor-pointer mt-0.5 block font-semibold"
-                    >
-                      @{selectedVideo.author || 'FlixxesUser'}
-                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span 
+                        onClick={() => { handleOpenProfile(selectedVideo.author || 'FlixxesUser'); handleCloseVideo(); }}
+                        className="text-xs text-blue-400 hover:underline cursor-pointer font-semibold"
+                      >
+                        @{selectedVideo.author || 'FlixxesUser'}
+                      </span>
+                      <span className="text-zinc-600 text-xs">•</span>
+                      <span className="text-xs text-zinc-400 font-medium">
+                        👁️ {viewsMap[selectedVideo.id] !== undefined ? viewsMap[selectedVideo.id] : (selectedVideo.views || 0)} vistas
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
@@ -1459,8 +1495,7 @@ export default function Home() {
                       checked={isShortVideo} 
                       onChange={(e) => setIsShortVideo(e.target.checked)} 
                       className="w-4 h-4 accent-blue-500 cursor-pointer" 
-                    />
-                    <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
+                    />                    <label htmlFor="shortCheckbox" className="text-xs font-bold text-white cursor-pointer select-none">
                       ¿Es un Video Vertical / Short?
                     </label>
                   </div>
@@ -1478,8 +1513,6 @@ export default function Home() {
             </form>
           </div>
         )}
-
-      </div>
 
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
         <div className="max-w-3xl mx-auto space-y-3">
@@ -1504,3 +1537,4 @@ export default function Home() {
     </main>
   );
 }
+
