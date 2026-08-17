@@ -1035,6 +1035,31 @@ export default function Home() {
               </section>
             )}
 
+            {/* CARRUSEL DE VIDEOS VERTICALES EN HORIZONTAL */}
+            {verticalShorts.length > 0 && (
+              <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-black text-purple-400 tracking-wider uppercase flex items-center gap-1.5">
+                    📱 Carrusel de Videos Verticales (Movimiento Horizontal)
+                  </h3>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
+                  {verticalShorts.map((v) => (
+                    <div 
+                      key={`v-horizontal-${v.id}`} 
+                      onClick={() => handleSelectVideo(v)}
+                      className="min-w-[130px] max-w-[130px] h-[230px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
+                    >
+                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2">
+                        <h4 className="text-[10px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* GALERÍA DE FOTOS */}
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
@@ -1077,10 +1102,39 @@ export default function Home() {
               </section>
             )}
 
-            {/* PUBLICIDAD SUPERIOR */}
+            {/* PUBLICIDAD Y CARRUSEL HORIZONTAL EN MEDIO */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
+              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
+                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada 1</span>
+                <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+              </div>
+
+              {/* CARRUSEL HORIZONTAL ENMEDIO DE LOS 4 ANUNCIOS */}
+              {horizontalVideos.length > 0 && (
+                <div className="my-4 py-3 bg-zinc-950/40 border border-zinc-800/60 rounded-2xl p-3">
+                  <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2">🔥 Carrusel Destacado Intermedio</h3>
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+                    {horizontalVideos.slice(0, 8).map(v => (
+                      <div 
+                        key={`mid-car-${v.id}`}
+                        onClick={() => handleSelectVideo(v)}
+                        className="min-w-[150px] max-w-[150px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group hover:border-blue-500 shadow"
+                      >
+                        <div className="aspect-video bg-black relative flex items-center justify-center overflow-hidden">
+                          <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        </div>
+                        <div className="p-2">
+                          <h4 className="text-[11px] font-bold text-white line-clamp-1">{v.title}</h4>
+                          <span className="text-[9px] text-zinc-400">@{v.author || 'FlixxesUser'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada</span>
+                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad Patrocinada 2</span>
                 <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
               </div>
             </section>
