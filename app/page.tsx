@@ -423,10 +423,8 @@ export default function Home() {
     fetchProducts();
   }, [fetchVideos, fetchProducts]);
 
-  // CORRECCIÓN DE VISTAS: Se realiza una consulta robusta y asíncrona para actualizar la base de datos de Supabase de manera correcta.
   const incrementRealView = useCallback(async (videoId: string) => {
     try {
-      // Obtenemos el valor actual directamente desde la base de datos para evitar desincronización
       const { data: currentVideo, error: fetchError } = await supabase
         .from('videos')
         .select('views')
@@ -441,7 +439,6 @@ export default function Home() {
       const currentViews = currentVideo?.views || 0;
       const newViews = currentViews + 1;
 
-      // Actualizamos en Supabase
       const { error: updateError } = await supabase
         .from('videos')
         .update({ views: newViews })
@@ -450,7 +447,6 @@ export default function Home() {
       if (updateError) {
         console.error('Error al actualizar vistas en Supabase:', updateError);
       } else {
-        // Actualizamos el estado local de las vistas
         setViewsMap(prev => ({ ...prev, [videoId]: newViews }));
       }
     } catch (e) {
@@ -1440,8 +1436,29 @@ export default function Home() {
             Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 años.
           </p>
         </div>
+        
+        {/* Banner Adsterra Integrado en el Footer */}
+        <div className="w-full flex justify-center items-center my-4">
+          <script type="text/javascript">
+            {`
+              atOptions = {
+                'key' : '3149b600641b759a380a3da4a64eeca9',
+                'format' : 'iframe',
+                'height' : 250,
+                'width' : 300,
+                'params' : {}
+              };
+            `}
+          </script>
+          <script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
+        </div>
+
+        {/* Script Adsterra Adicional Integrado en el Footer */}
+        <script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
+
         <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
   );
 }
+
