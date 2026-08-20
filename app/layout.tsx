@@ -1,20 +1,25 @@
-import './globals.css';
+import type { Metadata } from 'next'
+import './globals.css'
 
-export const metadata = {
-  title: 'FLIXES',
+export const metadata: Metadata = {
+  title: 'Flixxes',
+  description: 'Tu plataforma de video',
   icons: {
-    icon: '/icon_v2.png',
-    apple: '/icon_v2.png',
+    icon: '/favicon.ico', // O la ruta de tu logo, ej: '/icon.png'
+    shortcut: '/favicon.ico',
+    apple: '/icon.png', // Este es clave para cuando se guarda en dispositivos móviles (iPhone/Android)
   },
-  openGraph: {
-    images: ['/icon_v2.png'],
-  },
-};
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="es">
       <body>{children}</body>
     </html>
-  );
+  )
 }
+
