@@ -81,7 +81,7 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
 
   return (
     <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden" />
+      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden min-h-[250px]" />
     </div>
   );
 }
@@ -1483,6 +1483,7 @@ export default function Home() {
               };
             `}
           </script>
+          <script type="z-adscript" dangerouslySetInnerHTML={{ __html: `atOptions = {'key' : '3149b600641b759a380a3da4a64eeca9','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};` }} />
           <script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
         </div>
 
