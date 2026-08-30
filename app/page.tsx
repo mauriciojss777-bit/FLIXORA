@@ -159,9 +159,7 @@ function HorizontalVideoCard({
   onToggleSave,
   likesCount,
   viewsCount,
-  onOpenProfile,
-  onDonate,
-  onShare
+  onOpenProfile
 }: {
   video: Video;
   onSelect: (v: Video) => void;
@@ -170,8 +168,6 @@ function HorizontalVideoCard({
   likesCount: number;
   viewsCount: number;
   onOpenProfile: (username: string, e: React.MouseEvent) => void;
-  onDonate: (e: React.MouseEvent) => void;
-  onShare: (video: Video, e: React.MouseEvent) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -220,11 +216,13 @@ function HorizontalVideoCard({
             <div className="w-full h-full absolute inset-0 overflow-hidden flex items-center justify-center bg-black pointer-events-none">
               <div
                 key={`preview-${video.id}`}
-                className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
+                className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0 [&>iframe]:pointer-events-none"
                 dangerouslySetInnerHTML={{
                   __html: video.voe_url.includes('<iframe')
-                    ? video.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"')
-                    : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
+                    ? video.voe_url
+                        .replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation" pointer-events="none"')
+                        .replace(/src="([^"]*)"/, 'src="$1&autoplay=1&mute=1&controls=0"')
+                    : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1&controls=0" class="w-full h-full border-0 pointer-events-none" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
                 }}
               />
             </div>
@@ -256,20 +254,6 @@ function HorizontalVideoCard({
               <span>👁️ {viewsCount}</span>
               <span className="text-zinc-600">•</span>
               <span>👍 {likesCount}</span>
-            </div>
-            <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-zinc-800/60">
-              <button
-                onClick={(e) => { e.stopPropagation(); onDonate(e); }}
-                className="bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-colors border border-zinc-700/50"
-              >
-                <span>☕</span> Donar
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onShare(video, e); }}
-                className="bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-colors border border-zinc-700/50"
-              >
-                <span>🔗</span> Compartir
-              </button>
             </div>
           </div>
         </div>
@@ -341,7 +325,6 @@ export default function Home() {
     ]
   });
   const [newCommentText, setNewCommentText] = useState('');
-  const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
   const shuffleArray = (array: Video[]) => {
@@ -464,7 +447,6 @@ export default function Home() {
     setSelectedVideo(null);
     setIsPipActive(false);
     setIsCinemaMode(false);
-    setShowCommentsDrawer(false);
     window.history.pushState(null, '', window.location.pathname);
   };
 
@@ -710,13 +692,6 @@ export default function Home() {
 
         <div className="bg-[#0f0f0f]/80 backdrop-blur-md border-b border-zinc-800/60 px-4 py-3 flex flex-wrap items-center justify-center gap-3 w-full shadow-inner">
           <button
-            onClick={() => setShowDonateModal(true)}
-            className="bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-xl font-bold border border-zinc-800 transition-all flex items-center gap-2 shadow"
-          >
-            <span>☕</span>
-            <span>Donar</span>
-          </button>
-          <button
             onClick={() => setShowStore(true)}
             className="bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-xl font-bold border border-zinc-800 transition-all flex items-center gap-2 shadow"
           >
@@ -748,7 +723,6 @@ export default function Home() {
                 <button onClick={() => { setActiveTag('Fotos'); setShowMenu(false); setViewingProfile(null); setShowSocialFeed(false); }} className="flex items-center gap-3.5 p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-left text-zinc-200 transition-colors">📷 Galería de Fotos</button>
                 <button onClick={() => { setShowWatchLaterModal(true); setShowMenu(false); }} className="flex items-center gap-3.5 p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-left text-zinc-200 transition-colors">⭐ Guardados ({watchLater.length})</button>
                 <button onClick={() => { setShowStore(true); setShowMenu(false); }} className="flex items-center gap-3.5 p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-left text-zinc-200 transition-colors">🛍️ Tienda</button>
-                <button onClick={() => { setShowDonateModal(true); setShowMenu(false); }} className="flex items-center gap-3.5 p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-left text-zinc-200 transition-colors">☕ Donar</button>
                 <div className="pt-3 border-t border-zinc-800/80 space-y-1.5">
                   <span className="text-[10px] uppercase font-extrabold text-zinc-500 px-3 tracking-widest block">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
@@ -838,8 +812,6 @@ export default function Home() {
                     likesCount={likesMap[v.id] || 0}
                     viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}
                     onOpenProfile={handleOpenProfile}
-                    onDonate={() => setShowDonateModal(true)}
-                    onShare={handleShare}
                   />
                 ))}
               </div>
@@ -1032,8 +1004,6 @@ export default function Home() {
                           likesCount={likesMap[video.id] || 0}
                           viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)}
                           onOpenProfile={handleOpenProfile}
-                          onDonate={() => setShowDonateModal(true)}
-                          onShare={handleShare}
                         />
                       );
                     })}
@@ -1110,15 +1080,6 @@ export default function Home() {
                               ❤️
                             </div>
                             <span className="text-[10px] font-bold drop-shadow">{likesMap[v.id] || 0}</span>
-                          </button>
-                          <button
-                            onClick={() => { handleSelectVideo(v); setShowCommentsDrawer(true); }}
-                            className="flex flex-col items-center text-white gap-1"
-                          >
-                            <div className="p-3.5 rounded-2xl bg-black/60 backdrop-blur-xl hover:bg-black transition-all shadow-xl">
-                              💬
-                            </div>
-                            <span className="text-[10px] font-bold drop-shadow">Comentarios</span>
                           </button>
                           <button
                             onClick={(e) => toggleWatchLater(v, e)}
@@ -1238,12 +1199,6 @@ export default function Home() {
                       >
                         <span>🔗</span> Compartir
                       </button>
-                      <button
-                        onClick={() => setShowDonateModal(true)}
-                        className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all border border-zinc-800"
-                      >
-                        <span>☕</span> Donar
-                      </button>
                       <button 
                         onClick={handleCloseVideo} 
                         className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs px-5 py-2.5 rounded-xl font-extrabold transition-all"
@@ -1337,17 +1292,6 @@ export default function Home() {
           </div>
         )}
 
-        {showDonateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn" onClick={() => setShowDonateModal(false)}>
-            <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-md w-full space-y-5 text-center shadow-2xl backdrop-blur-xl" onClick={e => e.stopPropagation()}>
-              <h2 className="text-2xl font-black text-white tracking-tight">☕ Apóyame con una Donación</h2>
-              <p className="text-xs text-zinc-400 leading-relaxed">Tu valioso apoyo ayuda a mantener los servidores activos y el contenido fluyendo diariamente.</p>
-              <a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl text-xs tracking-wider uppercase transition-all shadow-lg shadow-blue-600/30">Donar con PayPal</a>
-              <button onClick={() => setShowDonateModal(false)} className="w-full text-xs text-zinc-500 hover:text-white py-2 font-medium transition-colors">Cancelar</button>
-            </div>
-          </div>
-        )}
-
         {showWatchLaterModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn" onClick={() => setShowWatchLaterModal(false)}>
             <div className="bg-zinc-950 border border-zinc-800 p-6 md:p-8 rounded-3xl max-w-2xl w-full space-y-5 max-h-[85vh] overflow-y-auto shadow-2xl backdrop-blur-xl" onClick={e => e.stopPropagation()}>
@@ -1425,7 +1369,7 @@ export default function Home() {
                   <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs text-zinc-300 outline-none shadow-inner">
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-                  <textarea placeholder="Descripción del contenido" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs text-white outline-none resize-none shadow-inner" />
+                  <textarea placeholder="Description del contenido" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs text-white outline-none resize-none shadow-inner" />
                   <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs text-white outline-none focus:border-blue-500 shadow-inner" />
                   <input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs text-white outline-none focus:border-blue-500 shadow-inner" />
                 </>
