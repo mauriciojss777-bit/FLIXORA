@@ -76,7 +76,7 @@ containerRef.current.innerHTML = '';
 const script = document.createElement('script');
 script.async = true;
 script.setAttribute('data-cfasync', 'false');
-script.src = [https://pl30814143.effectivecpmnetwork.com/$](https://pl30814143.effectivecpmnetwork.com/$){zoneId}/invoke.js;
+script.src = `https://pl30814143.effectivecpmnetwork.com/${zoneId}/invoke.js`;
 const innerDiv = document.createElement('div');
 innerDiv.id = container-draggable-${zoneId};
 containerRef.current.appendChild(script);
