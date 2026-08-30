@@ -99,7 +99,7 @@ y: clientY - dragOffset.y
 };
 return (
 <div
-style={{ left: ${position.x}px, top: ${position.y}px }}
+style={{ left: `${position.x}px`, top: `${position.y}px` }}
 className="fixed z-50 bg-zinc-950/90 border border-zinc-800/80 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden transition-shadow select-none max-w-[280px]"
 >
 <div
