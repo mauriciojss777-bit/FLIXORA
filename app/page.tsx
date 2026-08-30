@@ -1401,7 +1401,7 @@ className="w-20 aspect-video rounded-lg object-cover bg-black"
 <button
 type="button"
 onClick={() => setIsShortVideo(false)}
-className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}}
+className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}'}
 >
 Horizontal
 </button>
