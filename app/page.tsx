@@ -342,7 +342,6 @@ export default function Home() {
   const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
-  // Función de ordenamiento aleatorio (Fisher-Yates o sort aleatorio seguro)
   const shuffleArray = (array: Video[]) => {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -358,7 +357,6 @@ export default function Home() {
       const { data } = await supabase.from('videos').select('*');
       if (data) {
         const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
-        // Se organizan de forma aleatoria siempre como se solicitó
         setVideos(shuffleArray(enriched));
         const vMap: Record<string, number> = {};
         data.forEach(v => {
@@ -1047,7 +1045,6 @@ export default function Home() {
           <>
             <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78"/>
             {selectedVideo.is_short ? (
-              // VISUALIZADOR TIPO VERTICAL DESLIZABLE (FEED NATIVO) CON ANUNCIOS INTEGRADOS
               <div 
                 ref={shortContainerRef}
                 className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-between overflow-y-scroll snap-y snap-mandatory no-scrollbar"
@@ -1122,7 +1119,6 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* INSERCIÓN DE ANUNCIOS NATIVOS DENTRO DEL DESLIZAMIENTO */}
                       {sIndex % 2 === 1 && (
                         <div className="absolute inset-x-0 bottom-32 z-30 flex justify-center pointer-events-none px-4">
                           <div className="bg-zinc-950/90 border border-zinc-700 p-3 rounded-2xl shadow-2xl backdrop-blur-md pointer-events-auto max-w-xs w-full text-center">
@@ -1389,14 +1385,14 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => setIsShortVideo(false)}
-                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
+                        className={`px-3 py-1 text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
                       >
                         Horizontal
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsShortVideo(true)}
-                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
+                        className={`px-3 py-1 text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
                       >
                         Vertical (Short)
                       </button>
