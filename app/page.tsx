@@ -50,10 +50,10 @@ if (!containerRef.current) return;
 containerRef.current.innerHTML = '';
 const confScript = document.createElement('script');
 confScript.type = 'text/javascript';
-confScript.text = atOptions = { 'key' : '${zoneId}', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };;
+confScript.text = `atOptions = { 'key' : '${zoneId}', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };`;
 const invokeScript = document.createElement('script');
 invokeScript.type = 'text/javascript';
-invokeScript.src = //[www.highperformanceformat.com/$](https://www.highperformanceformat.com/$){zoneId}/invoke.js;
+invokeScript.src = `https://www.highperformanceformat.com/${zoneId}/invoke.js`;
 containerRef.current.appendChild(confScript);
 containerRef.current.appendChild(invokeScript);
 }, [zoneId]);
@@ -78,7 +78,7 @@ script.async = true;
 script.setAttribute('data-cfasync', 'false');
 script.src = `https://pl30814143.effectivecpmnetwork.com/${zoneId}/invoke.js`;
 const innerDiv = document.createElement('div');
-innerDiv.id = container-draggable-${zoneId};
+innerDiv.id = `container-draggable-${zoneId}`;
 containerRef.current.appendChild(script);
 containerRef.current.appendChild(innerDiv);
 }, [zoneId, minimized, isVisible]);
@@ -99,7 +99,7 @@ y: clientY - dragOffset.y
 };
 return (
 <div
-style={{ left: ${position.x}px, top: ${position.y}px }}
+style={{ left: `${position.x}px`, top: `${position.y}px` }}
 className="fixed z-50 bg-zinc-950/95 border border-zinc-700 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden transition-shadow select-none max-w-[280px]"
 >
 <div
@@ -159,7 +159,7 @@ onDonate: (e: React.MouseEvent) => void;
 onShare: (video: Video, e: React.MouseEvent) => void;
 }) {
 const [isHovered, setIsHovered] = useState(false);
-const timeoutRef = useRef<NodeJS.Timeout null |>(null);
+const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 const handleMouseEnter = () => {
 if (video.is_photo) return;
 timeoutRef.current = setTimeout(() => {
@@ -204,14 +204,14 @@ className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0
 dangerouslySetInnerHTML={{
 __html: video.voe_url.includes('<iframe')
 ? video.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"')
-: <iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>
+: `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
 }}
 />
 </div>
 )}
 <button
 onClick={(e) => onToggleSave(video, e)}
-className={absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}}
+className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
 >
 ⭐
 </button>
@@ -262,7 +262,7 @@ const [videos, setVideos] = useState<Video[]>([]);
 const [products, setProducts] = useState<Product[]>([]);
 const [storeSearchQuery, setStoreSearchQuery] = useState('');
 const [loading, setLoading] = useState(true);
-const [selectedVideo, setSelectedVideo] = useState<Video null |>(null);
+const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
 const [activeTag, setActiveTag] = useState<string>('Todos');
 const [searchQuery, setSearchQuery] = useState('');
 const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'likes'>('recent');
@@ -420,7 +420,7 @@ alert('Para instalar la app, toca los tres puntos de tu navegador y selecciona "
 const handleSelectVideo = (video: Video) => {
 setSelectedVideo(video);
 setIsPipActive(false);
-window.history.pushState(null, '', ?v=${video.id});
+window.history.pushState(null, '', `?v=${video.id}`);
 incrementRealView(video.id);
 // Si es un short, ubicamos su índice dentro de la lista de verticales
 if (video.is_short) {
@@ -555,7 +555,7 @@ fetchVideos();
 };
 const handleShare = (video?: Video, e?: React.MouseEvent) => {
 if (e) e.stopPropagation();
-const shareUrl = video ? ${window.location.origin}${window.location.pathname}?v=${video.id} : window.location.href;
+const shareUrl = video ? `${window.location.origin}${window.location.pathname}?v=${video.id}` : window.location.href;
 const shareTitle = video ? video.title : 'Flixxes';
 if (navigator.share) {
 navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
@@ -650,7 +650,7 @@ const filteredProducts = products.filter(p =>
 p.title.toLowerCase().includes(storeSearchQuery.toLowerCase())
 );
 return (
-<main className={min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300}>
+<main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
 <div className="w-full max-w-[100vw] overflow-x-hidden">
 <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
 <div className="flex items-center gap-2 flex-shrink-0">
@@ -788,7 +788,7 @@ className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-x
 {viewingProfile !== currentUsername && (
 <button
 onClick={() => handleToggleFollow(viewingProfile)}
-className={px-6 py-2 rounded-full font-bold text-xs transition-all ${followingMap[viewingProfile] ? 'bg-zinc-800 text-zinc-300 border border-zinc-700' : 'bg-blue-600 text-white hover:bg-blue-500'}}
+className={`px-6 py-2 rounded-full font-bold text-xs transition-all ${followingMap[viewingProfile] ? 'bg-zinc-800 text-zinc-300 border border-zinc-700' : 'bg-blue-600 text-white hover:bg-blue-500'}`}
 >
 {followingMap[viewingProfile] ? 'Siguiendo ✓' : 'Seguir +'}
 </button>
@@ -804,7 +804,11 @@ className={px-6 py-2 rounded-full font-bold text-xs transition-all ${followingMa
 <h3 className="text-sm font-black uppercase tracking-wider text-blue-400">Publicaciones de @{viewingProfile}</h3>
 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
 {videos.filter(v => v.author === viewingProfile).map(v => (
-<HorizontalVideoCard isSaved="{watchLater.some(item" key="{v.id}" onSelect="{handleSelectVideo}" video="{v}"> item.id === v.id)}
+<HorizontalVideoCard 
+key={v.id} 
+video={v} 
+onSelect={handleSelectVideo} 
+isSaved={watchLater.some(item => item.id === v.id)}
 onToggleSave={toggleWatchLater}
 likesCount={likesMap[v.id] || 0}
 viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}
@@ -878,14 +882,14 @@ className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-xs fo
 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/60 w-full">
 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
 {defaultTags.map(tag => (
-<button key={tag} onClick={() => setActiveTag(tag)} className={px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}}>
+<button key={tag} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>
 {tag}
 </button>
 ))}
 </div>
 <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs flex-shrink-0">
-<button onClick={() => setSortBy('recent')} className={px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}}>Recientes</button>
-<button onClick={() => setSortBy('popular')} className={px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'popular' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}}>Populares</button>
+<button onClick={() => setSortBy('recent')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'recent' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Recientes</button>
+<button onClick={() => setSortBy('popular')} className={`px-3 py-1 rounded-lg font-bold transition-all ${sortBy === 'popular' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'}`}>Populares</button>
 </div>
 </div>
 </section>
@@ -899,7 +903,7 @@ className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-xs fo
 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
 {verticalShorts.map((v, index) => (
 <div
-key={short-${v.id}}
+key={`short-${v.id}`}
 onClick={() => {
 setActiveShortIndex(index);
 handleSelectVideo(v);
@@ -933,7 +937,7 @@ className="w-full h-full object-cover bg-black group-hover:scale-105 transition-
 const isSaved = watchLater.some(v => v.id === photo.id);
 return (
 <div
-key={photo-${photo.id}}
+key={`photo-${photo.id}`}
 onClick={() => handleSelectVideo(photo)}
 className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow"
 >
@@ -947,7 +951,7 @@ className="w-full h-full object-cover group-hover:scale-105 transition-transform
 />
 <button
 onClick={(e) => toggleWatchLater(photo, e)}
-className={absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}}
+className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
 >
 ⭐
 </button>
@@ -988,7 +992,16 @@ className={absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition
 {horizontalVideos.map((video) => {
 const isSaved = watchLater.some(v => v.id === video.id);
 return (
-<HorizontalVideoCard !="=" (video.views 0)} 0} : ? isSaved="{isSaved}" key="{video.id}" likesCount="{likesMap[video.id]" onDonate="{()" onOpenProfile="{handleOpenProfile}" onSelect="{handleSelectVideo}" onToggleSave="{toggleWatchLater}" undefined video="{video}" viewsCount="{viewsMap[video.id]" viewsMap[video.id] ||> setShowDonateModal(true)}
+<HorizontalVideoCard 
+key={video.id} 
+video={video} 
+onSelect={handleSelectVideo} 
+isSaved={isSaved} 
+onToggleSave={toggleWatchLater}
+likesCount={likesMap[video.id] || 0}
+viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)}
+onOpenProfile={handleOpenProfile}
+onDonate={() => setShowDonateModal(true)}
 onShare={handleShare}
 />
 );
@@ -1002,10 +1015,8 @@ onShare={handleShare}
 {selectedVideo && !isPipActive && (
 <>
 <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78"/>
-{/* MODO TIKTOK PARA VIDEOS VERTICALES (SHORTS) /}
 {selectedVideo.is_short ? (
 <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-between overflow-hidden">
-{/ Header superior TikTok-style */}
 <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent">
 <button onClick={handleCloseVideo} className="text-white bg-zinc-900/60 p-2 rounded-full backdrop-blur-md">
 ✕
@@ -1017,7 +1028,6 @@ onShare={handleShare}
 🔗
 </button>
 </div>
-{/* Contenedor del video vertical con Adsterra integrado y soporte swipe/scroll */}
 <div className="relative w-full h-full flex items-center justify-center bg-black">
 <div className="w-full h-full max-w-md relative flex items-center justify-center bg-zinc-950">
 <div
@@ -1025,10 +1035,9 @@ className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0
 dangerouslySetInnerHTML={{
 __html: selectedVideo.voe_url.includes('<iframe')
 ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"')
-: <iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>
+: `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>`
 }}
 />
-{/* Superposición de información de autor y título estilo TikTok */}
 <div className="absolute bottom-16 left-4 right-20 z-10 space-y-2 pointer-events-none">
 <div className="flex items-center gap-2 pointer-events-auto" onClick={(e) => handleOpenProfile(selectedVideo.author || 'FlixxesUser', e)}>
 <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-xs border border-white/20">
@@ -1038,13 +1047,12 @@ __html: selectedVideo.voe_url.includes('<iframe')
 </div>
 <p className="text-white text-xs font-medium drop-shadow-md line-clamp-2">{selectedVideo.title}</p>
 </div>
-{/* Botones laterales de interacción (Like, Comentarios, Compartir, Anuncio Adsterra) */}
 <div className="absolute right-3 bottom-20 z-20 flex flex-col items-center gap-4">
 <button
 onClick={() => handleLike(selectedVideo.id)}
 className="flex flex-col items-center text-white gap-1 group"
 >
-<div className={p-3 rounded-full backdrop-blur-md transition-all ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-black/60 hover:bg-black'}}>
+<div className={`p-3 rounded-full backdrop-blur-md transition-all ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-black/60 hover:bg-black'}`}>
 ❤️
 </div>
 <span className="text-[10px] font-bold drop-shadow">{likesMap[selectedVideo.id] || 0}</span>
@@ -1067,14 +1075,12 @@ className="flex flex-col items-center text-white gap-1"
 </div>
 <span className="text-[10px] font-bold drop-shadow">Guardar</span>
 </button>
-{/* Mini Banner Adsterra flotante dentro del feed de Shorts */}
 <div className="w-12 h-12 rounded-full bg-zinc-900/90 border border-zinc-700 flex items-center justify-center overflow-hidden shadow-lg p-1">
 <span className="text-[8px] text-blue-400 font-bold uppercase">Ad</span>
 </div>
 </div>
 </div>
 </div>
-{/* Navegación inferior tipo TikTok (Siguiente / Anterior Short) */}
 <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center items-center gap-4 px-6 pointer-events-none">
 <button 
 onClick={handlePrevVideoForShorts} 
@@ -1089,7 +1095,6 @@ className="pointer-events-auto bg-blue-600 hover:bg-blue-500 text-white text-xs 
 Siguiente Short ➔
 </button>
 </div>
-{/* Drawer de Comentarios Desplegable para el modo TikTok */}
 {showCommentsDrawer && (
 <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm">
 <div className="bg-[#121212] border-t border-zinc-800 rounded-t-3xl max-h-[70vh] flex flex-col p-4 space-y-4 animate-in slide-in-from-bottom">
@@ -1123,14 +1128,13 @@ className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-2.5 rounded-xl text
 )}
 </div>
 ) : (
-/* MODO REPRODUCTOR ESTÁNDAR PARA VIDEOS HORIZONTALES Y FOTOS */
 <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
-<div className={bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 shadow-2xl} onClick={e => e.stopPropagation()}>
+<div className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 shadow-2xl`} onClick={e => e.stopPropagation()}>
 <div className="bg-zinc-950 px-4 py-2.5 border-b border-zinc-800 flex justify-between items-center text-xs">
 <div className="flex items-center gap-2">
 {!selectedVideo.is_photo && (
 <>
-<button onClick={() => setIsCinemaMode(!isCinemaMode)} className={px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}}>
+<button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>
 Modo Cine
 </button>
 <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">
@@ -1165,7 +1169,7 @@ className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0
 dangerouslySetInnerHTML={{
 __html: selectedVideo.voe_url.includes('<iframe')
 ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"')
-: <iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>
+: `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>`
 }}
 />
 </div>
@@ -1183,7 +1187,7 @@ __html: selectedVideo.voe_url.includes('<iframe')
 <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
 <button
 onClick={() => handleLike(selectedVideo.id)}
-className={flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}}
+className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
 >
 👍 {likesMap[selectedVideo.id] || 0}
 </button>
@@ -1211,9 +1215,9 @@ CERRAR
 <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
 {defaultTags.map(tag => (
 <button
-key={nav-sub-${tag}}
+key={`nav-sub-${tag}`}
 onClick={() => setActiveTag(tag)}
-className={px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}}
+className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}
 >
 {tag}
 </button>
@@ -1229,7 +1233,7 @@ Videos y Anuncios Recomendados
 </h4>
 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
 {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 6).map((v, index) => (
-<div key={mix-carousel-${v.id}} className="flex gap-3 flex-shrink-0 snap-start">
+<div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
 <div
 onClick={() => handleSelectVideo(v)}
 className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow"
@@ -1332,7 +1336,7 @@ className="w-full h-full object-cover"
 <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-3xl max-w-md w-full space-y-4 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
 <h2 className="text-2xl font-black text-white">☕ Apóyame con una Donación</h2>
 <p className="text-xs text-zinc-400">Tu apoyo ayuda a mantener los servidores activos.</p>
-<a href="[https://paypal.me/TU_USUARIO_PAYPAL](https://paypal.me/TU_USUARIO_PAYPAL)" target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3.5 rounded-xl text-sm transition-all">Donar con PayPal</a>
+<a href="https://paypal.me/TU_USUARIO_PAYPAL" target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3.5 rounded-xl text-sm transition-all">Donar con PayPal</a>
 <button onClick={() => setShowDonateModal(false)} className="w-full text-xs text-zinc-500 hover:text-white py-2">Cancelar</button>
 </div>
 </div>
@@ -1370,9 +1374,9 @@ className="w-20 aspect-video rounded-lg object-cover bg-black"
 <div className="flex justify-between items-center">
 <h2 className="text-xl font-bold text-white">Panel Admin</h2>
 <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl text-xs font-bold">
-<button type="button" onClick={() => setAdminTab('video')} className={px-2.5 py-1 rounded-lg ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}}>Video</button>
-<button type="button" onClick={() => setAdminTab('photo')} className={px-2.5 py-1 rounded-lg ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}}>Foto</button>
-<button type="button" onClick={() => setAdminTab('afiliado')} className={px-2.5 py-1 rounded-lg ${adminTab === 'afiliado' ? 'bg-blue-600 text-white' : 'text-zinc-400'}}>Afiliado</button>
+<button type="button" onClick={() => setAdminTab('video')} className={`px-2.5 py-1 rounded-lg ${adminTab === 'video' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Video</button>
+<button type="button" onClick={() => setAdminTab('photo')} className={`px-2.5 py-1 rounded-lg ${adminTab === 'photo' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Foto</button>
+<button type="button" onClick={() => setAdminTab('afiliado')} className={`px-2.5 py-1 rounded-lg ${adminTab === 'afiliado' ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Afiliado</button>
 </div>
 </div>
 <input type="password" placeholder="Clave de administrador" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
@@ -1397,14 +1401,14 @@ className="w-20 aspect-video rounded-lg object-cover bg-black"
 <button
 type="button"
 onClick={() => setIsShortVideo(false)}
-className={px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}}
+className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}}
 >
 Horizontal
 </button>
 <button
 type="button"
 onClick={() => setIsShortVideo(true)}
-className={px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}}
+className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}}
 >
 Vertical (Short)
 </button>
@@ -1415,7 +1419,7 @@ Vertical (Short)
 </select>
 <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
 <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
-<input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+<input type="text" placeholder="URL Miniatura (Opcional)" value=${coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
 </>
 )}
 <div className="flex gap-2 pt-2">
@@ -1435,11 +1439,11 @@ Todo el material alojado en esta web es recolectado de sitios públicos. Prohibi
 </div>
 <div className="w-full flex justify-center items-center my-4">
 <script type="text/javascript">
-{atOptions = { 'key' : '3149b600641b759a380a3da4a64eeca9', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };}
+{atOptions = { 'key' : '3149b600641b759a380a3da4a64eeca9', 'format' : 'iframe', 'height' : 250, 'width' : '300', 'params' : {} };}
 </script>
-<script type="text/javascript" src="[https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js](https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js)"></script>
+<script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
 </div>
-<script type="text/javascript" src="[https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js](https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js)"></script>
+<script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
 <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
 </footer>
 </main>
