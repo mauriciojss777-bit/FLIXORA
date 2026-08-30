@@ -53,7 +53,7 @@ confScript.type = 'text/javascript';
 confScript.text = atOptions = { 'key' : '${zoneId}', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };;
 const invokeScript = document.createElement('script');
 invokeScript.type = 'text/javascript';
-invokeScript.src = [https://www.highperformanceformat.com/$](https://www.highperformanceformat.com/$){zoneId}/invoke.js;
+script.src = 'https://www.highperformanceformat.com/8f/${zoneId}/invoke.js';
 containerRef.current.appendChild(confScript);
 containerRef.current.appendChild(invokeScript);
 }, [zoneId]);
