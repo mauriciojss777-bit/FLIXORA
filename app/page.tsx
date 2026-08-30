@@ -1163,7 +1163,7 @@ export default function Home() {
                       />
                     </div>
                   ) : (
-                    <div className="w-full bg-black flex justify-center items-center relative aspect-video w-full">
+                    <div className="w-full bg-black flex justify-center items-center relative aspect-video">
                       <div className="w-full h-full relative absolute inset-0">
                         <div
                           key={`modal-player-${selectedVideo.id}`}
@@ -1395,4 +1395,5 @@ export default function Home() {
     </main>
   );
 }
+
 
