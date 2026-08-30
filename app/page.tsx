@@ -292,7 +292,6 @@ const [history, setHistory] = useState<Video[]>([]);
 const [watchLater, setWatchLater] = useState<Video[]>([]);
 const [isCinemaMode, setIsCinemaMode] = useState(false);
 const [isPipActive, setIsPipActive] = useState(false);
-// Estados específicos para el modo TikTok (Vertical Shorts Feed)
 const [activeShortIndex, setActiveShortIndex] = useState(0);
 const shortContainerRef = useRef<HTMLDivElement>(null);
 const [likesMap, setLikesMap] = useState<Record<string, number>>({});
@@ -422,7 +421,6 @@ setSelectedVideo(video);
 setIsPipActive(false);
 window.history.pushState(null, '', `?v=${video.id}`);
 incrementRealView(video.id);
-// Si es un short, ubicamos su índice dentro de la lista de verticales
 if (video.is_short) {
 const vShorts = videos.filter(v => v.is_short);
 const idx = vShorts.findIndex(v => v.id === video.id);
@@ -1401,14 +1399,14 @@ className="w-20 aspect-video rounded-lg object-cover bg-black"
 <button
 type="button"
 onClick={() => setIsShortVideo(false)}
-className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}'}
+className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
 >
 Horizontal
 </button>
 <button
 type="button"
 onClick={() => setIsShortVideo(true)}
-className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}'}
+className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
 >
 Vertical (Short)
 </button>
@@ -1419,7 +1417,7 @@ Vertical (Short)
 </select>
 <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
 <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
-<input type="text" placeholder="URL Miniatura (Opcional)" value=${coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+<input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
 </>
 )}
 <div className="flex gap-2 pt-2">
@@ -1437,16 +1435,8 @@ Vertical (Short)
 Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 años.
 </p>
 </div>
-<div className="w-full flex justify-center items-center my-4">
-<script type="text/javascript">
-{atOptions = { 'key' : '3149b600641b759a380a3da4a64eeca9', 'format' : 'iframe', 'height' : 250, 'width' : '300', 'params' : {} };}
-</script>
-<script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
-</div>
-<script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
 <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
 </footer>
 </main>
 );
 }
-
