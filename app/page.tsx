@@ -78,7 +78,7 @@ script.async = true;
 script.setAttribute('data-cfasync', 'false');
 script.src = `https://pl30814143.effectivecreativenetwork.com/${zoneId}/invoke.js`;
 const innerDiv = document.createElement('div');
-innerDiv.id = container-draggable-${zoneId};
+innerDiv.id = `container-draggable-${zoneId}`;
 containerRef.current.appendChild(script);
 containerRef.current.appendChild(innerDiv);
 }, [zoneId, minimized, isVisible]);
