@@ -53,16 +53,13 @@ interface SocialPost {
   created_at: string;
 }
 
-/* ==========================================================================
-   BLOQUES DE PUBLICIDAD OPTIMIZADOS (Diseño UI Profesional y Fallback)
-   ========================================================================== */
-
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    currentContainer.innerHTML = '';
 
     const confScript = document.createElement('script');
     confScript.type = 'text/javascript';
@@ -80,8 +77,12 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
     invokeScript.type = 'text/javascript';
     invokeScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
 
-    containerRef.current.appendChild(confScript);
-    containerRef.current.appendChild(invokeScript);
+    currentContainer.appendChild(confScript);
+    currentContainer.appendChild(invokeScript);
+
+    return () => {
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
   }, [zoneId]);
 
   return (
@@ -99,8 +100,9 @@ function NativeBannerBlock({ zoneId }: { zoneId: string }) {
   const [hasContentLoaded, setHasContentLoaded] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    currentContainer.innerHTML = '';
 
     const script = document.createElement('script');
     script.async = true;
@@ -113,17 +115,19 @@ function NativeBannerBlock({ zoneId }: { zoneId: string }) {
     innerDiv.style.display = 'flex';
     innerDiv.style.justifyContent = 'center';
 
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
+    currentContainer.appendChild(script);
+    currentContainer.appendChild(innerDiv);
 
-    // Timeout para verificar si el script nativo cargó contenido real o quedó vacío
     const checkTimer = setTimeout(() => {
-      if (containerRef.current && containerRef.current.innerHTML.trim().length > 100) {
+      if (currentContainer && currentContainer.innerHTML.trim().length > 100) {
         setHasContentLoaded(true);
       }
     }, 1500);
 
-    return () => clearTimeout(checkTimer);
+    return () => {
+      clearTimeout(checkTimer);
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
   }, [zoneId]);
 
   return (
@@ -151,8 +155,9 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current || minimized || !isVisible) return;
-    containerRef.current.innerHTML = '';
+    const currentContainer = containerRef.current;
+    if (!currentContainer || minimized || !isVisible) return;
+    currentContainer.innerHTML = '';
 
     const script = document.createElement('script');
     script.async = true;
@@ -162,8 +167,12 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
     const innerDiv = document.createElement('div');
     innerDiv.id = `container-draggable-${zoneId}`;
 
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
+    currentContainer.appendChild(script);
+    currentContainer.appendChild(innerDiv);
+
+    return () => {
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
   }, [zoneId, minimized, isVisible]);
 
   if (!isVisible) return null;
@@ -224,6 +233,63 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
       <span>{message}</span>
     </div>
   );
+}
+
+function SafeFooterAd() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    currentContainer.innerHTML = '';
+
+    const confScript = document.createElement('script');
+    confScript.type = 'text/javascript';
+    confScript.text = `
+      atOptions = {
+        'key' : '3149b600641b759a380a3da4a64eeca9',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    `;
+
+    const invokeScript = document.createElement('script');
+    invokeScript.type = 'text/javascript';
+    invokeScript.src = 'https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js';
+
+    currentContainer.appendChild(confScript);
+    currentContainer.appendChild(invokeScript);
+
+    return () => {
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
+  }, []);
+
+  return <div ref={containerRef} className="flex justify-center items-center my-4 overflow-hidden" />;
+}
+
+function SafeFooterScript() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    currentContainer.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js';
+    
+    currentContainer.appendChild(script);
+
+    return () => {
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
+  }, []);
+
+  return <div ref={containerRef} />;
 }
 
 function HorizontalVideoCard({ 
@@ -407,7 +473,7 @@ export default function Home() {
 
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
-  const showToast = (text: string, type: 'success' | 'error' = 'success') => setToastMessage({ text, type });
+  const showToast = useCallback((text: string, type: 'success' | 'error' = 'success') => setToastMessage({ text, type }), []);
 
   const fetchVideos = useCallback(async () => {
     try {
@@ -441,10 +507,15 @@ export default function Home() {
       const savedWatchLater = localStorage.getItem('flixxes_watch_later');
       if (savedWatchLater) { try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); } }
 
-      window.addEventListener('beforeinstallprompt', (e) => {
+      const handleBeforeInstall = (e: Event) => {
         e.preventDefault();
         setDeferredPrompt(e);
-      });
+      };
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      };
     }
     fetchVideos();
     fetchProducts();
@@ -855,7 +926,6 @@ export default function Home() {
               </section>
             )}
 
-            {/* SECCIÓN DE ANUNCIOS OPTIMIZADOS Y LIMPIOS */}
             <section className="px-4 py-4 w-full max-w-[100vw] flex flex-col items-center">
               <div className="w-full max-w-xl flex flex-col items-center gap-4 bg-[#111113] border border-zinc-800/80 p-5 rounded-3xl shadow-lg">
                 <div className="w-full flex flex-col items-center">
@@ -941,7 +1011,6 @@ export default function Home() {
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
-                  {/* ANUNCIOS CENTRADOS DENTRO DEL MODAL */}
                   <div className="w-full flex flex-col items-center gap-4 my-3 bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
                     <div className="w-full flex flex-col items-center">
                       <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 font-semibold">Patrocinado</span>
@@ -949,7 +1018,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* CARRUSEL DE RECOMENDADOS */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
@@ -1107,12 +1175,9 @@ export default function Home() {
           <p className="leading-relaxed text-[11px] text-zinc-400">Todo el material alojado en esta web es recolectado de sitios públicos de internet. Prohibido estrictamente el acceso a menores de 18 años.</p>
         </div>
         
-        <div className="w-full flex justify-center items-center my-4">
-          <script type="text/javascript" dangerouslySetInnerHTML={{ __html: `atOptions = {'key' : '3149b600641b759a380a3da4a64eeca9','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};` }} />
-          <script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
-        </div>
+        <SafeFooterAd />
+        <SafeFooterScript />
 
-        <script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
         <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
