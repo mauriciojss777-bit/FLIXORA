@@ -919,26 +919,36 @@ export default function Home() {
                     <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
                   </div>
 
-                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
-                    <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
-                  </div>
-
+                  {/* SECCIÓN SOLICITADA: SOLO VIDEOS RECOMENDADOS EN CARRUSEL ADAPTABLE */}
                   <div className="space-y-2 pt-2">
-                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos y Anuncios Recomendados</h4>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
-                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 6).map((v, index) => (
-                        <div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
-                          <div onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow">
-                            <div className="aspect-video bg-black relative overflow-hidden"><img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>
-                            <div className="p-2"><h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5></div>
+                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full max-w-full">
+                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).map((v) => (
+                        <div 
+                          key={`carousel-video-${v.id}`} 
+                          onClick={() => handleSelectVideo(v)} 
+                          className="min-w-[180px] sm:min-w-[210px] max-w-[180px] sm:max-w-[210px] bg-zinc-900 border border-zinc-800 hover:border-blue-500/50 rounded-2xl overflow-hidden cursor-pointer flex flex-col flex-shrink-0 snap-start shadow transition-all group"
+                        >
+                          <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center">
+                            <img 
+                              src={v.cover_url || DEFAULT_COVER_IMAGE} 
+                              alt={v.title} 
+                              loading="lazy" 
+                              decoding="async" 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                            />
+                            <span className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-sm text-blue-400 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-zinc-700/50">
+                              {v.category}
+                            </span>
                           </div>
-                          {index === 2 && (
-                            <div className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col justify-center items-center p-2 text-center">
-                              <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Anuncio</span>
-                              <div className="scale-75 origin-center"><AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" /></div>
+                          <div className="p-2.5 flex flex-col flex-1 justify-between">
+                            <h5 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{v.title}</h5>
+                            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-zinc-400">
+                              <span>👁️ {viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}</span>
+                              <span>•</span>
+                              <span>👍 {likesMap[v.id] || 0}</span>
                             </div>
-                          )}
+                          </div>
                         </div>
                       ))}
                     </div>
