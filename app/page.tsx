@@ -67,20 +67,19 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
       atOptions = {
         'key' : '${zoneId}',
         'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
+        'height' : 50,
+        'width' : 320,
         'params' : {}
       };
     `;
 
     const invokeScript = document.createElement('script');
     invokeScript.type = 'text/javascript';
-    invokeScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
+    invokeScript.src = `https://www.highrevenueformat.com/${zoneId}/invoke.js`;
 
     containerRef.current.appendChild(confScript);
     containerRef.current.appendChild(invokeScript);
 
-    // Verificación automática: si tras 3 segundos el anuncio no inyectó un iframe o contenido válido, se oculta para no dejar espacio vacío
     const checkTimer = setTimeout(() => {
       if (containerRef.current) {
         const hasContent = containerRef.current.querySelector('iframe') || containerRef.current.innerHTML.trim().length > 150;
@@ -97,7 +96,7 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
 
   return (
     <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
-      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[120px]" />
+      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[60px]" />
     </div>
   );
 }
@@ -815,13 +814,31 @@ export default function Home() {
               </section>
             )}
 
-            {/* ANUNCIO NATIVO ADSTERRA CON AUTOCULPAMIENTO SI ESTÁ VACÍO */}
+            {/* ANUNCIO SOCIAL BAR Y NUEVO BANNER ADSTERRA */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
               <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '15px 0', width: '100%' }}>
-                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
+                
+                {/* Social Bar Script */}
+                <script type="text/javascript" src="https://www.highrevenueformat.com/fe670ed06808d1978bdfc05940c58a27/invoke.js"></script>
+
+                {/* Nuevo Banner (Iframe / Native Format) */}
+                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[60px] shadow-inner">
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
-                  <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                  <script type="text/javascript">
+                    {`
+                      atOptions = {
+                        'key' : 'fe670ed06808d1978bdfc05940c58a27',
+                        'format' : 'iframe',
+                        'height' : 50,
+                        'width' : 320,
+                        'params' : {}
+                      };
+                    `}
+                  </script>
+                  <script type="text/javascript" src="https://www.highrevenueformat.com/fe670ed06808d1978bdfc05940c58a27/invoke.js"></script>
+                  <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" />
                 </div>
+
               </div>
             </section>
 
@@ -897,15 +914,13 @@ export default function Home() {
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
-                  {/* ANUNCIO DENTRO DEL REPRODUCTOR CON AUTOCULPAMIENTO */}
                   <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '10px 0', width: '100%' }}>
-                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
+                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[60px] shadow-inner">
                       <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
-                      <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                      <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" />
                     </div>
                   </div>
 
-                  {/* CARRUSEL EXCLUSIVO DE VIDEOS RECOMENDADOS */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
