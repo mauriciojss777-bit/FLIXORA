@@ -81,8 +81,8 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden min-h-[250px]" />
+    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
+      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[120px]" />
     </div>
   );
 }
@@ -107,8 +107,8 @@ function NativeBannerBlock({ zoneId }: { zoneId: string }) {
   }, [zoneId]);
 
   return (
-    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-3">
-      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden min-h-[100px] w-full" />
+    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
+      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[100px]" />
     </div>
   );
 }
@@ -734,7 +734,7 @@ export default function Home() {
 
             <div className="space-y-4">
               <h3 className="text-sm font-black uppercase tracking-wider text-blue-400">Publicaciones de @{viewingProfile}</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {videos.filter(v => v.author === viewingProfile).map(v => (
                   <HorizontalVideoCard key={v.id} video={v} onSelect={handleSelectVideo} isSaved={watchLater.some(item => item.id === v.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[v.id] || 0} viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
                 ))}
@@ -809,7 +809,7 @@ export default function Home() {
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-black text-pink-400 tracking-wider uppercase">📷 Galería de Fotos ({photoGallery.length})</h3></div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 w-full">
                   {photoGallery.map((photo) => {
                     const isSaved = watchLater.some(v => v.id === photo.id);
                     return (
@@ -826,53 +826,32 @@ export default function Home() {
               </section>
             )}
 
-            {/* INTEGRACIÓN DEL NATIVE BANNER EN EL INICIO */}
+            {/* SECCIÓN DE ANUNCIOS OPTIMIZADA EN CUADRÍCULA RESPONSIVA */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
-              <div className="bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native Banner)</span>
-                <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
-              </div>
-            </section>
-
-            <section className="px-4 py-2 w-full max-w-[100vw]">
-              <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
-                <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+              <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '15px 0', width: '100%' }}>
+                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
+                  <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
+                </div>
+                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
+                  <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                </div>
               </div>
             </section>
 
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
-              <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
-                  <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">
-                    📺 Videos Horizontales ({horizontalVideos.length})
-                  </h3>
-                </div>
+              <section className="px-4 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4"><h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">📺 Videos Horizontales ({horizontalVideos.length})</h3></div>
 
                 {loading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                      <div key={n} className="animate-pulse flex flex-col space-y-2 w-full">
-                        <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
-                        <div className="h-3 bg-zinc-800 rounded w-3/4"></div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (<div key={n} className="animate-pulse flex flex-col space-y-3 w-full"><div className="aspect-video rounded-xl bg-zinc-800 w-full"></div><div className="h-4 bg-zinc-800 rounded w-3/4"></div></div>))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 w-full max-w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
                     {horizontalVideos.map((video) => (
-                      <HorizontalVideoCard 
-                        key={video.id} 
-                        video={video} 
-                        onSelect={handleSelectVideo} 
-                        isSaved={watchLater.some(v => v.id === video.id)} 
-                        onToggleSave={toggleWatchLater} 
-                        likesCount={likesMap[video.id] || 0} 
-                        viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)} 
-                        onOpenProfile={handleOpenProfile} 
-                        onDonate={() => setShowDonateModal(true)} 
-                        onShare={handleShare} 
-                      />
+                      <HorizontalVideoCard key={video.id} video={video} onSelect={handleSelectVideo} isSaved={watchLater.some(v => v.id === video.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[video.id] || 0} viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
                     ))}
                   </div>
                 )}
@@ -933,31 +912,26 @@ export default function Home() {
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
-                  {/* NATIVE BANNER DENTRO DEL REPRODUCTOR */}
-                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
-                    <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
+                  {/* ANUNCIOS EN CUADRÍCULA DENTRO DEL REPRODUCTOR */}
+                  <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '10px 0', width: '100%' }}>
+                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[100px] shadow-inner">
+                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
+                      <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
+                    </div>
+                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
+                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                      <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                    </div>
                   </div>
 
-                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
-                    <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
-                  </div>
-
-                  {/* CARRUSEL DE VIDEOS RECOMENDADOS (SIN ANUNCIOS INTERCALADOS) */}
+                  {/* CARRUSEL EXCLUSIVO DE VIDEOS RECOMENDADOS (SIN INTERCALAR ANUNCIOS) */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
                       {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 10).map((v) => (
-                        <div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
-                          <div onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow">
-                            <div className="aspect-video bg-black relative overflow-hidden">
-                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            </div>
-                            <div className="p-2">
-                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
-                            </div>
-                          </div>
+                        <div key={`video-carousel-${v.id}`} onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow flex-shrink-0 snap-start">
+                          <div className="aspect-video bg-black relative overflow-hidden"><img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>
+                          <div className="p-2"><h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5></div>
                         </div>
                       ))}
                     </div>
@@ -1094,7 +1068,7 @@ export default function Home() {
 
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowAdminModal(false)} className="w-full p-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold">Cancelar y Cerrar</button>
-                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black">Publicar</button>
+                <button type="submit" className="w-full p-3 rounded-xl bg-blue-600 text-white font-black">Publicarendif</button>
               </div>
             </form>
           </div>
