@@ -55,6 +55,7 @@ interface SocialPost {
 
 function AdsterraBlock({ zoneId }: { zoneId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -78,37 +79,25 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
 
     containerRef.current.appendChild(confScript);
     containerRef.current.appendChild(invokeScript);
+
+    // Verificación automática: si tras 3 segundos el anuncio no inyectó un iframe o contenido válido, se oculta para no dejar espacio vacío
+    const checkTimer = setTimeout(() => {
+      if (containerRef.current) {
+        const hasContent = containerRef.current.querySelector('iframe') || containerRef.current.innerHTML.trim().length > 150;
+        if (!hasContent) {
+          setIsEmpty(true);
+        }
+      }
+    }, 3000);
+
+    return () => clearTimeout(checkTimer);
   }, [zoneId]);
+
+  if (isEmpty) return null;
 
   return (
     <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
       <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[120px]" />
-    </div>
-  );
-}
-
-function NativeBannerBlock({ zoneId }: { zoneId: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
-
-    const script = document.createElement('script');
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    script.src = `https://pl30814143.profitableratecpmnetwork.com/${zoneId}/invoke.js`;
-
-    const innerDiv = document.createElement('div');
-    innerDiv.id = `container-${zoneId}`;
-
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
-  }, [zoneId]);
-
-  return (
-    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
-      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[100px]" />
     </div>
   );
 }
@@ -826,7 +815,7 @@ export default function Home() {
               </section>
             )}
 
-            {/* SECCIÓN DE ANUNCIOS OPTIMIZADA EN CUADRÍCULA RESPONSIVA (Removido el nativo de aquí, conservando Adsterra) */}
+            {/* ANUNCIO NATIVO ADSTERRA CON AUTOCULPAMIENTO SI ESTÁ VACÍO */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
               <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '15px 0', width: '100%' }}>
                 <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
@@ -908,7 +897,7 @@ export default function Home() {
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
-                  {/* ANUNCIOS EN CUADRÍCULA DENTRO DEL REPRODUCTOR (Removido el nativo de aquí, conservando Adsterra) */}
+                  {/* ANUNCIO DENTRO DEL REPRODUCTOR CON AUTOCULPAMIENTO */}
                   <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '10px 0', width: '100%' }}>
                     <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
                       <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
@@ -1085,5 +1074,3 @@ export default function Home() {
     </main>
   );
 }
-
-
