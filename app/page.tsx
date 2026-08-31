@@ -87,6 +87,32 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
+function NativeBannerBlock({ zoneId }: { zoneId: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    script.src = `https://pl30814143.profitableratecpmnetwork.com/${zoneId}/invoke.js`;
+
+    const innerDiv = document.createElement('div');
+    innerDiv.id = `container-${zoneId}`;
+
+    containerRef.current.appendChild(script);
+    containerRef.current.appendChild(innerDiv);
+  }, [zoneId]);
+
+  return (
+    <div className="w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-3">
+      <div ref={containerRef} className="flex justify-center items-center max-w-full overflow-hidden min-h-[100px] w-full" />
+    </div>
+  );
+}
+
 function DraggableAdPopup({ zoneId }: { zoneId: string }) {
   const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -434,7 +460,6 @@ export default function Home() {
     localStorage.setItem('flixxes_history', JSON.stringify(updatedHistory));
   };
 
-  // AQUÍ ESTÁ LA INTEGRACIÓN DEL SMARTLINK DE ADSTERRA AL CERRAR UN VIDEO
   const handleCloseVideo = () => {
     window.open(ADSTERRA_SMARTLINK, '_blank');
     setSelectedVideo(null);
@@ -801,6 +826,14 @@ export default function Home() {
               </section>
             )}
 
+            {/* INTEGRACIÓN DEL NATIVE BANNER EN EL INICIO */}
+            <section className="px-4 py-2 w-full max-w-[100vw]">
+              <div className="bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
+                <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native Banner)</span>
+                <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
+              </div>
+            </section>
+
             <section className="px-4 py-2 w-full max-w-[100vw]">
               <div className="bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center shadow-inner mb-4">
                 <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
@@ -878,6 +911,12 @@ export default function Home() {
                 <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
                   <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
+                  </div>
+
+                  {/* NATIVE BANNER DENTRO DEL REPRODUCTOR */}
+                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
+                    <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
                   </div>
 
                   <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
