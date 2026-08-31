@@ -826,13 +826,9 @@ export default function Home() {
               </section>
             )}
 
-            {/* SECCIÓN DE ANUNCIOS OPTIMIZADA EN CUADRÍCULA RESPONSIVA */}
+            {/* SECCIÓN DE ANUNCIOS OPTIMIZADA EN CUADRÍCULA RESPONSIVA (Removido el nativo de aquí, conservando Adsterra) */}
             <section className="px-4 py-2 w-full max-w-[100vw]">
               <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '15px 0', width: '100%' }}>
-                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
-                  <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
-                </div>
                 <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
                   <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
@@ -912,19 +908,15 @@ export default function Home() {
                     {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
-                  {/* ANUNCIOS EN CUADRÍCULA DENTRO DEL REPRODUCTOR */}
+                  {/* ANUNCIOS EN CUADRÍCULA DENTRO DEL REPRODUCTOR (Removido el nativo de aquí, conservando Adsterra) */}
                   <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '10px 0', width: '100%' }}>
-                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[100px] shadow-inner">
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (Native)</span>
-                      <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
-                    </div>
                     <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[120px] shadow-inner">
                       <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
                       <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
                     </div>
                   </div>
 
-                  {/* CARRUSEL EXCLUSIVO DE VIDEOS RECOMENDADOS (SIN INTERCALAR ANUNCIOS) */}
+                  {/* CARRUSEL EXCLUSIVO DE VIDEOS RECOMENDADOS */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
@@ -1062,7 +1054,7 @@ export default function Home() {
                   </select>
                   <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
                   <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
-                  <input type="text5" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+                  <input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                 </>
               )}
 
@@ -1093,4 +1085,5 @@ export default function Home() {
     </main>
   );
 }
+
 
