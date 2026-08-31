@@ -734,7 +734,7 @@ export default function Home() {
 
             <div className="space-y-4">
               <h3 className="text-sm font-black uppercase tracking-wider text-blue-400">Publicaciones de @{viewingProfile}</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
                 {videos.filter(v => v.author === viewingProfile).map(v => (
                   <HorizontalVideoCard key={v.id} video={v} onSelect={handleSelectVideo} isSaved={watchLater.some(item => item.id === v.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[v.id] || 0} viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
                 ))}
@@ -809,7 +809,7 @@ export default function Home() {
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
                 <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-black text-pink-400 tracking-wider uppercase">📷 Galería de Fotos ({photoGallery.length})</h3></div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
                   {photoGallery.map((photo) => {
                     const isSaved = watchLater.some(v => v.id === photo.id);
                     return (
@@ -842,17 +842,37 @@ export default function Home() {
             </section>
 
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
-              <section className="px-4 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4"><h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">📺 Videos Horizontales ({horizontalVideos.length})</h3></div>
+              <section className="px-3 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
+                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
+                  <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">
+                    📺 Videos Horizontales ({horizontalVideos.length})
+                  </h3>
+                </div>
 
                 {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (<div key={n} className="animate-pulse flex flex-col space-y-3 w-full"><div className="aspect-video rounded-xl bg-zinc-800 w-full"></div><div className="h-4 bg-zinc-800 rounded w-3/4"></div></div>))}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4 w-full">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                      <div key={n} className="animate-pulse flex flex-col space-y-2 w-full">
+                        <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
+                        <div className="h-3 bg-zinc-800 rounded w-3/4"></div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 w-full max-w-full">
                     {horizontalVideos.map((video) => (
-                      <HorizontalVideoCard key={video.id} video={video} onSelect={handleSelectVideo} isSaved={watchLater.some(v => v.id === video.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[video.id] || 0} viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
+                      <HorizontalVideoCard 
+                        key={video.id} 
+                        video={video} 
+                        onSelect={handleSelectVideo} 
+                        isSaved={watchLater.some(v => v.id === video.id)} 
+                        onToggleSave={toggleWatchLater} 
+                        likesCount={likesMap[video.id] || 0} 
+                        viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)} 
+                        onOpenProfile={handleOpenProfile} 
+                        onDonate={() => setShowDonateModal(true)} 
+                        onShare={handleShare} 
+                      />
                     ))}
                   </div>
                 )}
@@ -919,34 +939,23 @@ export default function Home() {
                     <NativeBannerBlock zoneId="df896f70ade366b92d5f509ddfef3a78" />
                   </div>
 
-                  {/* SECCIÓN SOLICITADA: SOLO VIDEOS RECOMENDADOS EN CARRUSEL ADAPTABLE */}
+                  <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                    <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
+                  </div>
+
+                  {/* CARRUSEL DE VIDEOS RECOMENDADOS (SIN ANUNCIOS INTERCALADOS) */}
                   <div className="space-y-2 pt-2">
                     <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full max-w-full">
-                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).map((v) => (
-                        <div 
-                          key={`carousel-video-${v.id}`} 
-                          onClick={() => handleSelectVideo(v)} 
-                          className="min-w-[180px] sm:min-w-[210px] max-w-[180px] sm:max-w-[210px] bg-zinc-900 border border-zinc-800 hover:border-blue-500/50 rounded-2xl overflow-hidden cursor-pointer flex flex-col flex-shrink-0 snap-start shadow transition-all group"
-                        >
-                          <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center">
-                            <img 
-                              src={v.cover_url || DEFAULT_COVER_IMAGE} 
-                              alt={v.title} 
-                              loading="lazy" 
-                              decoding="async" 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
-                            />
-                            <span className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-sm text-blue-400 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-zinc-700/50">
-                              {v.category}
-                            </span>
-                          </div>
-                          <div className="p-2.5 flex flex-col flex-1 justify-between">
-                            <h5 className="text-xs font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{v.title}</h5>
-                            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-zinc-400">
-                              <span>👁️ {viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}</span>
-                              <span>•</span>
-                              <span>👍 {likesMap[v.id] || 0}</span>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
+                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 10).map((v) => (
+                        <div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
+                          <div onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow">
+                            <div className="aspect-video bg-black relative overflow-hidden">
+                              <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                            <div className="p-2">
+                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
                             </div>
                           </div>
                         </div>
