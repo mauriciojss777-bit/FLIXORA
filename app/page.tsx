@@ -10,6 +10,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
+const ADSTERRA_SMARTLINK = 'https://www.profitableratecpmnetwork.com/u9xtrrbj?key=5e1242fb44358ba404f094359ad59a45';
 
 interface Video {
   id: string;
@@ -114,18 +115,12 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
 
   const handleTouchStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
-    setDragOffset({
-      x: clientX - position.x,
-      y: clientY - position.y
-    });
+    setDragOffset({ x: clientX - position.x, y: clientY - position.y });
   };
 
   const handleTouchMove = (clientX: number, clientY: number) => {
     if (!isDragging) return;
-    setPosition({
-      x: clientX - dragOffset.x,
-      y: clientY - dragOffset.y
-    });
+    setPosition({ x: clientX - dragOffset.x, y: clientY - dragOffset.y });
   };
 
   return (
@@ -146,18 +141,8 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
           <span>📌</span> Patrocinado
         </span>
         <div className="flex items-center gap-1.5">
-          <button 
-            onClick={() => setMinimized(!minimized)} 
-            className="text-zinc-400 hover:text-white text-xs px-1 font-bold"
-          >
-            {minimized ? '+' : '−'}
-          </button>
-          <button 
-            onClick={() => setIsVisible(false)} 
-            className="text-zinc-400 hover:text-red-400 text-xs px-1 font-bold"
-          >
-            ✕
-          </button>
+          <button onClick={() => setMinimized(!minimized)} className="text-zinc-400 hover:text-white text-xs px-1 font-bold">{minimized ? '+' : '−'}</button>
+          <button onClick={() => setIsVisible(false)} className="text-zinc-400 hover:text-red-400 text-xs px-1 font-bold">✕</button>
         </div>
       </div>
 
@@ -172,9 +157,7 @@ function DraggableAdPopup({ zoneId }: { zoneId: string }) {
 
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 3500);
+    const timer = setTimeout(onClose, 3500);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -214,9 +197,7 @@ function HorizontalVideoCard({
 
   const handleMouseEnter = () => {
     if (video.is_photo) return;
-    timeoutRef.current = setTimeout(() => {
-      setIsHovered(true);
-    }, 250);
+    timeoutRef.current = setTimeout(() => setIsHovered(true), 250);
   };
 
   const handleMouseLeave = () => {
@@ -224,11 +205,7 @@ function HorizontalVideoCard({
     setIsHovered(false);
   };
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
 
   return (
     <div 
@@ -283,10 +260,7 @@ function HorizontalVideoCard({
           <div className="flex flex-col min-w-0 flex-1">
             <h3 className="text-xs font-bold text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
             <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-400 font-medium flex-wrap">
-              <span 
-                onClick={(e) => onOpenProfile(video.author || 'FlixxesUser', e)}
-                className="hover:text-blue-400 underline cursor-pointer"
-              >
+              <span onClick={(e) => onOpenProfile(video.author || 'FlixxesUser', e)} className="hover:text-blue-400 underline cursor-pointer">
                 {video.author || 'FlixxesUser'}
               </span>
               <span>•</span>
@@ -296,18 +270,8 @@ function HorizontalVideoCard({
             </div>
             
             <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-800/60">
-              <button 
-                onClick={(e) => { e.stopPropagation(); onDonate(e); }}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
-              >
-                <span>☕</span> Donar
-              </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onShare(video, e); }}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
-              >
-                <span>🔗</span> Compartir
-              </button>
+              <button onClick={(e) => { e.stopPropagation(); onDonate(e); }} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"><span>☕</span> Donar</button>
+              <button onClick={(e) => { e.stopPropagation(); onShare(video, e); }} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"><span>🔗</span> Compartir</button>
             </div>
           </div>
         </div>
@@ -388,9 +352,7 @@ export default function Home() {
 
   const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
-  const showToast = (text: string, type: 'success' | 'error' = 'success') => {
-    setToastMessage({ text, type });
-  };
+  const showToast = (text: string, type: 'success' | 'error' = 'success') => setToastMessage({ text, type });
 
   const fetchVideos = useCallback(async () => {
     try {
@@ -400,16 +362,10 @@ export default function Home() {
         const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
         setVideos(enriched);
         const vMap: Record<string, number> = {};
-        data.forEach(v => {
-          vMap[v.id] = v.views || 0;
-        });
+        data.forEach(v => { vMap[v.id] = v.views || 0; });
         setViewsMap(vMap);
       }
-    } catch (e) { 
-      console.error(e); 
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { console.error(e); } finally { setLoading(false); }
   }, []);
 
   const fetchProducts = useCallback(async () => {
@@ -421,20 +377,14 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (localStorage.getItem('age_verified') === 'true') {
-        setAgeAccepted(true);
-      }
+      if (localStorage.getItem('age_verified') === 'true') setAgeAccepted(true);
       const savedUser = localStorage.getItem('flixxes_username');
       if (savedUser) setCurrentUsername(savedUser);
 
       const savedHistory = localStorage.getItem('flixxes_history');
-      if (savedHistory) {
-        try { setHistory(JSON.parse(savedHistory)); } catch (e) { console.error(e); }
-      }
+      if (savedHistory) { try { setHistory(JSON.parse(savedHistory)); } catch (e) { console.error(e); } }
       const savedWatchLater = localStorage.getItem('flixxes_watch_later');
-      if (savedWatchLater) {
-        try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); }
-      }
+      if (savedWatchLater) { try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); } }
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -447,33 +397,11 @@ export default function Home() {
 
   const incrementRealView = useCallback(async (videoId: string) => {
     try {
-      const { data: currentVideo, error: fetchError } = await supabase
-        .from('videos')
-        .select('views')
-        .eq('id', videoId)
-        .single();
-
-      if (fetchError) {
-        console.error('Error al obtener vistas actuales:', fetchError);
-        return;
-      }
-
-      const currentViews = currentVideo?.views || 0;
-      const newViews = currentViews + 1;
-
-      const { error: updateError } = await supabase
-        .from('videos')
-        .update({ views: newViews })
-        .eq('id', videoId);
-
-      if (updateError) {
-        console.error('Error al actualizar vistas en Supabase:', updateError);
-      } else {
-        setViewsMap(prev => ({ ...prev, [videoId]: newViews }));
-      }
-    } catch (e) {
-      console.error('Excepción al incrementar vista:', e);
-    }
+      const { data: currentVideo } = await supabase.from('videos').select('views').eq('id', videoId).single();
+      const newViews = (currentVideo?.views || 0) + 1;
+      await supabase.from('videos').update({ views: newViews }).eq('id', videoId);
+      setViewsMap(prev => ({ ...prev, [videoId]: newViews }));
+    } catch (e) { console.error(e); }
   }, []);
 
   useEffect(() => {
@@ -481,10 +409,7 @@ export default function Home() {
     const vId = params.get('v');
     if (vId && videos.length > 0 && !selectedVideo) {
       const video = videos.find(v => v.id === vId);
-      if (video) {
-        setSelectedVideo(video);
-        incrementRealView(video.id);
-      }
+      if (video) { setSelectedVideo(video); incrementRealView(video.id); }
     }
   }, [videos, selectedVideo, incrementRealView]);
 
@@ -492,9 +417,7 @@ export default function Home() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-      }
+      if (outcome === 'accepted') setDeferredPrompt(null);
     } else {
       showToast('Para instalar la app, usa el menú de tu navegador.', 'error');
     }
@@ -511,7 +434,9 @@ export default function Home() {
     localStorage.setItem('flixxes_history', JSON.stringify(updatedHistory));
   };
 
+  // AQUÍ ESTÁ LA INTEGRACIÓN DEL SMARTLINK DE ADSTERRA AL CERRAR UN VIDEO
   const handleCloseVideo = () => {
+    window.open(ADSTERRA_SMARTLINK, '_blank');
     setSelectedVideo(null);
     setIsPipActive(false);
     setIsCinemaMode(false);
@@ -521,23 +446,16 @@ export default function Home() {
   const toggleWatchLater = (video: Video, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const exists = watchLater.some(v => v.id === video.id);
-    let updated: Video[];
-    if (exists) {
-      updated = watchLater.filter(v => v.id !== video.id);
-      showToast('Eliminado de guardados', 'success');
-    } else {
-      updated = [video, ...watchLater];
-      showToast('Añadido a guardados ⭐', 'success');
-    }
+    const updated = exists ? watchLater.filter(v => v.id !== video.id) : [video, ...watchLater];
     setWatchLater(updated);
     localStorage.setItem('flixxes_watch_later', JSON.stringify(updated));
+    showToast(exists ? 'Eliminado de guardados' : 'Añadido a guardados ⭐', 'success');
   };
 
   const handleNextVideo = () => {
     if (!selectedVideo || videos.length === 0) return;
     const currentIndex = videos.findIndex(v => v.id === selectedVideo.id);
-    const nextVideo = videos[(currentIndex + 1) % videos.length];
-    handleSelectVideo(nextVideo);
+    handleSelectVideo(videos[(currentIndex + 1) % videos.length]);
   };
 
   const handleLike = (videoId: string) => {
@@ -559,16 +477,9 @@ export default function Home() {
         showToast('Completa título, precio y URL', 'error');
         return;
       }
-      const { error } = await supabase.from('products').insert([{
-        title: prodTitle,
-        price: prodPrice,
-        image_url: prodImage.trim() ? prodImage.trim() : DEFAULT_COVER_IMAGE,
-        buy_url: prodUrl
-      }]);
-
-      if (error) {
-        showToast('Error: ' + error.message, 'error');
-      } else {
+      const { error } = await supabase.from('products').insert([{ title: prodTitle, price: prodPrice, image_url: prodImage.trim() || DEFAULT_COVER_IMAGE, buy_url: prodUrl }]);
+      if (error) showToast('Error: ' + error.message, 'error');
+      else {
         showToast('Producto añadido con éxito');
         setShowAdminModal(false);
         setProdTitle(''); setProdPrice(''); setProdImage(''); setProdUrl(''); setAdminPassword('');
@@ -582,22 +493,9 @@ export default function Home() {
         showToast('Completa título y URL de la foto', 'error');
         return;
       }
-      const { error } = await supabase.from('videos').insert([{
-        title: photoTitleInput,
-        category: 'Fotos',
-        voe_url: '',
-        cover_url: photoUrlInput,
-        description: 'Fotografía exclusiva en alta resolución.',
-        tags: ['Fotos', 'HD'],
-        is_photo: true,
-        is_short: false,
-        author: currentUsername,
-        views: 0
-      }]);
-
-      if (error) {
-        showToast('Error: ' + error.message, 'error');
-      } else {
+      const { error } = await supabase.from('videos').insert([{ title: photoTitleInput, category: 'Fotos', voe_url: '', cover_url: photoUrlInput, description: 'Fotografía exclusiva en alta resolución.', tags: ['Fotos', 'HD'], is_photo: true, is_short: false, author: currentUsername, views: 0 }]);
+      if (error) showToast('Error: ' + error.message, 'error');
+      else {
         showToast('Foto publicada con éxito');
         setShowAdminModal(false);
         setPhotoTitleInput(''); setPhotoUrlInput(''); setAdminPassword('');
@@ -607,24 +505,10 @@ export default function Home() {
     }
 
     const parsedTags = videoTagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    const finalCoverUrl = coverUrl.trim() ? coverUrl.trim() : DEFAULT_COVER_IMAGE;
+    const { error } = await supabase.from('videos').insert([{ title, category, voe_url: voeUrl, cover_url: coverUrl.trim() || DEFAULT_COVER_IMAGE, description: description || 'Disfruta de este contenido en alta definición.', tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'], is_short: isShortVideo, is_photo: false, author: currentUsername, views: 0 }]);
 
-    const { error } = await supabase.from('videos').insert([{ 
-      title, 
-      category, 
-      voe_url: voeUrl, 
-      cover_url: finalCoverUrl,
-      description: description || 'Disfruta de este contenido en alta definición.',
-      tags: parsedTags.length > 0 ? parsedTags : [category, 'HD'],
-      is_short: isShortVideo,
-      is_photo: false,
-      author: currentUsername,
-      views: 0
-    }]);
-
-    if (error) { 
-      showToast('Error: ' + error.message, 'error'); 
-    } else {
+    if (error) showToast('Error: ' + error.message, 'error');
+    else {
       showToast('Publicado con éxito');
       setShowAdminModal(false);
       setTitle(''); setVoeUrl(''); setCoverUrl(''); setDescription(''); setVideoTagsInput('HD, Latino, Casero'); setIsShortVideo(false); setAdminPassword('');
@@ -636,9 +520,8 @@ export default function Home() {
     if (e) e.stopPropagation();
     const shareUrl = video ? `${window.location.origin}${window.location.pathname}?v=${video.id}` : window.location.href;
     const shareTitle = video ? video.title : 'Flixxes';
-    if (navigator.share) {
-      navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
-    } else {
+    if (navigator.share) navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
+    else {
       navigator.clipboard.writeText(shareUrl);
       showToast('¡Enlace copiado al portapapeles!');
     }
@@ -647,17 +530,8 @@ export default function Home() {
   const handleAddComment = (videoId: string, e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
-    const commentItem: Comment = {
-      id: Date.now().toString(),
-      user: currentUsername || 'Anónimo',
-      text: newCommentText.trim(),
-      created_at: 'Justo ahora'
-    };
-    const currentList = commentsMap[videoId] || commentsMap['default'];
-    setCommentsMap({
-      ...commentsMap,
-      [videoId]: [commentItem, ...currentList]
-    });
+    const commentItem: Comment = { id: Date.now().toString(), user: currentUsername || 'Anónimo', text: newCommentText.trim(), created_at: 'Justo ahora' };
+    setCommentsMap({ ...commentsMap, [videoId]: [commentItem, ...(commentsMap[videoId] || commentsMap['default'])] });
     setNewCommentText('');
     showToast('Comentario publicado');
   };
@@ -671,14 +545,7 @@ export default function Home() {
   const handleCreateSocialPost = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostText.trim()) return;
-    const newPost: SocialPost = {
-      id: Date.now().toString(),
-      user: currentUsername,
-      content: newPostText.trim(),
-      likes: 0,
-      created_at: 'Justo ahora'
-    };
-    setSocialPosts([newPost, ...socialPosts]);
+    setSocialPosts([{ id: Date.now().toString(), user: currentUsername, content: newPostText.trim(), likes: 0, created_at: 'Justo ahora' }, ...socialPosts]);
     setNewPostText('');
     showToast('Publicación compartida en el feed');
   };
@@ -695,13 +562,7 @@ export default function Home() {
   const handleSendChatMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-    const newMsg: Comment = {
-      id: Date.now().toString(),
-      user: currentUsername,
-      text: chatInput.trim(),
-      created_at: 'Justo ahora'
-    };
-    setChatMessages([...chatMessages, newMsg]);
+    setChatMessages([...chatMessages, { id: Date.now().toString(), user: currentUsername, text: chatInput.trim(), created_at: 'Justo ahora' }]);
     setChatInput('');
   };
 
@@ -717,48 +578,33 @@ export default function Home() {
     );
   }
 
-  const filteredVideos = videos
-    .filter(v => {
-      const vTags = Array.isArray(v.tags) ? v.tags : (v.tags ? [String(v.tags)] : []);
-      const matchesTag = activeTag === 'Todos' || (activeTag === 'Fotos' ? v.is_photo : (v.category === activeTag || vTags.some(t => t.toLowerCase() === activeTag.toLowerCase())));
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = v.title.toLowerCase().includes(query) || 
-                            (v.category && v.category.toLowerCase().includes(query)) ||
-                            vTags.some(t => t.toLowerCase().includes(query)) ||
-                            (v.author && v.author.toLowerCase().includes(query));
-      return matchesTag && matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
-      if (sortBy === 'popular') return (viewsMap[b.id] || 0) - (viewsMap[a.id] || 0);
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-    });
+  const filteredVideos = videos.filter(v => {
+    const vTags = Array.isArray(v.tags) ? v.tags : (v.tags ? [String(v.tags)] : []);
+    const matchesTag = activeTag === 'Todos' || (activeTag === 'Fotos' ? v.is_photo : (v.category === activeTag || vTags.some(t => t.toLowerCase() === activeTag.toLowerCase())));
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = v.title.toLowerCase().includes(query) || (v.category && v.category.toLowerCase().includes(query)) || vTags.some(t => t.toLowerCase().includes(query)) || (v.author && v.author.toLowerCase().includes(query));
+    return matchesTag && matchesSearch;
+  }).sort((a, b) => {
+    if (sortBy === 'likes') return (likesMap[b.id] || 0) - (likesMap[a.id] || 0);
+    if (sortBy === 'popular') return (viewsMap[b.id] || 0) - (viewsMap[a.id] || 0);
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
 
   const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
   const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
-
-  const filteredProducts = products.filter(p => 
-    p.title.toLowerCase().includes(storeSearchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => p.title.toLowerCase().includes(storeSearchQuery.toLowerCase()));
 
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
-        {toastMessage && (
-          <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />
-        )}
+        {toastMessage && <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />}
 
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button 
-              onClick={() => setShowMenu(true)} 
-              className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex items-center gap-1.5"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button onClick={() => setShowMenu(true)} className="text-zinc-200 hover:bg-zinc-800 p-2 rounded-xl transition-colors focus:outline-none flex items-center gap-1.5">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
               <span className="text-xs font-bold hidden sm:inline">Menú</span>
             </button>
           </div>
@@ -770,45 +616,19 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-            <button 
-              onClick={() => setShowChatDrawer(true)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-1.5 rounded-full font-bold border border-zinc-750 transition-all flex items-center gap-1"
-            >
-              <span>💬</span>
-              <span className="hidden md:inline">Chat</span>
+            <button onClick={() => setShowChatDrawer(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-1.5 rounded-full font-bold border border-zinc-750 transition-all flex items-center gap-1">
+              <span>💬</span><span className="hidden md:inline">Chat</span>
             </button>
-            <button 
-              onClick={() => handleOpenProfile(currentUsername)} 
-              className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-1.5 rounded-full font-bold transition-all shadow flex items-center gap-1.5"
-            >
-              <span>👤</span>
-              <span className="hidden md:inline">Perfil</span>
+            <button onClick={() => handleOpenProfile(currentUsername)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-1.5 rounded-full font-bold transition-all shadow flex items-center gap-1.5">
+              <span>👤</span><span className="hidden md:inline">Perfil</span>
             </button>
           </div>
         </nav>
 
         <div className="bg-[#141414] border-b border-zinc-800 px-4 py-3 flex flex-wrap items-center justify-center gap-3 w-full">
-          <button 
-            onClick={() => setShowDonateModal(true)}
-            className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"
-          >
-            <span>☕</span>
-            <span>Donar</span>
-          </button>
-          <button 
-            onClick={() => setShowStore(true)}
-            className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"
-          >
-            <span>🛍️</span>
-            <span>Tienda</span>
-          </button>
-          <button 
-            onClick={handleInstallClick}
-            className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-black transition-all shadow flex items-center gap-1.5"
-          >
-            <span>📱</span>
-            <span>Instalar App</span>
-          </button>
+          <button onClick={() => setShowDonateModal(true)} className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"><span>☕</span><span>Donar</span></button>
+          <button onClick={() => setShowStore(true)} className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs px-4 py-2 rounded-full font-bold border border-zinc-700 transition-all flex items-center gap-1.5 shadow"><span>🛍️</span><span>Tienda</span></button>
+          <button onClick={handleInstallClick} className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-black transition-all shadow flex items-center gap-1.5"><span>📱</span><span>Instalar App</span></button>
         </div>
 
         {showMenu && (
@@ -833,9 +653,7 @@ export default function Home() {
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
                   {defaultTags.filter(t => t !== 'Todos').map(t => (
-                    <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); setViewingProfile(null); setShowSocialFeed(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white">
-                      #{t}
-                    </button>
+                    <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); setViewingProfile(null); setShowSocialFeed(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white">#{t}</button>
                   ))}
                 </div>
 
@@ -852,33 +670,19 @@ export default function Home() {
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowChatDrawer(false)}></div>
             <div className="relative bg-[#141414] border-l border-zinc-800 w-full max-w-sm h-full flex flex-col z-10 shadow-2xl">
               <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">💬</span>
-                  <h3 className="font-bold text-white text-sm">Chat Comunidad</h3>
-                </div>
+                <div className="flex items-center gap-2"><span className="text-lg">💬</span><h3 className="font-bold text-white text-sm">Chat Comunidad</h3></div>
                 <button onClick={() => setShowChatDrawer(false)} className="text-zinc-400 hover:text-white p-1.5 text-xs font-bold">Cerrar</button>
               </div>
-
               <div className="flex-1 p-4 overflow-y-auto space-y-3">
                 {chatMessages.map(msg => (
                   <div key={msg.id} className="bg-zinc-900/80 border border-zinc-800 p-3 rounded-2xl space-y-1">
-                    <div className="flex justify-between items-center text-[10px]">
-                      <span className="font-bold text-blue-400">@{msg.user}</span>
-                      <span className="text-zinc-500">{msg.created_at}</span>
-                    </div>
+                    <div className="flex justify-between items-center text-[10px]"><span className="font-bold text-blue-400">@{msg.user}</span><span className="text-zinc-500">{msg.created_at}</span></div>
                     <p className="text-xs text-zinc-200">{msg.text}</p>
                   </div>
                 ))}
               </div>
-
               <form onSubmit={handleSendChatMessage} className="p-3 border-t border-zinc-800 bg-zinc-950 flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Escribe un mensaje..." 
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500"
-                />
+                <input type="text" placeholder="Escribe un mensaje..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" />
                 <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Enviar</button>
               </form>
             </div>
@@ -888,25 +692,18 @@ export default function Home() {
         {viewingProfile && (
           <div className="px-4 py-8 max-w-4xl mx-auto w-full space-y-6">
             <div className="bg-zinc-900/60 border border-zinc-800 p-6 rounded-3xl flex flex-col sm:flex-row items-center gap-6 shadow-xl">
-              <div className="w-24 h-24 rounded-2xl bg-blue-600 text-white font-black text-3xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                {viewingProfile.charAt(0).toUpperCase()}
-              </div>
+              <div className="w-24 h-24 rounded-2xl bg-blue-600 text-white font-black text-3xl flex items-center justify-center flex-shrink-0 shadow-lg">{viewingProfile.charAt(0).toUpperCase()}</div>
               <div className="flex-1 text-center sm:text-left space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <h2 className="text-2xl font-black text-white">@{viewingProfile}</h2>
                   {viewingProfile !== currentUsername && (
-                    <button 
-                      onClick={() => handleToggleFollow(viewingProfile)}
-                      className={`px-6 py-2 rounded-full font-bold text-xs transition-all ${followingMap[viewingProfile] ? 'bg-zinc-800 text-zinc-300 border border-zinc-700' : 'bg-blue-600 text-white hover:bg-blue-500'}`}
-                    >
+                    <button onClick={() => handleToggleFollow(viewingProfile)} className={`px-6 py-2 rounded-full font-bold text-xs transition-all ${followingMap[viewingProfile] ? 'bg-zinc-800 text-zinc-300 border border-zinc-700' : 'bg-blue-600 text-white hover:bg-blue-500'}`}>
                       {followingMap[viewingProfile] ? 'Siguiendo ✓' : 'Seguir +'}
                     </button>
                   )}
                 </div>
                 <p className="text-xs text-zinc-400">Creador de contenido en Flixxes.</p>
-                <div className="flex justify-center sm:justify-start gap-4 text-xs text-zinc-300 font-semibold pt-1">
-                  <span>Videos: <strong>{videos.filter(v => v.author === viewingProfile).length}</strong></span>
-                </div>
+                <div className="flex justify-center sm:justify-start gap-4 text-xs text-zinc-300 font-semibold pt-1"><span>Videos: <strong>{videos.filter(v => v.author === viewingProfile).length}</strong></span></div>
               </div>
             </div>
 
@@ -914,68 +711,33 @@ export default function Home() {
               <h3 className="text-sm font-black uppercase tracking-wider text-blue-400">Publicaciones de @{viewingProfile}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {videos.filter(v => v.author === viewingProfile).map(v => (
-                  <HorizontalVideoCard 
-                    key={v.id}
-                    video={v}
-                    onSelect={handleSelectVideo}
-                    isSaved={watchLater.some(item => item.id === v.id)}
-                    onToggleSave={toggleWatchLater}
-                    likesCount={likesMap[v.id] || 0}
-                    viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)}
-                    onOpenProfile={handleOpenProfile}
-                    onDonate={() => setShowDonateModal(true)}
-                    onShare={handleShare}
-                  />
+                  <HorizontalVideoCard key={v.id} video={v} onSelect={handleSelectVideo} isSaved={watchLater.some(item => item.id === v.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[v.id] || 0} viewsCount={viewsMap[v.id] !== undefined ? viewsMap[v.id] : (v.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
                 ))}
               </div>
             </div>
 
-            <div className="pt-4 flex justify-center">
-              <button onClick={() => setViewingProfile(null)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold px-6 py-2.5 rounded-full">
-                ← Volver al Inicio
-              </button>
-            </div>
+            <div className="pt-4 flex justify-center"><button onClick={() => setViewingProfile(null)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold px-6 py-2.5 rounded-full">← Volver al Inicio</button></div>
           </div>
         )}
 
         {showSocialFeed && !viewingProfile && (
           <div className="px-4 py-8 max-w-2xl mx-auto w-full space-y-6">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <div>
-                <h2 className="text-xl font-black text-white">Comunidad y Muro Social</h2>
-              </div>
+              <div><h2 className="text-xl font-black text-white">Comunidad y Muro Social</h2></div>
               <button onClick={() => setShowSocialFeed(false)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs px-3 py-1.5 rounded-full font-bold">Cerrar</button>
             </div>
 
             <form onSubmit={handleCreateSocialPost} className="bg-zinc-900/60 border border-zinc-800 p-4 rounded-2xl space-y-3">
-              <textarea 
-                placeholder="¿Qué estás pensando?" 
-                value={newPostText}
-                onChange={(e) => setNewPostText(e.target.value)}
-                rows={3}
-                className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-xs text-white outline-none focus:border-blue-500 resize-none"
-              />
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-zinc-500">@{currentUsername}</span>
-                <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-4 py-2 rounded-xl">Publicar</button>
-              </div>
+              <textarea placeholder="¿Qué estás pensando?" value={newPostText} onChange={(e) => setNewPostText(e.target.value)} rows={3} className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-xs text-white outline-none focus:border-blue-500 resize-none" />
+              <div className="flex justify-between items-center"><span className="text-[10px] text-zinc-500">@{currentUsername}</span><button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-4 py-2 rounded-xl">Publicar</button></div>
             </form>
 
             <div className="space-y-4">
               {socialPosts.map(post => (
                 <div key={post.id} className="bg-zinc-900/40 border border-zinc-800 p-4 rounded-2xl space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span onClick={() => handleOpenProfile(post.user)} className="font-bold text-blue-400 text-xs hover:underline cursor-pointer">
-                      @{post.user}
-                    </span>
-                    <span className="text-[10px] text-zinc-500">{post.created_at}</span>
-                  </div>
+                  <div className="flex justify-between items-center"><span onClick={() => handleOpenProfile(post.user)} className="font-bold text-blue-400 text-xs hover:underline cursor-pointer">@{post.user}</span><span className="text-[10px] text-zinc-500">{post.created_at}</span></div>
                   <p className="text-xs text-zinc-200 leading-relaxed">{post.content}</p>
-                  <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs">
-                    <button onClick={() => handleLikePost(post.id)} className="text-zinc-400 hover:text-blue-400 font-bold flex items-center gap-1">
-                      👍 {post.likes}
-                    </button>
-                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs"><button onClick={() => handleLikePost(post.id)} className="text-zinc-400 hover:text-blue-400 font-bold flex items-center gap-1">👍 {post.likes}</button></div>
                 </div>
               ))}
             </div>
@@ -986,21 +748,13 @@ export default function Home() {
           <>
             <section className="px-4 pt-4 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
               <div className="mb-3 w-full">
-                <input 
-                  type="text" 
-                  placeholder="Buscar por título, categoría o etiqueta..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)} 
-                  className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-xs focus:border-blue-500 outline-none text-zinc-200 shadow-inner" 
-                />
+                <input type="text" placeholder="Buscar por título, categoría o etiqueta..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#121212] border border-zinc-800 p-3 rounded-2xl text-xs focus:border-blue-500 outline-none text-zinc-200 shadow-inner" />
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/60 w-full">
                 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
                   {defaultTags.map(tag => (
-                    <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>
-                      {tag}
-                    </button>
+                    <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>
                   ))}
                 </div>
 
@@ -1013,26 +767,11 @@ export default function Home() {
 
             {verticalShorts.length > 0 && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-black text-blue-400 tracking-wider uppercase">
-                    ⚡ Shorts Verticales ({verticalShorts.length})
-                  </h3>
-                </div>
-
+                <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-black text-blue-400 tracking-wider uppercase">⚡ Shorts Verticales ({verticalShorts.length})</h3></div>
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
                   {verticalShorts.map((v) => (
-                    <div 
-                      key={`short-${v.id}`} 
-                      onClick={() => handleSelectVideo(v)}
-                      className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center"
-                    >
-                      <img 
-                        src={v.cover_url || DEFAULT_COVER_IMAGE} 
-                        alt={v.title} 
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
-                      />
+                    <div key={`short-${v.id}`} onClick={() => handleSelectVideo(v)} className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center">
+                      <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
                         <h4 className="text-[11px] font-bold text-white line-clamp-2 leading-tight">{v.title}</h4>
                       </div>
@@ -1044,38 +783,17 @@ export default function Home() {
 
             {photoGallery.length > 0 && (activeTag === 'Todos' || activeTag === 'Fotos') && (
               <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-black text-pink-400 tracking-wider uppercase">
-                    📷 Galería de Fotos ({photoGallery.length})
-                  </h3>
-                </div>
+                <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-black text-pink-400 tracking-wider uppercase">📷 Galería de Fotos ({photoGallery.length})</h3></div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 w-full">
                   {photoGallery.map((photo) => {
                     const isSaved = watchLater.some(v => v.id === photo.id);
                     return (
-                      <div 
-                        key={`photo-${photo.id}`}
-                        onClick={() => handleSelectVideo(photo)}
-                        className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow"
-                      >
+                      <div key={`photo-${photo.id}`} onClick={() => handleSelectVideo(photo)} className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer group flex flex-col relative shadow">
                         <div className="aspect-square bg-black relative overflow-hidden flex items-center justify-center">
-                          <img 
-                            src={photo.cover_url} 
-                            alt={photo.title} 
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
-                          />
-                          <button 
-                            onClick={(e) => toggleWatchLater(photo, e)}
-                            className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
-                          >
-                            ⭐
-                          </button>
+                          <img src={photo.cover_url} alt={photo.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
+                          <button onClick={(e) => toggleWatchLater(photo, e)} className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}>⭐</button>
                         </div>
-                        <div className="p-2.5">
-                          <h4 className="text-xs font-bold text-zinc-100 line-clamp-1 group-hover:text-blue-400 transition-colors">{photo.title}</h4>
-                        </div>
+                        <div className="p-2.5"><h4 className="text-xs font-bold text-zinc-100 line-clamp-1 group-hover:text-blue-400 transition-colors">{photo.title}</h4></div>
                       </div>
                     );
                   })}
@@ -1092,41 +810,17 @@ export default function Home() {
 
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
               <section className="px-4 pb-12 pt-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4">
-                  <h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">
-                    📺 Videos Horizontales ({horizontalVideos.length})
-                  </h3>
-                </div>
+                <div className="flex items-center justify-between mb-3 border-t border-zinc-800/60 pt-4"><h3 className="text-xs font-black text-zinc-300 tracking-wider uppercase">📺 Videos Horizontales ({horizontalVideos.length})</h3></div>
 
                 {loading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                      <div key={n} className="animate-pulse flex flex-col space-y-3 w-full">
-                        <div className="aspect-video rounded-xl bg-zinc-800 w-full"></div>
-                        <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
-                      </div>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (<div key={n} className="animate-pulse flex flex-col space-y-3 w-full"><div className="aspect-video rounded-xl bg-zinc-800 w-full"></div><div className="h-4 bg-zinc-800 rounded w-3/4"></div></div>))}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full">
-                    {horizontalVideos.map((video) => {
-                      const isSaved = watchLater.some(v => v.id === video.id);
-
-                      return (
-                        <HorizontalVideoCard 
-                          key={video.id}
-                          video={video}
-                          onSelect={handleSelectVideo}
-                          isSaved={isSaved}
-                          onToggleSave={toggleWatchLater}
-                          likesCount={likesMap[video.id] || 0}
-                          viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)}
-                          onOpenProfile={handleOpenProfile}
-                          onDonate={() => setShowDonateModal(true)}
-                          onShare={handleShare}
-                        />
-                      );
-                    })}
+                    {horizontalVideos.map((video) => (
+                      <HorizontalVideoCard key={video.id} video={video} onSelect={handleSelectVideo} isSaved={watchLater.some(v => v.id === video.id)} onToggleSave={toggleWatchLater} likesCount={likesMap[video.id] || 0} viewsCount={viewsMap[video.id] !== undefined ? viewsMap[video.id] : (video.views || 0)} onOpenProfile={handleOpenProfile} onDonate={() => setShowDonateModal(true)} onShare={handleShare} />
+                    ))}
                   </div>
                 )}
               </section>
@@ -1145,46 +839,24 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     {!selectedVideo.is_photo && (
                       <>
-                        <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>
-                          Modo Cine
-                        </button>
-                        <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">
-                          PiP
-                        </button>
+                        <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Modo Cine</button>
+                        <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">PiP</button>
                       </>
                     )}
                   </div>
-                  
                   <div className="flex items-center gap-3">
-                    {!selectedVideo.is_photo && (
-                      <button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg">
-                        Siguiente ➔
-                      </button>
-                    )}
+                    {!selectedVideo.is_photo && (<button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg">Siguiente ➔</button>)}
                   </div>
                 </div>
 
                 {selectedVideo.is_photo ? (
                   <div className="w-full bg-black flex justify-center items-center py-6">
-                    <img 
-                      src={selectedVideo.cover_url} 
-                      alt={selectedVideo.title} 
-                      loading="lazy"
-                      decoding="async"
-                      className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" 
-                    />
+                    <img src={selectedVideo.cover_url} alt={selectedVideo.title} loading="lazy" decoding="async" className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
                   </div>
                 ) : (
                   <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video w-full'}`}>
                     <div className={`w-full h-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'absolute inset-0'}`}>
-                      <div 
-                        className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
-                        dangerouslySetInnerHTML={{ 
-                          __html: selectedVideo.voe_url.includes('<iframe') 
-                            ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') 
-                            : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>`
-                        }}
-                      />
+                      <div className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0" dangerouslySetInnerHTML={{ __html: selectedVideo.voe_url.includes('<iframe') ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>` }} />
                     </div>
                   </div>
                 )}
@@ -1192,52 +864,20 @@ export default function Home() {
                 <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
                   <div>
                     <h2 className="font-bold text-white text-base sm:text-lg">{selectedVideo.title}</h2>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-zinc-400 font-medium">
-                        👁️ {viewsMap[selectedVideo.id] !== undefined ? viewsMap[selectedVideo.id] : (selectedVideo.views || 0)} vistas
-                      </span>
-                    </div>
+                    <div className="flex items-center gap-2 mt-0.5"><span className="text-xs text-zinc-400 font-medium">👁️ {viewsMap[selectedVideo.id] !== undefined ? viewsMap[selectedVideo.id] : (selectedVideo.views || 0)} vistas</span></div>
                   </div>
                   
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                    <button 
-                      onClick={() => handleLike(selectedVideo.id)}
-                      className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}
-                    >
-                      👍 {likesMap[selectedVideo.id] || 0}
-                    </button>
-                    <button 
-                      onClick={(e) => handleShare(selectedVideo, e)}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"
-                    >
-                      <span>🔗</span> Compartir
-                    </button>
-                    <button 
-                      onClick={() => setShowDonateModal(true)}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"
-                    >
-                      <span>☕</span> Donar
-                    </button>
-                    <button 
-                      onClick={handleCloseVideo} 
-                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-full font-bold"
-                    >
-                      CERRAR
-                    </button>
+                    <button onClick={() => handleLike(selectedVideo.id)} className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}>👍 {likesMap[selectedVideo.id] || 0}</button>
+                    <button onClick={(e) => handleShare(selectedVideo, e)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>🔗</span> Compartir</button>
+                    <button onClick={() => setShowDonateModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>☕</span> Donar</button>
+                    <button onClick={handleCloseVideo} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-full font-bold">CERRAR</button>
                   </div>
                 </div>
 
                 <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
                   <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
-                    {defaultTags.map(tag => (
-                      <button 
-                        key={`nav-sub-${tag}`} 
-                        onClick={() => setActiveTag(tag)} 
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
+                    {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                   </div>
 
                   <div className="bg-zinc-900/80 p-2.5 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center">
@@ -1246,36 +886,18 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2 pt-2">
-                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">
-                      Videos y Anuncios Recomendados
-                    </h4>
+                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos y Anuncios Recomendados</h4>
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
                       {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 6).map((v, index) => (
                         <div key={`mix-carousel-${v.id}`} className="flex gap-3 flex-shrink-0 snap-start">
-                          <div 
-                            onClick={() => handleSelectVideo(v)}
-                            className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow"
-                          >
-                            <div className="aspect-video bg-black relative overflow-hidden">
-                              <img 
-                                src={v.cover_url || DEFAULT_COVER_IMAGE} 
-                                alt={v.title} 
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                              />
-                            </div>
-                            <div className="p-2">
-                              <h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5>
-                            </div>
+                          <div onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow">
+                            <div className="aspect-video bg-black relative overflow-hidden"><img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>
+                            <div className="p-2"><h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5></div>
                           </div>
-
                           {index === 2 && (
                             <div className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col justify-center items-center p-2 text-center">
                               <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Anuncio</span>
-                              <div className="scale-75 origin-center">
-                                <AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" />
-                              </div>
+                              <div className="scale-75 origin-center"><AdsterraBlock zoneId="3837baa3b86f4b03245779a93841cdf8" /></div>
                             </div>
                           )}
                         </div>
@@ -1285,30 +907,17 @@ export default function Home() {
                 </div>
 
                 <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
-                  <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                    Comentarios
-                  </h3>
-
+                  <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Comentarios</h3>
                   <form onSubmit={(e) => handleAddComment(selectedVideo.id, e)} className="space-y-2">
                     <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Añade un comentario..." 
-                        value={newCommentText} 
-                        onChange={(e) => setNewCommentText(e.target.value)} 
-                        className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" 
-                      />
+                      <input type="text" placeholder="Añade un comentario..." value={newCommentText} onChange={(e) => setNewCommentText(e.target.value)} className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" />
                       <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Comentar</button>
                     </div>
                   </form>
-
                   <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
                     {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
                       <div key={c.id} className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/60 text-xs space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-blue-400">@{c.user}</span>
-                          <span className="text-[10px] text-zinc-500">{c.created_at}</span>
-                        </div>
+                        <div className="flex justify-between items-center"><span className="font-bold text-blue-400">@{c.user}</span><span className="text-[10px] text-zinc-500">{c.created_at}</span></div>
                         <p className="text-zinc-300">{c.text}</p>
                       </div>
                     ))}
@@ -1331,15 +940,7 @@ export default function Home() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {filteredProducts.map(p => (
                     <div key={p.id} className="group bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
-                      <div className="aspect-square bg-black relative overflow-hidden">
-                        <img 
-                          src={p.image_url || DEFAULT_COVER_IMAGE} 
-                          alt={p.title} 
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
+                      <div className="aspect-square bg-black relative overflow-hidden"><img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} loading="lazy" decoding="async" className="w-full h-full object-cover" /></div>
                       <div className="p-3 flex flex-col flex-1">
                         <h4 className="text-xs font-bold text-zinc-200 line-clamp-2 mb-2">{p.title}</h4>
                         <div className="mt-auto flex items-center justify-between pt-3 border-t border-zinc-800/50">
@@ -1376,13 +977,7 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {watchLater.map(v => (
                   <div key={v.id} className="bg-zinc-900 p-2 rounded-xl flex gap-3 items-center border border-zinc-800">
-                    <img 
-                      src={v.cover_url || DEFAULT_COVER_IMAGE} 
-                      alt={v.title} 
-                      loading="lazy"
-                      decoding="async"
-                      className="w-20 aspect-video rounded-lg object-cover bg-black" 
-                    />
+                    <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-20 aspect-video rounded-lg object-cover bg-black" />
                     <div className="flex-1 overflow-hidden">
                       <h4 className="text-xs font-bold text-white line-clamp-1">{v.title}</h4>
                       <button onClick={() => { handleSelectVideo(v); setShowWatchLaterModal(false); }} className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold mt-2">Ver</button>
@@ -1423,27 +1018,13 @@ export default function Home() {
               ) : (
                 <>
                   <input type="text" placeholder="Título del video" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
-                  
                   <div className="flex items-center justify-between bg-zinc-900 p-3 rounded-xl border border-zinc-800">
                     <span className="text-xs text-zinc-300 font-bold">Tipo de video:</span>
                     <div className="flex gap-1 bg-zinc-950 p-1 rounded-lg">
-                      <button 
-                        type="button" 
-                        onClick={() => setIsShortVideo(false)} 
-                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
-                      >
-                        Horizontal
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={() => setIsShortVideo(true)} 
-                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
-                      >
-                        Vertical (Short)
-                      </button>
+                      <button type="button" onClick={() => setIsShortVideo(false)} className={`px-3 py-1 rounded text-xs font-bold transition-all ${!isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Horizontal</button>
+                      <button type="button" onClick={() => setIsShortVideo(true)} className={`px-3 py-1 rounded text-xs font-bold transition-all ${isShortVideo ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>Vertical (Short)</button>
                     </div>
                   </div>
-
                   <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none">
                     {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -1466,29 +1047,15 @@ export default function Home() {
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
-          <p className="leading-relaxed text-[11px] text-zinc-400">
-            Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 años.
-          </p>
+          <p className="leading-relaxed text-[11px] text-zinc-400">Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 años.</p>
         </div>
         
         <div className="w-full flex justify-center items-center my-4">
-          <script type="text/javascript">
-            {`
-              atOptions = {
-                'key' : '3149b600641b759a380a3da4a64eeca9',
-                'format' : 'iframe',
-                'height' : 250,
-                'width' : 300,
-                'params' : {}
-              };
-            `}
-          </script>
-          <script type="z-adscript" dangerouslySetInnerHTML={{ __html: `atOptions = {'key' : '3149b600641b759a380a3da4a64eeca9','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};` }} />
+          <script type="text/javascript" dangerouslySetInnerHTML={{ __html: `atOptions = {'key' : '3149b600641b759a380a3da4a64eeca9','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};` }} />
           <script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
         </div>
 
         <script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
-
         <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
