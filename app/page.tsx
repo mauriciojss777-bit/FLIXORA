@@ -53,7 +53,7 @@ interface SocialPost {
   created_at: string;
 }
 
-function AdsterraBlock({ zoneId }: { zoneId: string }) {
+function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; format: string; width: number; height: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(false);
 
@@ -66,9 +66,9 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
     confScript.text = `
       atOptions = {
         'key' : '${zoneId}',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
+        'format' : '${format}',
+        'height' : ${height},
+        'width' : ${width},
         'params' : {}
       };
     `;
@@ -90,7 +90,7 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
     }, 3000);
 
     return () => clearTimeout(checkTimer);
-  }, [zoneId]);
+  }, [zoneId, format, width, height]);
 
   if (isEmpty) return null;
 
@@ -101,72 +101,21 @@ function AdsterraBlock({ zoneId }: { zoneId: string }) {
   );
 }
 
-function DraggableAdPopup({ zoneId }: { zoneId: string }) {
-  const [position, setPosition] = useState({ x: 20, y: 100 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [minimized, setMinimized] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-
+function SocialBarScript({ src }: { src: string }) {
   useEffect(() => {
-    if (!containerRef.current || minimized || !isVisible) return;
-    containerRef.current.innerHTML = '';
-
     const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = src;
     script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    script.src = `https://pl30814143.effectivecpmnetwork.com/${zoneId}/invoke.js`;
+    document.body.appendChild(script);
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, [src]);
 
-    const innerDiv = document.createElement('div');
-    innerDiv.id = `container-draggable-${zoneId}`;
-
-    containerRef.current.appendChild(script);
-    containerRef.current.appendChild(innerDiv);
-  }, [zoneId, minimized, isVisible]);
-
-  if (!isVisible) return null;
-
-  const handleTouchStart = (clientX: number, clientY: number) => {
-    setIsDragging(true);
-    setDragOffset({ x: clientX - position.x, y: clientY - position.y });
-  };
-
-  const handleTouchMove = (clientX: number, clientY: number) => {
-    if (!isDragging) return;
-    setPosition({ x: clientX - dragOffset.x, y: clientY - dragOffset.y });
-  };
-
-  return (
-    <div 
-      style={{ left: `${position.x}px`, top: `${position.y}px` }}
-      className="fixed z-50 bg-zinc-950/95 border border-zinc-700 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden transition-shadow select-none max-w-[280px]"
-    >
-      <div 
-        className="bg-zinc-900 px-3 py-1.5 flex items-center justify-between cursor-move border-b border-zinc-800"
-        onMouseDown={(e) => handleTouchStart(e.clientX, e.clientY)}
-        onMouseMove={(e) => handleTouchMove(e.clientX, e.clientY)}
-        onMouseUp={() => setIsDragging(false)}
-        onTouchStart={(e) => handleTouchStart(e.touches[0].clientX, e.touches[0].clientY)}
-        onTouchMove={(e) => handleTouchMove(e.touches[0].clientX, e.touches[0].clientY)}
-        onTouchEnd={() => setIsDragging(false)}
-      >
-        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1">
-          <span>📌</span> Patrocinado
-        </span>
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => setMinimized(!minimized)} className="text-zinc-400 hover:text-white text-xs px-1 font-bold">{minimized ? '+' : '−'}</button>
-          <button onClick={() => setIsVisible(false)} className="text-zinc-400 hover:text-red-400 text-xs px-1 font-bold">✕</button>
-        </div>
-      </div>
-
-      {!minimized && (
-        <div className="p-2 flex flex-col items-center justify-center bg-black/40">
-          <div ref={containerRef} className="w-full flex justify-center items-center min-h-[120px]" />
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }
 
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
@@ -552,7 +501,7 @@ export default function Home() {
   const handleToggleFollow = (username: string) => {
     const isFollowing = !!followingMap[username];
     setFollowingMap({ ...followingMap, [username]: !isFollowing });
-    showToast(isFollowing ? `Dejaste de seguir a @${username}` : `Siguiendo a @${username} ✓`);
+    showToast(isFollowing ? `Dejaste de seguir à @${username}` : `Siguiendo a @${username} ✓`);
   };
 
   const handleCreateSocialPost = (e: React.FormEvent) => {
@@ -610,6 +559,9 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
+      {/* Popunder Script Integration */}
+      <script type="text/javascript" src="https://pl31106866.profitableratecpmnetwork.com/53/cb/b3/53cbb3e6987e15461553264372023874.js"></script>
+
       <div className="w-full max-w-[100vw] overflow-x-hidden">
         
         {toastMessage && <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />}
@@ -814,32 +766,26 @@ export default function Home() {
               </section>
             )}
 
-            {/* ANUNCIO SOCIAL BAR Y NUEVO BANNER ADSTERRA */}
-            <section className="px-4 py-2 w-full max-w-[100vw]">
-              <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '15px 0', width: '100%' }}>
+            {/* SECCIÓN DE PUBLICIDAD CON LAS 4 OPCIONES */}
+            <section className="px-4 py-4 w-full max-w-[100vw]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2 w-full">
                 
-                {/* Social Bar Script */}
-                <script type="text/javascript" src="https://www.highrevenueformat.com/fe670ed06808d1978bdfc05940c58a27/invoke.js"></script>
+                {/* Banner 320x50 */}
+                <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (320x50)</span>
+                  <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
+                </div>
 
-                {/* Nuevo Banner (Iframe / Native Format) */}
-                <div className="ad-box bg-[#1a1a1a] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[60px] shadow-inner">
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Publicidad</span>
-                  <script type="text/javascript">
-                    {`
-                      atOptions = {
-                        'key' : 'fe670ed06808d1978bdfc05940c58a27',
-                        'format' : 'iframe',
-                        'height' : 50,
-                        'width' : 320,
-                        'params' : {}
-                      };
-                    `}
-                  </script>
-                  <script type="text/javascript" src="https://www.highrevenueformat.com/fe670ed06808d1978bdfc05940c58a27/invoke.js"></script>
-                  <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" />
+                {/* Banner 300x250 */}
+                <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (300x250)</span>
+                  <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
                 </div>
 
               </div>
+
+              {/* Social Bar integration */}
+              <SocialBarScript src="https://pl30901736.profitableratecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js" />
             </section>
 
             {horizontalVideos.length > 0 && activeTag !== 'Fotos' && (
@@ -863,98 +809,98 @@ export default function Home() {
         )}
 
         {selectedVideo && !isPipActive && (
-          <>
-            <DraggableAdPopup zoneId="df896f70ade366b92d5f509ddfef3a78" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
+            <div className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 shadow-2xl`} onClick={e => e.stopPropagation()}>
+              
+              <div className="bg-zinc-950 px-4 py-2.5 border-b border-zinc-800 flex justify-between items-center text-xs">
+                <div className="flex items-center gap-2">
+                  {!selectedVideo.is_photo && (
+                    <>
+                      <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Modo Cine</button>
+                      <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">PiP</button>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {!selectedVideo.is_photo && (<button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg">Siguiente ➔</button>)}
+                </div>
+              </div>
 
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/95 backdrop-blur-md overflow-y-auto" onClick={handleCloseVideo}>
-              <div className={`bg-[#0f0f0f] w-full min-h-screen md:min-h-0 ${isCinemaMode ? 'md:max-w-6xl' : 'md:max-w-4xl'} md:rounded-3xl overflow-hidden flex flex-col my-auto border border-zinc-800 shadow-2xl`} onClick={e => e.stopPropagation()}>
+              {selectedVideo.is_photo ? (
+                <div className="w-full bg-black flex justify-center items-center py-6">
+                  <img src={selectedVideo.cover_url} alt={selectedVideo.title} loading="lazy" decoding="async" className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
+                </div>
+              ) : (
+                <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video w-full'}`}>
+                  <div className={`w-full h-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'absolute inset-0'}`}>
+                    <div className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0" dangerouslySetInnerHTML={{ __html: selectedVideo.voe_url.includes('<iframe') ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>` }} />
+                  </div>
+                </div>
+              )}
+              
+              <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
+                <div>
+                  <h2 className="font-bold text-white text-base sm:text-lg">{selectedVideo.title}</h2>
+                  <div className="flex items-center gap-2 mt-0.5"><span className="text-xs text-zinc-400 font-medium">👁️ {viewsMap[selectedVideo.id] !== undefined ? viewsMap[selectedVideo.id] : (selectedVideo.views || 0)} vistas</span></div>
+                </div>
                 
-                <div className="bg-zinc-950 px-4 py-2.5 border-b border-zinc-800 flex justify-between items-center text-xs">
-                  <div className="flex items-center gap-2">
-                    {!selectedVideo.is_photo && (
-                      <>
-                        <button onClick={() => setIsCinemaMode(!isCinemaMode)} className={`px-2.5 py-1 rounded-lg font-bold border ${isCinemaMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Modo Cine</button>
-                        <button onClick={() => setIsPipActive(true)} className="px-2.5 py-1 rounded-lg font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">PiP</button>
-                      </>
-                    )}
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                  <button onClick={() => handleLike(selectedVideo.id)} className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}>👍 {likesMap[selectedVideo.id] || 0}</button>
+                  <button onClick={(e) => handleShare(selectedVideo, e)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>🔗</span> Compartir</button>
+                  <button onClick={() => setShowDonateModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>☕</span> Donar</button>
+                  <button onClick={handleCloseVideo} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-full font-bold">CERRAR</button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
+                <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
+                  {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 w-full">
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-2 flex flex-col items-center justify-center shadow-inner">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                    <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                   </div>
-                  <div className="flex items-center gap-3">
-                    {!selectedVideo.is_photo && (<button onClick={handleNextVideo} className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg">Siguiente ➔</button>)}
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-2 flex flex-col items-center justify-center shadow-inner">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                    <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
                   </div>
                 </div>
 
-                {selectedVideo.is_photo ? (
-                  <div className="w-full bg-black flex justify-center items-center py-6">
-                    <img src={selectedVideo.cover_url} alt={selectedVideo.title} loading="lazy" decoding="async" className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl" />
-                  </div>
-                ) : (
-                  <div className={`w-full bg-black flex justify-center items-center relative ${selectedVideo.is_short ? 'py-4' : 'aspect-video w-full'}`}>
-                    <div className={`w-full h-full relative ${selectedVideo.is_short ? 'max-w-[280px] aspect-[9/16] bg-zinc-900 rounded-lg overflow-hidden shadow-lg mx-auto' : 'absolute inset-0'}`}>
-                      <div className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0" dangerouslySetInnerHTML={{ __html: selectedVideo.voe_url.includes('<iframe') ? selectedVideo.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') : `<iframe src="${selectedVideo.voe_url}${selectedVideo.voe_url.includes('?') ? '&' : '?'}autoplay=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${selectedVideo.title}"></iframe>` }} />
-                    </div>
-                  </div>
-                )}
-                
-                <div className="p-4 bg-[#0f0f0f] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800">
-                  <div>
-                    <h2 className="font-bold text-white text-base sm:text-lg">{selectedVideo.title}</h2>
-                    <div className="flex items-center gap-2 mt-0.5"><span className="text-xs text-zinc-400 font-medium">👁️ {viewsMap[selectedVideo.id] !== undefined ? viewsMap[selectedVideo.id] : (selectedVideo.views || 0)} vistas</span></div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                    <button onClick={() => handleLike(selectedVideo.id)} className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full font-bold transition-colors ${userLikedMap[selectedVideo.id] ? 'bg-blue-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200'}`}>👍 {likesMap[selectedVideo.id] || 0}</button>
-                    <button onClick={(e) => handleShare(selectedVideo, e)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>🔗</span> Compartir</button>
-                    <button onClick={() => setShowDonateModal(true)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3.5 py-2 rounded-full font-bold flex items-center gap-1.5 transition-colors"><span>☕</span> Donar</button>
-                    <button onClick={handleCloseVideo} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs px-4 py-2 rounded-full font-bold">CERRAR</button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
-                  <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
-                    {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
-                  </div>
-
-                  <div className="ads-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px', margin: '10px 0', width: '100%' }}>
-                    <div className="ad-box bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 min-h-[60px] shadow-inner">
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
-                      <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pt-2">
-                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
-                      {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 10).map((v) => (
-                        <div key={`video-carousel-${v.id}`} onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow flex-shrink-0 snap-start">
-                          <div className="aspect-video bg-black relative overflow-hidden"><img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>
-                          <div className="p-2"><h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5></div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
-                  <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Comentarios</h3>
-                  <form onSubmit={(e) => handleAddComment(selectedVideo.id, e)} className="space-y-2">
-                    <div className="flex gap-2">
-                      <input type="text" placeholder="Añade un comentario..." value={newCommentText} onChange={(e) => setNewCommentText(e.target.value)} className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" />
-                      <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Comentar</button>
-                    </div>
-                  </form>
-                  <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
-                    {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
-                      <div key={c.id} className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/60 text-xs space-y-1">
-                        <div className="flex justify-between items-center"><span className="font-bold text-blue-400">@{c.user}</span><span className="text-[10px] text-zinc-500">{c.created_at}</span></div>
-                        <p className="text-zinc-300">{c.text}</p>
+                <div className="space-y-2 pt-2">
+                  <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider">Videos Recomendados</h4>
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
+                    {horizontalVideos.filter(v => v.id !== selectedVideo.id).slice(0, 10).map((v) => (
+                      <div key={`video-carousel-${v.id}`} onClick={() => handleSelectVideo(v)} className="min-w-[180px] max-w-[180px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden cursor-pointer flex flex-col group shadow flex-shrink-0 snap-start">
+                        <div className="aspect-video bg-black relative overflow-hidden"><img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>
+                        <div className="p-2"><h5 className="text-[11px] font-bold text-zinc-200 line-clamp-2 leading-snug group-hover:text-blue-400">{v.title}</h5></div>
                       </div>
                     ))}
                   </div>
                 </div>
-
               </div>
+
+              <div className="p-4 bg-zinc-900/40 border-t border-zinc-800 space-y-4">
+                <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Comentarios</h3>
+                <form onSubmit={(e) => handleAddComment(selectedVideo.id, e)} className="space-y-2">
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Añade un comentario..." value={newCommentText} onChange={(e) => setNewCommentText(e.target.value)} className="flex-grow bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white outline-none focus:border-blue-500" />
+                    <button type="submit" className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Comentar</button>
+                  </div>
+                </form>
+                <div className="space-y-3 pt-2 max-h-48 overflow-y-auto pr-1">
+                  {(commentsMap[selectedVideo.id] || commentsMap['default']).map(c => (
+                    <div key={c.id} className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/60 text-xs space-y-1">
+                      <div className="flex justify-between items-center"><span className="font-bold text-blue-400">@{c.user}</span><span className="text-[10px] text-zinc-500">{c.created_at}</span></div>
+                      <p className="text-zinc-300">{c.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
-          </>
+          </div>
         )}
 
         {showStore && (
@@ -1079,11 +1025,12 @@ export default function Home() {
         </div>
         
         <div className="w-full flex justify-center items-center my-4">
-          <script type="text/javascript" dangerouslySetInnerHTML={{ __html: `atOptions = {'key' : '3149b600641b759a380a3da4a64eeca9','format' : 'iframe','height' : '250','width' : '300','params' : {}};` }} />
-          <script type="text/javascript" src="https://www.highperformanceformat.com/3149b600641b759a380a3da4a64eeca9/invoke.js"></script>
+          <div className="w-full max-w-[300px] flex justify-center">
+            <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
+          </div>
         </div>
 
-        <script type="text/javascript" src="https://pl30901736.effectivecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js"></script>
+        <SocialBarScript src="https://pl30901736.profitableratecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js" />
         <p className="text-zinc-600 text-[10px]">© FLIXXES.COM 2016-2026</p>
       </footer>
     </main>
