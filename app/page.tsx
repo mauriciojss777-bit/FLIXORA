@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -11,6 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop';
 const ADSTERRA_SMARTLINK = 'https://www.profitableratecpmnetwork.com/u9xtrrbj?key=5e1242fb44358ba404f094359ad59a45';
+const DEFAULT_TAGS = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
 
 interface Video {
   id: string;
@@ -58,8 +59,9 @@ function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; form
   const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    currentContainer.innerHTML = '';
 
     const confScript = document.createElement('script');
     confScript.type = 'text/javascript';
@@ -76,27 +78,31 @@ function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; form
     const invokeScript = document.createElement('script');
     invokeScript.type = 'text/javascript';
     invokeScript.src = `https://www.highrevenueformat.com/${zoneId}/invoke.js`;
+    invokeScript.async = true;
 
-    containerRef.current.appendChild(confScript);
-    containerRef.current.appendChild(invokeScript);
+    currentContainer.appendChild(confScript);
+    currentContainer.appendChild(invokeScript);
 
     const checkTimer = setTimeout(() => {
-      if (containerRef.current) {
-        const hasContent = containerRef.current.querySelector('iframe') || containerRef.current.innerHTML.trim().length > 150;
+      if (currentContainer) {
+        const hasContent = currentContainer.querySelector('iframe') || currentContainer.innerHTML.trim().length > 150;
         if (!hasContent) {
           setIsEmpty(true);
         }
       }
-    }, 3000);
+    }, 3500);
 
-    return () => clearTimeout(checkTimer);
+    return () => {
+      clearTimeout(checkTimer);
+      if (currentContainer) currentContainer.innerHTML = '';
+    };
   }, [zoneId, format, width, height]);
 
   if (isEmpty) return null;
 
   return (
-    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2">
-      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden min-h-[60px]" />
+    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2 min-h-[60px]">
+      <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden" />
     </div>
   );
 }
@@ -125,7 +131,7 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
   }, [onClose]);
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 backdrop-blur-md transition-all ${
+    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 backdrop-blur-md transition-all animate-bounce ${
       type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300' : 'bg-red-950/90 border-red-500/50 text-red-300'
     }`}>
       <span>{type === 'success' ? '✓' : '⚠️'}</span>
@@ -160,7 +166,7 @@ function HorizontalVideoCard({
 
   const handleMouseEnter = () => {
     if (video.is_photo) return;
-    timeoutRef.current = setTimeout(() => setIsHovered(true), 250);
+    timeoutRef.current = setTimeout(() => setIsHovered(true), 300);
   };
 
   const handleMouseLeave = () => {
@@ -168,7 +174,18 @@ function HorizontalVideoCard({
     setIsHovered(false);
   };
 
-  useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const videoIframeSrc = useMemo(() => {
+    if (!video.voe_url) return '';
+    if (video.voe_url.includes('<iframe')) return video.voe_url;
+    const separator = video.voe_url.includes('?') ? '&' : '?';
+    return `${video.voe_url}${separator}autoplay=1&mute=1`;
+  }, [video.voe_url]);
 
   return (
     <div 
@@ -194,19 +211,28 @@ function HorizontalVideoCard({
             </>
           ) : (
             <div className="w-full h-full absolute inset-0 overflow-hidden flex items-center justify-center bg-black pointer-events-none">
-              <div 
-                className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
-                dangerouslySetInnerHTML={{ 
-                  __html: video.voe_url.includes('<iframe') 
-                    ? video.voe_url.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') 
-                    : `<iframe src="${video.voe_url}${video.voe_url.includes('?') ? '&' : '?'}autoplay=1&mute=1" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay" title="${video.title}"></iframe>`
-                }} 
-              />
+              {videoIframeSrc.includes('<iframe') ? (
+                <div 
+                  className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
+                  dangerouslySetInnerHTML={{ 
+                    __html: videoIframeSrc.replace('<iframe', '<iframe sandbox="allow-scripts allow-same-origin allow-presentation"') 
+                  }} 
+                />
+              ) : (
+                <iframe 
+                  src={videoIframeSrc} 
+                  className="w-full h-full border-0" 
+                  sandbox="allow-scripts allow-same-origin allow-presentation" 
+                  allow="autoplay" 
+                  title={video.title} 
+                />
+              )}
             </div>
           )}
 
           <button 
             onClick={(e) => onToggleSave(video, e)}
+            aria-label="Guardar video"
             className={`absolute top-2 right-2 p-2 rounded-full backdrop-blur-md transition-all z-10 ${isSaved ? 'bg-blue-600 text-white' : 'bg-black/60 text-white hover:bg-black'}`}
           >
             ⭐
@@ -246,7 +272,6 @@ function HorizontalVideoCard({
 export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [storeSearchQuery, setStoreSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeTag, setActiveTag] = useState<string>('Todos');
@@ -313,14 +338,15 @@ export default function Home() {
   });
   const [newCommentText, setNewCommentText] = useState('');
 
-  const defaultTags = ['Todos', 'Destacados', 'Fotos', 'HD', 'Amateur', 'Latino', 'Parodia', 'VR', 'Rubias', 'Morochas', 'Caseros'];
-
-  const showToast = (text: string, type: 'success' | 'error' = 'success') => setToastMessage({ text, type });
+  const showToast = useCallback((text: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage({ text, type });
+  }, []);
 
   const fetchVideos = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
       if (data) {
         const enriched = data.map(v => ({ ...v, author: v.author || 'FlixxesOfficial' }));
         setVideos(enriched);
@@ -328,14 +354,22 @@ export default function Home() {
         data.forEach(v => { vMap[v.id] = v.views || 0; });
         setViewsMap(vMap);
       }
-    } catch (e) { console.error(e); } finally { setLoading(false); }
-  }, []);
+    } catch (e: any) { 
+      console.error(e);
+      showToast('Error al obtener videos', 'error');
+    } finally { 
+      setLoading(false); 
+    }
+  }, [showToast]);
 
   const fetchProducts = useCallback(async () => {
     try {
-      const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
       if (data) setProducts(data);
-    } catch (e) { console.error(e); }
+    } catch (e: any) { 
+      console.error(e);
+    }
   }, []);
 
   useEffect(() => {
@@ -349,11 +383,16 @@ export default function Home() {
       const savedWatchLater = localStorage.getItem('flixxes_watch_later');
       if (savedWatchLater) { try { setWatchLater(JSON.parse(savedWatchLater)); } catch (e) { console.error(e); } }
 
-      window.addEventListener('beforeinstallprompt', (e) => {
+      const handleBeforeInstall = (e: Event) => {
         e.preventDefault();
         setDeferredPrompt(e);
-      });
+      };
+      window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+      return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     }
+  }, []);
+
+  useEffect(() => {
     fetchVideos();
     fetchProducts();
   }, [fetchVideos, fetchProducts]);
@@ -501,7 +540,7 @@ export default function Home() {
   const handleToggleFollow = (username: string) => {
     const isFollowing = !!followingMap[username];
     setFollowingMap({ ...followingMap, [username]: !isFollowing });
-    showToast(isFollowing ? `Dejaste de seguir à @${username}` : `Siguiendo a @${username} ✓`);
+    showToast(isFollowing ? `Dejaste de seguir a @${username}` : `Siguiendo a @${username} ✓`);
   };
 
   const handleCreateSocialPost = (e: React.FormEvent) => {
@@ -555,15 +594,12 @@ export default function Home() {
   const horizontalVideos = filteredVideos.filter(v => !v.is_short && !v.is_photo);
   const photoGallery = filteredVideos.filter(v => v.is_photo);
   const verticalShorts = filteredVideos.filter(v => v.is_short);
-  const filteredProducts = products.filter(p => p.title.toLowerCase().includes(storeSearchQuery.toLowerCase()));
 
   return (
     <main className={`min-h-screen ${isCinemaMode ? 'bg-black' : 'bg-[#0f0f0f]'} text-zinc-200 flex flex-col justify-between w-full max-w-[100vw] overflow-x-hidden transition-colors duration-300`}>
-      {/* Popunder Script Integration */}
       <script type="text/javascript" src="https://pl31106866.profitableratecpmnetwork.com/53/cb/b3/53cbb3e6987e15461553264372023874.js"></script>
 
       <div className="w-full max-w-[100vw] overflow-x-hidden">
-        
         {toastMessage && <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />}
 
         <nav className="sticky top-0 z-40 bg-[#0f0f0f]/95 backdrop-blur-xl border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 w-full max-w-[100vw]">
@@ -617,7 +653,7 @@ export default function Home() {
                 
                 <div className="pt-2 border-t border-zinc-800 space-y-1">
                   <span className="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-wider">Categorías</span>
-                  {defaultTags.filter(t => t !== 'Todos').map(t => (
+                  {DEFAULT_TAGS.filter(t => t !== 'Todos').map(t => (
                     <button key={t} onClick={() => { setActiveTag(t); setShowMenu(false); setViewingProfile(null); setShowSocialFeed(false); }} className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white">#{t}</button>
                   ))}
                 </div>
@@ -718,7 +754,7 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/60 w-full">
                 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
-                  {defaultTags.map(tag => (
+                  {DEFAULT_TAGS.map(tag => (
                     <button key={tag} onClick={() => setActiveTag(tag)} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>
                   ))}
                 </div>
@@ -766,25 +802,19 @@ export default function Home() {
               </section>
             )}
 
-            {/* SECCIÓN DE PUBLICIDAD CON LAS 4 OPCIONES */}
             <section className="px-4 py-4 w-full max-w-[100vw]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2 w-full">
-                
-                {/* Banner 320x50 */}
                 <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (320x50)</span>
                   <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                 </div>
 
-                {/* Banner 300x250 */}
                 <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (300x250)</span>
                   <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
                 </div>
-
               </div>
 
-              {/* Social Bar integration */}
               <SocialBarScript src="https://pl30901736.profitableratecpmnetwork.com/e8/63/89/e86389099da35424bf779dd5f57a8a9f.js" />
             </section>
 
@@ -854,7 +884,7 @@ export default function Home() {
 
               <div className="p-4 bg-zinc-950/60 border-b border-zinc-800 space-y-3">
                 <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar w-full">
-                  {defaultTags.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
+                  {DEFAULT_TAGS.map(tag => (<button key={`nav-sub-${tag}`} onClick={() => setActiveTag(tag)} className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${activeTag === tag ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800'}`}>{tag}</button>))}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 w-full">
@@ -912,7 +942,7 @@ export default function Home() {
               </div>
               <div className="flex-1 overflow-y-auto p-5">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {filteredProducts.map(p => (
+                  {products.map(p => (
                     <div key={p.id} className="group bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
                       <div className="aspect-square bg-black relative overflow-hidden"><img src={p.image_url || DEFAULT_COVER_IMAGE} alt={p.title} loading="lazy" decoding="async" className="w-full h-full object-cover" /></div>
                       <div className="p-3 flex flex-col flex-1">
@@ -1000,7 +1030,7 @@ export default function Home() {
                     </div>
                   </div>
                   <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-zinc-300 outline-none">
-                    {defaultTags.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
+                    {DEFAULT_TAGS.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
                   <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
