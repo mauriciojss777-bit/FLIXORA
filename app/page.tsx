@@ -90,7 +90,7 @@ function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; form
           setIsEmpty(true);
         }
       }
-    }, 3500);
+    }, 4000);
 
     return () => {
       clearTimeout(checkTimer);
@@ -101,7 +101,7 @@ function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; form
   if (isEmpty) return null;
 
   return (
-    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-2 min-h-[60px]">
+    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-1" style={{ minHeight: `${height}px` }}>
       <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden" />
     </div>
   );
