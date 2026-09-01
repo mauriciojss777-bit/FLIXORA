@@ -804,13 +804,11 @@ export default function Home() {
 
             <section className="px-4 py-4 w-full max-w-[100vw]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2 w-full">
-                <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (320x50)</span>
+                <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                   <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                 </div>
 
-                <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-3 flex flex-col items-center justify-center shadow-inner">
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado (300x250)</span>
+                <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                   <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
                 </div>
               </div>
@@ -888,12 +886,10 @@ export default function Home() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 w-full">
-                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-2 flex flex-col items-center justify-center shadow-inner">
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                  <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                     <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                   </div>
-                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden p-2 flex flex-col items-center justify-center shadow-inner">
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Patrocinado</span>
+                  <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                     <AdsterraBlock zoneId="3149b600641b759a380a3da4a64eeca9" format="iframe" width={300} height={250} />
                   </div>
                 </div>
@@ -1016,7 +1012,6 @@ export default function Home() {
                 </>
               ) : adminTab === 'photo' ? (
                 <>
-                  <input type="text" placeholder="Título de la foto" value={photoTitleInput} onChange={e => setPhotoTitleInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                   <input type="text" placeholder="URL de la foto" value={photoUrlInput} onChange={e => setPhotoUrlInput(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                 </>
               ) : (
