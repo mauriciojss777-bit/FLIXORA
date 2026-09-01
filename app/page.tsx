@@ -56,7 +56,6 @@ interface SocialPost {
 
 function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; format: string; width: number; height: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     const currentContainer = containerRef.current;
@@ -83,25 +82,13 @@ function AdsterraBlock({ zoneId, format, width, height }: { zoneId: string; form
     currentContainer.appendChild(confScript);
     currentContainer.appendChild(invokeScript);
 
-    const checkTimer = setTimeout(() => {
-      if (currentContainer) {
-        const hasContent = currentContainer.querySelector('iframe') || currentContainer.innerHTML.trim().length > 150;
-        if (!hasContent) {
-          setIsEmpty(true);
-        }
-      }
-    }, 4000);
-
     return () => {
-      clearTimeout(checkTimer);
       if (currentContainer) currentContainer.innerHTML = '';
     };
   }, [zoneId, format, width, height]);
 
-  if (isEmpty) return null;
-
   return (
-    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-1" style={{ minHeight: `${height}px` }}>
+    <div className="ads-grid-wrapper w-full flex flex-col justify-center items-center overflow-hidden bg-transparent my-0 py-0" style={{ minHeight: `${height}px` }}>
       <div ref={containerRef} className="ad-box flex justify-center items-center w-full max-w-full overflow-x-hidden" />
     </div>
   );
@@ -792,9 +779,9 @@ export default function Home() {
             </section>
 
             {verticalShorts.length > 0 && (
-              <section className="px-4 py-4 w-full max-w-[100vw] overflow-x-hidden box-border">
-                <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-black text-blue-400 tracking-wider uppercase">⚡ Shorts Verticales ({verticalShorts.length})</h3></div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
+              <section className="px-4 pt-4 pb-1 w-full max-w-[100vw] overflow-x-hidden box-border">
+                <div className="flex items-center justify-between mb-2"><h3 className="text-xs font-black text-blue-400 tracking-wider uppercase">⚡ Shorts Verticales ({verticalShorts.length})</h3></div>
+                <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-none snap-x">
                   {verticalShorts.map((v) => (
                     <div key={`short-${v.id}`} onClick={() => handleSelectVideo(v)} className="min-w-[140px] max-w-[140px] h-[250px] bg-zinc-950 rounded-2xl overflow-hidden relative flex-shrink-0 snap-start border border-zinc-800 shadow-md group cursor-pointer flex items-center justify-center">
                       <img src={v.cover_url || DEFAULT_COVER_IMAGE} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover bg-black group-hover:scale-105 transition-transform duration-300 pointer-events-none" />
@@ -827,8 +814,8 @@ export default function Home() {
               </section>
             )}
 
-            <section className="px-4 py-2 w-full max-w-[100vw] overflow-x-hidden box-border">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-1 w-full">
+            <section className="px-4 pt-0 pb-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 my-0 w-full">
                 <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                   <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                 </div>
@@ -1071,7 +1058,7 @@ export default function Home() {
       <footer className="bg-black border-t border-zinc-900 py-10 px-4 mt-12 text-center text-xs text-zinc-500 space-y-6 w-full max-w-[100vw] overflow-x-hidden">
         <div className="max-w-3xl mx-auto space-y-3">
           <h3 className="text-zinc-300 font-bold uppercase tracking-widest text-sm">AVISO LEGAL</h3>
-          <p className="leading-relaxed text-[11px] text-zinc-400">Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 años.</p>
+          <p className="leading-relaxed text-[11px] text-zinc-400">Todo el material alojado en esta web es recolectado de sitios públicos. Prohibido el acceso a menores de 18 anos.</p>
         </div>
         
         <div className="w-full flex justify-center items-center my-4">
