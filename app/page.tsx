@@ -827,8 +827,8 @@ export default function Home() {
               </section>
             )}
 
-            <section className="px-4 py-4 w-full max-w-[100vw]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2 w-full">
+            <section className="px-4 py-2 w-full max-w-[100vw] overflow-x-hidden box-border">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-1 w-full">
                 <div className="bg-transparent rounded-2xl overflow-hidden p-0 flex flex-col items-center justify-center">
                   <AdsterraBlock zoneId="fe670ed06808d1978bdfc05940c58a27" format="iframe" width={320} height={50} />
                 </div>
@@ -1053,7 +1053,7 @@ export default function Home() {
                     {DEFAULT_TAGS.filter(t => t !== 'Todos' && t !== 'Fotos').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none resize-none" />
-                  <input type="text" placeholder="URL del video embed" value={voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
+                  <input type="text" placeholder="URL del video embed" value= {voeUrl} onChange={e => setVoeUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                   <input type="text" placeholder="URL Miniatura (Opcional)" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-zinc-900 p-3 rounded-xl border border-zinc-800 text-white outline-none" />
                 </>
               )}
@@ -1086,4 +1086,3 @@ export default function Home() {
     </main>
   );
 }
-
